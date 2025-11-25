@@ -128,18 +128,18 @@ export async function analyzeImage(
 ): Promise<MoodAnalysis> {
 	const prompt = `You are a music mood analyst. Analyze this image and extract musical mood and atmosphere information.
 
-Please provide a detailed analysis in the following JSON format:
+Please provide a detailed analysis in JSON format with these fields:
 
 {
-  "mood_tags": ["array", "of", "mood", "descriptors"],
-  "color_palette": ["dominant", "colors", "in", "the", "image"],
+  "mood_tags": [...],
+  "color_palette": [...],
   "energy_level": "low" | "medium" | "high",
-  "emotional_descriptors": ["emotional", "qualities"],
-  "atmosphere": "brief description of the overall atmosphere",
-  "recommended_genres": ["suggested", "music", "genres"],
-  "seed_artists": ["optional", "artist", "names"],
-  "seed_tracks": ["optional", "track", "names"],
-  "suggested_playlist_title": "Creative playlist title based on the mood",
+  "emotional_descriptors": [...],
+  "atmosphere": "...",
+  "recommended_genres": [...],
+  "seed_artists": [],
+  "seed_tracks": [],
+  "suggested_playlist_title": "...",
   "confidence_score": 0.0-1.0
 }
 
@@ -149,11 +149,13 @@ Guidelines:
 - energy_level: Rate the visual energy as low, medium, or high
 - emotional_descriptors: 3-5 emotional qualities the image evokes
 - atmosphere: 1-2 sentence description of the overall vibe
-- recommended_genres: 3-6 music genres that would match this mood
-- seed_artists: 0-3 artist names if the image suggests specific musical styles (optional)
-- seed_tracks: 0-3 specific track names if applicable (optional)
+- recommended_genres: 3-6 music genres that would match this mood (e.g., "indie", "electronic", "jazz", "rock")
+- seed_artists: LEAVE EMPTY ARRAY [] - we will use genres only
+- seed_tracks: LEAVE EMPTY ARRAY [] - we will use genres only
 - suggested_playlist_title: A creative, evocative title for a playlist matching this mood
 - confidence_score: Your confidence in the analysis (0.0-1.0)
+
+IMPORTANT: Do NOT include any artist or track names. Leave seed_artists and seed_tracks as empty arrays [].
 
 Respond ONLY with valid JSON, no additional text.`;
 
