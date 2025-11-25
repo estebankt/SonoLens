@@ -28,6 +28,10 @@ jobs:
 
       - name: Type check
         run: npm run check
+        env:
+          SPOTIFY_CLIENT_ID: test_client_id
+          SPOTIFY_REDIRECT_URI: http://127.0.0.1:5173/auth/callback
+          OPENAI_API_KEY: test_openai_key
 
       - name: Build
         run: npm run build
