@@ -75,7 +75,13 @@ export async function getTokensFromSpotify(
 	});
 
 	if (!response.ok) {
-		throw new Error(`Failed to get tokens: ${response.statusText}`);
+		const errorBody = await response.text();
+		console.error('Spotify token exchange failed:', {
+			status: response.status,
+			statusText: response.statusText,
+			body: errorBody
+		});
+		throw new Error(`Failed to get tokens: ${response.status} ${response.statusText} - ${errorBody}`);
 	}
 
 	return response.json();
