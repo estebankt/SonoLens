@@ -17,8 +17,13 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		maxAge: 60 * 10 // 10 minutes
 	});
 
-	// Build authorization URL and redirect
-	const authUrl = getAuthorizationUrl(SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI, codeChallenge);
+	// Build authorization URL with required scopes and redirect
+	const authUrl = getAuthorizationUrl(
+		SPOTIFY_CLIENT_ID,
+		SPOTIFY_REDIRECT_URI,
+		codeChallenge,
+		['user-read-email', 'user-read-private', 'user-top-read', 'user-read-recently-played']
+	);
 
 	throw redirect(302, authUrl);
 };
