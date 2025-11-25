@@ -136,3 +136,121 @@ export async function getUserProfile(
 
 	return response.json();
 }
+
+/**
+ * Get user's top artists
+ */
+export async function getTopArtists(
+	accessToken: string,
+	timeRange: 'short_term' | 'medium_term' | 'long_term' = 'medium_term',
+	limit: number = 10
+): Promise<{
+	items: Array<{
+		id: string;
+		name: string;
+		images: { url: string; height: number; width: number }[];
+		genres: string[];
+		popularity: number;
+		external_urls: { spotify: string };
+	}>;
+}> {
+	const params = new URLSearchParams({
+		time_range: timeRange,
+		limit: limit.toString()
+	});
+
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/me/top/artists?${params.toString()}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to get top artists: ${response.statusText}`);
+	}
+
+	return response.json();
+}
+
+/**
+ * Get user's top tracks
+ */
+export async function getTopTracks(
+	accessToken: string,
+	timeRange: 'short_term' | 'medium_term' | 'long_term' = 'medium_term',
+	limit: number = 10
+): Promise<{
+	items: Array<{
+		id: string;
+		name: string;
+		artists: Array<{ id: string; name: string }>;
+		album: {
+			id: string;
+			name: string;
+			images: { url: string; height: number; width: number }[];
+		};
+		duration_ms: number;
+		popularity: number;
+		external_urls: { spotify: string };
+	}>;
+}> {
+	const params = new URLSearchParams({
+		time_range: timeRange,
+		limit: limit.toString()
+	});
+
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/me/top/tracks?${params.toString()}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to get top tracks: ${response.statusText}`);
+	}
+
+	return response.json();
+}
+
+/**
+ * Get user's recently played tracks
+ */
+export async function getRecentlyPlayed(
+	accessToken: string,
+	limit: number = 10
+): Promise<{
+	items: Array<{
+		track: {
+			id: string;
+			name: string;
+			artists: Array<{ id: string; name: string }>;
+			album: {
+				id: string;
+				name: string;
+				images: { url: string; height: number; width: number }[];
+			};
+			duration_ms: number;
+			external_urls: { spotify: string };
+		};
+		played_at: string;
+	}>;
+}> {
+	const params = new URLSearchParams({
+		limit: limit.toString()
+	});
+
+	const response = await fetch(
+		`${SPOTIFY_API_BASE_URL}/me/player/recently-played?${params.toString()}`,
+		{
+			headers: {
+				Authorization: `Bearer ${accessToken}`
+			}
+		}
+	);
+
+	if (!response.ok) {
+		throw new Error(`Failed to get recently played tracks: ${response.statusText}`);
+	}
+
+	return response.json();
+}
