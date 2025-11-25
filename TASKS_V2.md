@@ -65,17 +65,17 @@ Phase 2 transforms SonoLens from an authentication-only MVP into a functional ph
 ## 🎵 Milestone 4 — Spotify Playlist Generation
 
 ### Spotify Recommendation Helpers
-- [ ] Add Spotify recommendation functions to `src/lib/spotify.ts`
-- [ ] Implement seed-based recommendation logic
-- [ ] Map AI mood data to Spotify parameters (genres, energy, valence, etc.)
-- [ ] Add playlist-required scopes to auth (`playlist-modify-public`, `playlist-modify-private`)
+- [x] Add Spotify recommendation functions to `src/lib/spotify.ts`
+- [x] Implement seed-based recommendation logic
+- [x] Map AI mood data to Spotify parameters (genres, energy, valence, etc.)
+- [x] Add playlist-required scopes to auth (`playlist-modify-public`, `playlist-modify-private`)
 
 ### Playlist Generation Endpoint
-- [ ] Create `/api/spotify/recommend/+server.ts` endpoint
-- [ ] Accept mood analysis data as input
-- [ ] Call Spotify Recommendations API
-- [ ] Return ~20 tracks with full metadata
-- [ ] Handle errors (insufficient seeds, API limits)
+- [x] Create `/api/spotify/recommend/+server.ts` endpoint
+- [x] Accept mood analysis data as input
+- [x] Call Spotify Recommendations API
+- [x] Return ~20 tracks with full metadata
+- [x] Handle errors (insufficient seeds, API limits)
 
 ### Generated Playlist UI
 - [ ] Create playlist display component
