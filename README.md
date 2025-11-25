@@ -42,6 +42,29 @@ npm run dev
 
 Visit http://127.0.0.1:5173 and click "Login with Spotify" to test the OAuth flow.
 
+### Available Scripts
+
+- `npm run dev` - Start development server
+- `npm run build` - Build for production
+- `npm run preview` - Preview production build
+- `npm run check` - Run TypeScript type checking
+- `npm run check:watch` - Run type checking in watch mode
+
+### Development Tips
+
+**OAuth Testing:**
+- The app runs on `127.0.0.1:5173` (not localhost) to match Spotify's redirect URI
+- Make sure your Spotify app settings have the exact redirect URI: `http://127.0.0.1:5173/auth/callback`
+
+**Environment Variables:**
+- Never commit `.env` file (already in .gitignore)
+- For production, set environment variables in your deployment platform
+
+**Debugging:**
+- Server logs appear in the terminal where `npm run dev` is running
+- Check browser console for client-side errors
+- API errors from Spotify are logged with full details
+
 ## Project Structure
 
 ```
@@ -88,3 +111,27 @@ Preview the production build:
 ```sh
 npm run preview
 ```
+
+## Troubleshooting
+
+**"Failed to exchange authorization code" error:**
+- Verify your `SPOTIFY_CLIENT_ID` is correct in `.env`
+- Ensure redirect URI in Spotify Dashboard exactly matches: `http://127.0.0.1:5173/auth/callback`
+- Check that you're accessing the app at `http://127.0.0.1:5173` (not `localhost`)
+
+**"Session expired" error:**
+- This is normal - access tokens expire after 1 hour
+- The app automatically refreshes tokens using the refresh token
+- If refresh fails, you'll need to log in again
+
+**Build errors:**
+- Run `npm run check` to see TypeScript errors
+- Ensure all environment variables are set (even dummy values for build)
+
+## CI/CD
+
+The project includes GitHub Actions workflow that runs on every push:
+- Type checking with `npm run check`
+- Production build with `npm run build`
+
+Check `.github/workflows/ci.yml` for configuration.
