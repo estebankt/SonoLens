@@ -387,6 +387,59 @@ export async function getRecommendations(
 }
 
 /**
+ * Search for an artist by name and return their Spotify ID
+ */
+export async function searchArtist(
+	accessToken: string,
+	artistName: string
+): Promise<string | null> {
+	const params = new URLSearchParams({
+		q: artistName,
+		type: 'artist',
+		limit: '1'
+	});
+
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/search?${params.toString()}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		console.error(`Failed to search for artist "${artistName}":`, response.statusText);
+		return null;
+	}
+
+	const data = await response.json();
+	return data.artists?.items?.[0]?.id || null;
+}
+
+/**
+ * Search for a track by name and return its Spotify ID
+ */
+export async function searchTrack(accessToken: string, trackName: string): Promise<string | null> {
+	const params = new URLSearchParams({
+		q: trackName,
+		type: 'track',
+		limit: '1'
+	});
+
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/search?${params.toString()}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		console.error(`Failed to search for track "${trackName}":`, response.statusText);
+		return null;
+	}
+
+	const data = await response.json();
+	return data.tracks?.items?.[0]?.id || null;
+}
+
+/**
  * Get available genre seeds for recommendations
  */
 export async function getAvailableGenreSeeds(accessToken: string): Promise<{ genres: string[] }> {

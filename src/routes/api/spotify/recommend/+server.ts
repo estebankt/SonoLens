@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getRecommendations } from '$lib/spotify';
+import { getRecommendations, searchArtist, searchTrack } from '$lib/spotify';
 import { moodToSpotifyParams } from '$lib/utils/mood-to-spotify';
 import type { GeneratePlaylistRequest, GeneratePlaylistResponse } from '$lib/types/phase2';
 
@@ -51,22 +51,39 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		console.log('Final Spotify Params:', spotifyParams);
 
-		// Debug: Test if the token works by fetching available genres
-		try {
-			const testResponse = await fetch('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
-				headers: { Authorization: `Bearer ${accessToken}` }
-			});
-			console.log('🧪 Genre seeds endpoint test:', {
-				status: testResponse.status,
-				ok: testResponse.ok
-			});
-			if (testResponse.ok) {
-				const genreData = await testResponse.json();
-				console.log('✓ Available genres count:', genreData.genres?.length || 0);
+		// Convert artist names to Spotify IDs
+		if (spotifyParams.seed_artists && spotifyParams.seed_artists.length > 0) {
+			console.log('🔍 Converting artist names to IDs...');
+			const artistIds: string[] = [];
+			for (const artistName of spotifyParams.seed_artists) {
+				const artistId = await searchArtist(accessToken, artistName);
+				if (artistId) {
+					console.log(`✓ Found artist: "${artistName}" -> ${artistId}`);
+					artistIds.push(artistId);
+				} else {
+					console.log(`✗ Could not find artist: "${artistName}"`);
+				}
 			}
-		} catch (e) {
-			console.error('Genre seeds test failed:', e);
+			spotifyParams.seed_artists = artistIds;
 		}
+
+		// Convert track names to Spotify IDs
+		if (spotifyParams.seed_tracks && spotifyParams.seed_tracks.length > 0) {
+			console.log('🔍 Converting track names to IDs...');
+			const trackIds: string[] = [];
+			for (const trackName of spotifyParams.seed_tracks) {
+				const trackId = await searchTrack(accessToken, trackName);
+				if (trackId) {
+					console.log(`✓ Found track: "${trackName}" -> ${trackId}`);
+					trackIds.push(trackId);
+				} else {
+					console.log(`✗ Could not find track: "${trackName}"`);
+				}
+			}
+			spotifyParams.seed_tracks = trackIds;
+		}
+
+		console.log('Converted Spotify Params:', spotifyParams);
 
 		// Get recommendations from Spotify
 		const recommendations = await getRecommendations(accessToken, spotifyParams);
