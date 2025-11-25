@@ -1,8 +1,15 @@
 <script lang="ts">
 	import { goto } from '$app/navigation';
-	import type { ImageUploadState, MoodAnalysis, AnalyzeImageResponse } from '$lib/types/phase2';
+	import type {
+		ImageUploadState,
+		MoodAnalysis,
+		AnalyzeImageResponse,
+		GeneratePlaylistResponse,
+		SpotifyTrack
+	} from '$lib/types/phase2';
 	import { fileToBase64 } from '$lib/utils/image';
 	import MoodAnalysisDisplay from '$lib/components/MoodAnalysisDisplay.svelte';
+	import PlaylistDisplay from '$lib/components/PlaylistDisplay.svelte';
 
 	let uploadState = $state<ImageUploadState>({
 		file: null,
@@ -12,6 +19,9 @@
 	});
 
 	let moodAnalysis = $state<MoodAnalysis | null>(null);
+	let generatedTracks = $state<SpotifyTrack[] | null>(null);
+	let isGeneratingPlaylist = $state(false);
+	let playlistError = $state<string | null>(null);
 	let fileInput = $state<HTMLInputElement>();
 
 	function handleFileSelect(event: Event) {
@@ -98,10 +108,44 @@
 		}
 	}
 
-	function handleGeneratePlaylist() {
+	async function handleGeneratePlaylist() {
 		if (!moodAnalysis) return;
-		// TODO: Navigate to playlist generation
-		console.log('Generating playlist with mood:', moodAnalysis);
+
+		isGeneratingPlaylist = true;
+		playlistError = null;
+
+		try {
+			// Call API to generate playlist
+			const response = await fetch('/api/spotify/recommend', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					mood_analysis: moodAnalysis,
+					limit: 20
+				})
+			});
+
+			const data: GeneratePlaylistResponse = await response.json();
+
+			if (!data.success || !data.tracks) {
+				throw new Error(data.error || 'Failed to generate playlist');
+			}
+
+			generatedTracks = data.tracks;
+		} catch (error) {
+			console.error('Error generating playlist:', error);
+			playlistError =
+				error instanceof Error ? error.message : 'Failed to generate playlist. Please try again.';
+		} finally {
+			isGeneratingPlaylist = false;
+		}
+	}
+
+	function handleSavePlaylist() {
+		// TODO: Implement save to Spotify
+		console.log('Saving playlist...');
 	}
 </script>
 
@@ -227,7 +271,28 @@
 
 		{#if moodAnalysis}
 			<div class="mt-6">
-				<MoodAnalysisDisplay analysis={moodAnalysis} onGeneratePlaylist={handleGeneratePlaylist} />
+				<MoodAnalysisDisplay
+					analysis={moodAnalysis}
+					onGeneratePlaylist={handleGeneratePlaylist}
+					isGenerating={isGeneratingPlaylist}
+				/>
+			</div>
+		{/if}
+
+		{#if playlistError}
+			<div class="mt-6 p-4 bg-red-100 border-4 border-red-500 text-red-700">
+				<p class="font-bold">Error generating playlist:</p>
+				<p>{playlistError}</p>
+			</div>
+		{/if}
+
+		{#if generatedTracks && moodAnalysis}
+			<div class="mt-6">
+				<PlaylistDisplay
+					title={moodAnalysis.suggested_playlist_title}
+					tracks={generatedTracks}
+					onSavePlaylist={handleSavePlaylist}
+				/>
 			</div>
 		{/if}
 
