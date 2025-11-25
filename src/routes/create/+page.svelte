@@ -178,16 +178,40 @@
 						/>
 					</div>
 
+					{#if uploadState.is_uploading}
+						<!-- Progress Bar -->
+						<div class="mb-4 p-6 bg-yellow-100 border-4 border-black">
+							<div class="flex items-center gap-3 mb-3">
+								<div class="animate-spin h-6 w-6 border-4 border-black border-t-transparent rounded-full"></div>
+								<h3 class="text-xl font-bold">Analyzing Image...</h3>
+							</div>
+							<p class="text-sm mb-3">AI is extracting mood and atmosphere from your image</p>
+
+							<!-- Progress Bar -->
+							<div class="w-full bg-white border-4 border-black h-8 overflow-hidden">
+								<div class="h-full bg-black animate-pulse" style="width: 100%"></div>
+							</div>
+						</div>
+					{/if}
+
 					<div class="flex flex-col sm:flex-row gap-3">
 						<button
 							onclick={handleAnalyze}
 							disabled={uploadState.is_uploading}
 							class="neo-button flex-1"
+							class:opacity-50={uploadState.is_uploading}
+							class:cursor-not-allowed={uploadState.is_uploading}
 						>
 							{uploadState.is_uploading ? 'Analyzing...' : 'Analyze & Generate Playlist'}
 						</button>
 
-						<button onclick={clearImage} class="neo-button bg-white" disabled={uploadState.is_uploading}>
+						<button
+							onclick={clearImage}
+							class="neo-button bg-white"
+							disabled={uploadState.is_uploading}
+							class:opacity-50={uploadState.is_uploading}
+							class:cursor-not-allowed={uploadState.is_uploading}
+						>
 							Change Image
 						</button>
 					</div>
