@@ -14,14 +14,14 @@ The current MVP implements **Spotify Authorization Code with PKCE** flow, allowi
 1. Create a Spotify Developer App:
    - Go to https://developer.spotify.com/dashboard
    - Create a new app
-   - Add `http://localhost:5173/auth/callback` to Redirect URIs
+   - Add `http://127.0.0.1:5173/auth/callback` to Redirect URIs
    - Copy your Client ID
 
 2. Configure environment variables:
    - Copy `.env` and add your Spotify Client ID:
    ```sh
    SPOTIFY_CLIENT_ID=your_actual_client_id_here
-   SPOTIFY_REDIRECT_URI=http://localhost:5173/auth/callback
+   SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/auth/callback
    ```
 
 ## Setup
@@ -40,7 +40,7 @@ Start the development server:
 npm run dev
 ```
 
-Visit http://localhost:5173 and click "Login with Spotify" to test the OAuth flow.
+Visit http://127.0.0.1:5173 and click "Login with Spotify" to test the OAuth flow.
 
 ## Project Structure
 
