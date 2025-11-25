@@ -51,6 +51,23 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		console.log('Final Spotify Params:', spotifyParams);
 
+		// Debug: Test if the token works by fetching available genres
+		try {
+			const testResponse = await fetch('https://api.spotify.com/v1/recommendations/available-genre-seeds', {
+				headers: { Authorization: `Bearer ${accessToken}` }
+			});
+			console.log('🧪 Genre seeds endpoint test:', {
+				status: testResponse.status,
+				ok: testResponse.ok
+			});
+			if (testResponse.ok) {
+				const genreData = await testResponse.json();
+				console.log('✓ Available genres count:', genreData.genres?.length || 0);
+			}
+		} catch (e) {
+			console.error('Genre seeds test failed:', e);
+		}
+
 		// Get recommendations from Spotify
 		const recommendations = await getRecommendations(accessToken, spotifyParams);
 
