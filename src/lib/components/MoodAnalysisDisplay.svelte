@@ -4,9 +4,10 @@
 	interface Props {
 		analysis: MoodAnalysis;
 		onGeneratePlaylist?: () => void;
+		isGenerating?: boolean;
 	}
 
-	let { analysis, onGeneratePlaylist }: Props = $props();
+	let { analysis, onGeneratePlaylist, isGenerating = false }: Props = $props();
 </script>
 
 <div class="neo-card">
@@ -92,8 +93,14 @@
 	<!-- Generate Playlist Button -->
 	{#if onGeneratePlaylist}
 		<div class="text-center">
-			<button onclick={onGeneratePlaylist} class="neo-button text-xl px-8 py-4">
-				Generate Playlist
+			<button
+				onclick={onGeneratePlaylist}
+				disabled={isGenerating}
+				class="neo-button text-xl px-8 py-4"
+				class:opacity-50={isGenerating}
+				class:cursor-not-allowed={isGenerating}
+			>
+				{isGenerating ? 'Generating Playlist...' : 'Generate Playlist'}
 			</button>
 		</div>
 	{/if}
