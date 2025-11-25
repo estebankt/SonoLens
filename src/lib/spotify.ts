@@ -254,3 +254,195 @@ export async function getRecentlyPlayed(
 
 	return response.json();
 }
+
+/**
+ * Get track recommendations based on seed data and audio features
+ */
+export async function getRecommendations(
+	accessToken: string,
+	params: {
+		seed_genres?: string[];
+		seed_artists?: string[];
+		seed_tracks?: string[];
+		target_energy?: number; // 0.0 - 1.0
+		target_valence?: number; // 0.0 - 1.0 (happiness)
+		target_danceability?: number; // 0.0 - 1.0
+		target_acousticness?: number; // 0.0 - 1.0
+		target_instrumentalness?: number; // 0.0 - 1.0
+		limit?: number; // default 20, max 100
+	}
+): Promise<{
+	tracks: Array<{
+		id: string;
+		uri: string;
+		name: string;
+		artists: Array<{
+			id: string;
+			name: string;
+			uri: string;
+		}>;
+		album: {
+			id: string;
+			name: string;
+			images: Array<{
+				url: string;
+				height: number;
+				width: number;
+			}>;
+		};
+		duration_ms: number;
+		preview_url: string | null;
+		external_urls: {
+			spotify: string;
+		};
+		popularity: number;
+	}>;
+}> {
+	// Build query parameters
+	const queryParams = new URLSearchParams();
+
+	// Add seeds (max 5 total seeds across all types)
+	if (params.seed_genres) {
+		queryParams.append('seed_genres', params.seed_genres.slice(0, 5).join(','));
+	}
+	if (params.seed_artists) {
+		queryParams.append('seed_artists', params.seed_artists.slice(0, 5).join(','));
+	}
+	if (params.seed_tracks) {
+		queryParams.append('seed_tracks', params.seed_tracks.slice(0, 5).join(','));
+	}
+
+	// Add target audio features
+	if (params.target_energy !== undefined) {
+		queryParams.append('target_energy', params.target_energy.toString());
+	}
+	if (params.target_valence !== undefined) {
+		queryParams.append('target_valence', params.target_valence.toString());
+	}
+	if (params.target_danceability !== undefined) {
+		queryParams.append('target_danceability', params.target_danceability.toString());
+	}
+	if (params.target_acousticness !== undefined) {
+		queryParams.append('target_acousticness', params.target_acousticness.toString());
+	}
+	if (params.target_instrumentalness !== undefined) {
+		queryParams.append('target_instrumentalness', params.target_instrumentalness.toString());
+	}
+
+	// Set limit (default 20, max 100)
+	queryParams.append('limit', (params.limit || 20).toString());
+
+	const response = await fetch(
+		`${SPOTIFY_API_BASE_URL}/recommendations?${queryParams.toString()}`,
+		{
+			headers: {
+				Authorization: `Bearer ${accessToken}`
+			}
+		}
+	);
+
+	if (!response.ok) {
+		const errorBody = await response.text();
+		console.error('Spotify recommendations failed:', {
+			status: response.status,
+			statusText: response.statusText,
+			body: errorBody
+		});
+		throw new Error(`Failed to get recommendations: ${response.statusText}`);
+	}
+
+	return response.json();
+}
+
+/**
+ * Get available genre seeds for recommendations
+ */
+export async function getAvailableGenreSeeds(accessToken: string): Promise<{ genres: string[] }> {
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/recommendations/available-genre-seeds`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		throw new Error(`Failed to get genre seeds: ${response.statusText}`);
+	}
+
+	return response.json();
+}
+
+/**
+ * Create a new playlist for the current user
+ */
+export async function createPlaylist(
+	accessToken: string,
+	userId: string,
+	name: string,
+	options?: {
+		description?: string;
+		public?: boolean;
+	}
+): Promise<{
+	id: string;
+	name: string;
+	external_urls: { spotify: string };
+	uri: string;
+	snapshot_id: string;
+}> {
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/users/${userId}/playlists`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			name,
+			description: options?.description || '',
+			public: options?.public ?? false
+		})
+	});
+
+	if (!response.ok) {
+		const errorBody = await response.text();
+		console.error('Create playlist failed:', {
+			status: response.status,
+			statusText: response.statusText,
+			body: errorBody
+		});
+		throw new Error(`Failed to create playlist: ${response.statusText}`);
+	}
+
+	return response.json();
+}
+
+/**
+ * Add tracks to a playlist
+ */
+export async function addTracksToPlaylist(
+	accessToken: string,
+	playlistId: string,
+	trackUris: string[]
+): Promise<{ snapshot_id: string }> {
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/playlists/${playlistId}/tracks`, {
+		method: 'POST',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'application/json'
+		},
+		body: JSON.stringify({
+			uris: trackUris
+		})
+	});
+
+	if (!response.ok) {
+		const errorBody = await response.text();
+		console.error('Add tracks to playlist failed:', {
+			status: response.status,
+			statusText: response.statusText,
+			body: errorBody
+		});
+		throw new Error(`Failed to add tracks to playlist: ${response.statusText}`);
+	}
+
+	return response.json();
+}

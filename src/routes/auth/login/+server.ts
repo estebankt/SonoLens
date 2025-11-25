@@ -22,7 +22,14 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		SPOTIFY_CLIENT_ID,
 		SPOTIFY_REDIRECT_URI,
 		codeChallenge,
-		['user-read-email', 'user-read-private', 'user-top-read', 'user-read-recently-played']
+		[
+			'user-read-email',
+			'user-read-private',
+			'user-top-read',
+			'user-read-recently-played',
+			'playlist-modify-public',
+			'playlist-modify-private'
+		]
 	);
 
 	throw redirect(302, authUrl);
