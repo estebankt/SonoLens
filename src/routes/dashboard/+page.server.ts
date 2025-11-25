@@ -1,6 +1,12 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { getUserProfile, refreshToken } from '$lib/spotify';
+import {
+	getUserProfile,
+	refreshToken,
+	getTopArtists,
+	getTopTracks,
+	getRecentlyPlayed
+} from '$lib/spotify';
 import { SPOTIFY_CLIENT_ID } from '$env/static/private';
 
 export const load: PageServerLoad = async ({ cookies }) => {
@@ -36,11 +42,19 @@ export const load: PageServerLoad = async ({ cookies }) => {
 	}
 
 	try {
-		// Fetch user profile from Spotify
-		const user = await getUserProfile(accessToken!);
+		// Fetch user profile, top artists, top tracks, and recently played from Spotify
+		const [user, topArtists, topTracks, recentlyPlayed] = await Promise.all([
+			getUserProfile(accessToken!),
+			getTopArtists(accessToken!, 'medium_term', 10),
+			getTopTracks(accessToken!, 'medium_term', 10),
+			getRecentlyPlayed(accessToken!, 10)
+		]);
 
 		return {
-			user
+			user,
+			topArtists: topArtists.items,
+			topTracks: topTracks.items,
+			recentlyPlayed: recentlyPlayed.items
 		};
 	} catch (err: any) {
 		console.error('Failed to fetch user profile:', err);
@@ -59,9 +73,19 @@ export const load: PageServerLoad = async ({ cookies }) => {
 					maxAge: tokens.expires_in
 				});
 
-				// Retry getting user profile
-				const user = await getUserProfile(tokens.access_token);
-				return { user };
+				// Retry getting user profile, top artists, top tracks, and recently played
+				const [user, topArtists, topTracks, recentlyPlayed] = await Promise.all([
+					getUserProfile(tokens.access_token),
+					getTopArtists(tokens.access_token, 'medium_term', 10),
+					getTopTracks(tokens.access_token, 'medium_term', 10),
+					getRecentlyPlayed(tokens.access_token, 10)
+				]);
+				return {
+					user,
+					topArtists: topArtists.items,
+					topTracks: topTracks.items,
+					recentlyPlayed: recentlyPlayed.items
+				};
 			} catch (refreshErr) {
 				console.error('Token refresh and retry failed:', refreshErr);
 			}
