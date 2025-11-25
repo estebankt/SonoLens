@@ -301,15 +301,42 @@ export async function getRecommendations(
 	// Build query parameters
 	const queryParams = new URLSearchParams();
 
-	// Add seeds (max 5 total seeds across all types)
-	if (params.seed_genres) {
-		queryParams.append('seed_genres', params.seed_genres.slice(0, 5).join(','));
+	// Calculate total seeds (Spotify requires at least 1, max 5 total)
+	let totalSeeds = 0;
+	const seedGenres: string[] = [];
+	const seedArtists: string[] = [];
+	const seedTracks: string[] = [];
+
+	if (params.seed_genres && params.seed_genres.length > 0) {
+		const available = 5 - totalSeeds;
+		seedGenres.push(...params.seed_genres.slice(0, available));
+		totalSeeds += seedGenres.length;
 	}
-	if (params.seed_artists) {
-		queryParams.append('seed_artists', params.seed_artists.slice(0, 5).join(','));
+	if (params.seed_artists && params.seed_artists.length > 0 && totalSeeds < 5) {
+		const available = 5 - totalSeeds;
+		seedArtists.push(...params.seed_artists.slice(0, available));
+		totalSeeds += seedArtists.length;
 	}
-	if (params.seed_tracks) {
-		queryParams.append('seed_tracks', params.seed_tracks.slice(0, 5).join(','));
+	if (params.seed_tracks && params.seed_tracks.length > 0 && totalSeeds < 5) {
+		const available = 5 - totalSeeds;
+		seedTracks.push(...params.seed_tracks.slice(0, available));
+		totalSeeds += seedTracks.length;
+	}
+
+	// Ensure we have at least one seed
+	if (totalSeeds === 0) {
+		throw new Error('At least one seed (genre, artist, or track) is required for recommendations');
+	}
+
+	// Add seeds to query params
+	if (seedGenres.length > 0) {
+		queryParams.append('seed_genres', seedGenres.join(','));
+	}
+	if (seedArtists.length > 0) {
+		queryParams.append('seed_artists', seedArtists.join(','));
+	}
+	if (seedTracks.length > 0) {
+		queryParams.append('seed_tracks', seedTracks.join(','));
 	}
 
 	// Add target audio features
@@ -332,21 +359,26 @@ export async function getRecommendations(
 	// Set limit (default 20, max 100)
 	queryParams.append('limit', (params.limit || 20).toString());
 
-	const response = await fetch(
-		`${SPOTIFY_API_BASE_URL}/recommendations?${queryParams.toString()}`,
-		{
-			headers: {
-				Authorization: `Bearer ${accessToken}`
-			}
+	const url = `${SPOTIFY_API_BASE_URL}/recommendations?${queryParams.toString()}`;
+	console.log('🎵 Spotify Recommendations API Call:');
+	console.log('URL:', url);
+	console.log('Seeds:', { genres: seedGenres, artists: seedArtists, tracks: seedTracks, total: totalSeeds });
+	console.log('Query Params:', Object.fromEntries(queryParams.entries()));
+
+	const response = await fetch(url, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
 		}
-	);
+	});
 
 	if (!response.ok) {
 		const errorBody = await response.text();
-		console.error('Spotify recommendations failed:', {
+		console.error('❌ Spotify recommendations failed:', {
 			status: response.status,
 			statusText: response.statusText,
-			body: errorBody
+			body: errorBody,
+			url: url,
+			params: Object.fromEntries(queryParams.entries())
 		});
 		throw new Error(`Failed to get recommendations: ${response.statusText}`);
 	}
