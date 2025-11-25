@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getRecommendations, searchArtist, searchTrack } from '$lib/spotify';
+import { getRecommendations, searchArtist, searchTrack, getUserProfile } from '$lib/spotify';
 import { moodToSpotifyParams } from '$lib/utils/mood-to-spotify';
 import type { GeneratePlaylistRequest, GeneratePlaylistResponse } from '$lib/types/phase2';
 
@@ -84,6 +84,17 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		}
 
 		console.log('Converted Spotify Params:', spotifyParams);
+
+		// Get user's market/country for recommendations
+		try {
+			const profile = await getUserProfile(accessToken);
+			if (profile.country) {
+				(spotifyParams as any).market = profile.country;
+				console.log('Using user market:', profile.country);
+			}
+		} catch (e) {
+			console.log('Could not get user market, continuing without it');
+		}
 
 		// Get recommendations from Spotify
 		const recommendations = await getRecommendations(accessToken, spotifyParams);
