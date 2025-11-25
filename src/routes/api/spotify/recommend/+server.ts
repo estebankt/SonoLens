@@ -34,6 +34,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		// Convert mood analysis to Spotify recommendation parameters
 		const spotifyParams = moodToSpotifyParams(body.mood_analysis, body.limit || 20);
 
+		console.log('Mood Analysis:', body.mood_analysis);
+		console.log('Spotify Params:', spotifyParams);
+
 		// Validate that we have at least one seed
 		const hasSeeds =
 			(spotifyParams.seed_genres && spotifyParams.seed_genres.length > 0) ||
@@ -41,14 +44,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			(spotifyParams.seed_tracks && spotifyParams.seed_tracks.length > 0);
 
 		if (!hasSeeds) {
-			return json(
-				{
-					success: false,
-					error: 'Unable to generate recommendations: No valid seeds found in mood analysis'
-				} satisfies GeneratePlaylistResponse,
-				{ status: 400 }
-			);
+			// Fallback: use generic pop genre if no seeds found
+			console.log('No seeds found, using fallback genre: pop');
+			spotifyParams.seed_genres = ['pop'];
 		}
+
+		console.log('Final Spotify Params:', spotifyParams);
 
 		// Get recommendations from Spotify
 		const recommendations = await getRecommendations(accessToken, spotifyParams);

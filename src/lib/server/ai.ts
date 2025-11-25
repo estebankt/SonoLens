@@ -5,11 +5,119 @@
 
 import OpenAI from 'openai';
 import { OPENAI_API_KEY } from '$env/static/private';
+import { env } from '$env/dynamic/private';
 import type { MoodAnalysis } from '$lib/types/phase2';
 
 const openai = new OpenAI({
 	apiKey: OPENAI_API_KEY
 });
+
+// Optional: Allow custom model via environment variable
+const OPENAI_MODEL = env.OPENAI_MODEL;
+
+/**
+ * Helper function to try multiple OpenAI models with automatic fallback
+ */
+async function analyzeWithFallback(
+	imageBase64: string,
+	imageType: string,
+	prompt: string
+): Promise<string> {
+	// Build model list with environment variable first, then fallbacks
+	const models = [
+		OPENAI_MODEL || 'gpt-4o',
+		'gpt-4o',
+		'gpt-4-vision-preview',
+		'gpt-4-turbo'
+	];
+
+	// Remove duplicates while preserving order
+	const uniqueModels = [...new Set(models)];
+
+	let lastError: Error | null = null;
+
+	for (const model of uniqueModels) {
+		try {
+			console.log(`🔍 Attempting image analysis with model: ${model}`);
+
+			const response = await openai.chat.completions.create({
+				model,
+				messages: [
+					{
+						role: 'user',
+						content: [
+							{
+								type: 'image_url',
+								image_url: {
+									url: `data:${imageType};base64,${imageBase64}`,
+									detail: 'high'
+								}
+							},
+							{
+								type: 'text',
+								text: prompt
+							}
+						]
+					}
+				],
+				max_tokens: 1024,
+				response_format: { type: 'json_object' }
+			});
+
+			// Validate response structure
+			if (!response.choices || response.choices.length === 0) {
+				throw new Error('OpenAI returned no response choices');
+			}
+
+			const choice = response.choices[0];
+			console.log(`Model ${model} finish_reason:`, choice.finish_reason);
+
+			// Handle different finish reasons
+			if (choice.finish_reason === 'content_filter') {
+				throw new Error(
+					'Image was flagged by OpenAI content policy. Please try a different image.'
+				);
+			}
+
+			if (choice.finish_reason === 'length') {
+				throw new Error('Response was too long and was cut off. This is unexpected.');
+			}
+
+			if (!choice.message) {
+				throw new Error('OpenAI response missing message object');
+			}
+
+			const content = choice.message.content;
+			if (!content) {
+				console.error(`Empty content with finish_reason: ${choice.finish_reason}`);
+				throw new Error(
+					`OpenAI returned no content (finish_reason: ${choice.finish_reason || 'unknown'})`
+				);
+			}
+
+			console.log(`✓ Successfully analyzed image with model: ${model}`);
+			return content;
+		} catch (error) {
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			console.error(`✗ Model ${model} failed:`, errorMessage);
+
+			lastError = error instanceof Error ? error : new Error(errorMessage);
+
+			// If this is the last model, re-throw the error
+			if (model === uniqueModels[uniqueModels.length - 1]) {
+				console.error('All models failed. Last error:', errorMessage);
+				throw lastError;
+			}
+
+			// Otherwise, try the next model
+			console.log(`Falling back to next model...`);
+			continue;
+		}
+	}
+
+	// Should never reach here, but just in case
+	throw lastError || new Error('All OpenAI models failed to analyze the image');
+}
 
 /**
  * Analyze image and extract mood/atmosphere data
@@ -50,34 +158,10 @@ Guidelines:
 Respond ONLY with valid JSON, no additional text.`;
 
 	try {
-		const response = await openai.chat.completions.create({
-			model: 'gpt-4o',
-			messages: [
-				{
-					role: 'user',
-					content: [
-						{
-							type: 'image_url',
-							image_url: {
-								url: `data:${imageType};base64,${imageBase64}`,
-								detail: 'high'
-							}
-						},
-						{
-							type: 'text',
-							text: prompt
-						}
-					]
-				}
-			],
-			max_tokens: 1024,
-			response_format: { type: 'json_object' }
-		});
+		// Use fallback strategy to try multiple models
+		const content = await analyzeWithFallback(imageBase64, imageType, prompt);
 
-		const content = response.choices[0]?.message?.content;
-		if (!content) {
-			throw new Error('No content in AI response');
-		}
+		console.log('AI Content:', content);
 
 		// Parse JSON response
 		const analysis = JSON.parse(content) as MoodAnalysis;

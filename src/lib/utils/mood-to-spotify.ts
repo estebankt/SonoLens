@@ -157,47 +157,169 @@ function inferInstrumentalness(moodTags: string[]): number | undefined {
 
 /**
  * Normalize genre names to match Spotify's available genre seeds
- * This is a simplified mapping - in production, you'd fetch available genres
- * and do fuzzy matching
+ * Only returns genres that are known to be valid in Spotify
  */
 function normalizeGenres(genres: string[]): string[] {
+	// Known valid Spotify genre seeds (subset of most common ones)
+	const validGenres = [
+		'acoustic',
+		'afrobeat',
+		'alt-rock',
+		'alternative',
+		'ambient',
+		'anime',
+		'black-metal',
+		'bluegrass',
+		'blues',
+		'bossanova',
+		'brazil',
+		'breakbeat',
+		'british',
+		'cantopop',
+		'chicago-house',
+		'children',
+		'chill',
+		'classical',
+		'club',
+		'comedy',
+		'country',
+		'dance',
+		'dancehall',
+		'death-metal',
+		'deep-house',
+		'detroit-techno',
+		'disco',
+		'disney',
+		'drum-and-bass',
+		'dub',
+		'dubstep',
+		'edm',
+		'electro',
+		'electronic',
+		'emo',
+		'folk',
+		'forro',
+		'french',
+		'funk',
+		'garage',
+		'german',
+		'gospel',
+		'goth',
+		'grindcore',
+		'groove',
+		'grunge',
+		'guitar',
+		'happy',
+		'hard-rock',
+		'hardcore',
+		'hardstyle',
+		'heavy-metal',
+		'hip-hop',
+		'holidays',
+		'honky-tonk',
+		'house',
+		'idm',
+		'indian',
+		'indie',
+		'indie-pop',
+		'industrial',
+		'iranian',
+		'j-dance',
+		'j-idol',
+		'j-pop',
+		'j-rock',
+		'jazz',
+		'k-pop',
+		'kids',
+		'latin',
+		'latino',
+		'malay',
+		'mandopop',
+		'metal',
+		'metal-misc',
+		'metalcore',
+		'minimal-techno',
+		'movies',
+		'mpb',
+		'new-age',
+		'new-release',
+		'opera',
+		'pagode',
+		'party',
+		'philippines-opm',
+		'piano',
+		'pop',
+		'pop-film',
+		'post-dubstep',
+		'power-pop',
+		'progressive-house',
+		'psych-rock',
+		'punk',
+		'punk-rock',
+		'r-n-b',
+		'rainy-day',
+		'reggae',
+		'reggaeton',
+		'road-trip',
+		'rock',
+		'rock-n-roll',
+		'rockabilly',
+		'romance',
+		'sad',
+		'salsa',
+		'samba',
+		'sertanejo',
+		'show-tunes',
+		'singer-songwriter',
+		'ska',
+		'sleep',
+		'songwriter',
+		'soul',
+		'soundtracks',
+		'spanish',
+		'study',
+		'summer',
+		'swedish',
+		'synth-pop',
+		'tango',
+		'techno',
+		'trance',
+		'trip-hop',
+		'turkish',
+		'work-out',
+		'world-music'
+	];
+
 	const genreMap: Record<string, string> = {
-		// Common mappings
-		hiphop: 'hip-hop',
+		// Common mappings to valid genres
 		'hip hop': 'hip-hop',
+		hiphop: 'hip-hop',
 		rap: 'hip-hop',
 		rnb: 'r-n-b',
 		'r&b': 'r-n-b',
-		edm: 'dance',
-		electronic: 'electronic',
-		indie: 'indie',
-		alternative: 'alt-rock',
-		metal: 'metal',
-		jazz: 'jazz',
-		blues: 'blues',
-		classical: 'classical',
-		country: 'country',
-		folk: 'folk',
-		reggae: 'reggae',
-		latin: 'latin',
-		soul: 'soul',
-		funk: 'funk',
-		disco: 'disco',
-		house: 'house',
-		techno: 'techno',
-		ambient: 'ambient',
-		rock: 'rock',
-		pop: 'pop',
-		punk: 'punk'
+		alt: 'alternative',
+		'alt rock': 'alt-rock',
+		'indie rock': 'indie',
+		'rock and roll': 'rock-n-roll'
 	};
 
-	return genres
+	const normalized = genres
 		.map((genre) => {
-			const normalized = genre.toLowerCase().replace(/[^a-z0-9\s-]/g, '');
-			return genreMap[normalized] || normalized;
+			const lower = genre.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '');
+			// Check if it's in our mapping
+			if (genreMap[lower]) return genreMap[lower];
+			// Check if it's already valid
+			if (validGenres.includes(lower)) return lower;
+			// Try without spaces (turn spaces to hyphens)
+			const hyphenated = lower.replace(/\s+/g, '-');
+			if (validGenres.includes(hyphenated)) return hyphenated;
+			return null;
 		})
-		.filter((genre) => genre.length > 0)
-		.slice(0, 5); // Max 5 genres
+		.filter((genre): genre is string => genre !== null && genre.length > 0);
+
+	// Return up to 5 genres, or fallback to 'pop' if none are valid
+	const result = normalized.slice(0, 5);
+	return result.length > 0 ? result : ['pop'];
 }
 
 /**
