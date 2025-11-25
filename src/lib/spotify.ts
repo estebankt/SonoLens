@@ -122,6 +122,7 @@ export async function getUserProfile(
 	id: string;
 	display_name: string;
 	email: string;
+	country?: string;
 	images: { url: string }[];
 }> {
 	const response = await fetch(`${SPOTIFY_API_BASE_URL}/me`, {
@@ -270,6 +271,7 @@ export async function getRecommendations(
 		target_acousticness?: number; // 0.0 - 1.0
 		target_instrumentalness?: number; // 0.0 - 1.0
 		limit?: number; // default 20, max 100
+		market?: string; // ISO 3166-1 alpha-2 country code
 	}
 ): Promise<{
 	tracks: Array<{
@@ -358,6 +360,11 @@ export async function getRecommendations(
 
 	// Set limit (default 20, max 100)
 	queryParams.append('limit', (params.limit || 20).toString());
+
+	// Add market parameter if provided (helps with availability)
+	if (params.market) {
+		queryParams.append('market', params.market);
+	}
 
 	const url = `${SPOTIFY_API_BASE_URL}/recommendations?${queryParams.toString()}`;
 	console.log('🎵 Spotify Recommendations API Call:');
