@@ -300,9 +300,6 @@ export async function getRecommendations(
 		popularity: number;
 	}>;
 }> {
-	// Build query parameters
-	const queryParams = new URLSearchParams();
-
 	// Calculate total seeds (Spotify requires at least 1, max 5 total)
 	let totalSeeds = 0;
 	const seedGenres: string[] = [];
@@ -330,47 +327,51 @@ export async function getRecommendations(
 		throw new Error('At least one seed (genre, artist, or track) is required for recommendations');
 	}
 
-	// Add seeds to query params
+	// Build query parameters manually (URLSearchParams encodes commas as %2C which breaks Spotify)
+	const queryParts: string[] = [];
+
+	// Add seeds (commas must NOT be encoded for Spotify)
 	if (seedGenres.length > 0) {
-		queryParams.append('seed_genres', seedGenres.join(','));
+		queryParts.push(`seed_genres=${seedGenres.join(',')}`);
 	}
 	if (seedArtists.length > 0) {
-		queryParams.append('seed_artists', seedArtists.join(','));
+		queryParts.push(`seed_artists=${seedArtists.join(',')}`);
 	}
 	if (seedTracks.length > 0) {
-		queryParams.append('seed_tracks', seedTracks.join(','));
+		queryParts.push(`seed_tracks=${seedTracks.join(',')}`);
 	}
 
 	// Add target audio features
 	if (params.target_energy !== undefined) {
-		queryParams.append('target_energy', params.target_energy.toString());
+		queryParts.push(`target_energy=${params.target_energy}`);
 	}
 	if (params.target_valence !== undefined) {
-		queryParams.append('target_valence', params.target_valence.toString());
+		queryParts.push(`target_valence=${params.target_valence}`);
 	}
 	if (params.target_danceability !== undefined) {
-		queryParams.append('target_danceability', params.target_danceability.toString());
+		queryParts.push(`target_danceability=${params.target_danceability}`);
 	}
 	if (params.target_acousticness !== undefined) {
-		queryParams.append('target_acousticness', params.target_acousticness.toString());
+		queryParts.push(`target_acousticness=${params.target_acousticness}`);
 	}
 	if (params.target_instrumentalness !== undefined) {
-		queryParams.append('target_instrumentalness', params.target_instrumentalness.toString());
+		queryParts.push(`target_instrumentalness=${params.target_instrumentalness}`);
 	}
 
 	// Set limit (default 20, max 100)
-	queryParams.append('limit', (params.limit || 20).toString());
+	queryParts.push(`limit=${params.limit || 20}`);
 
 	// Add market parameter if provided (helps with availability)
 	if (params.market) {
-		queryParams.append('market', params.market);
+		queryParts.push(`market=${params.market}`);
 	}
 
-	const url = `${SPOTIFY_API_BASE_URL}/recommendations?${queryParams.toString()}`;
+	const queryString = queryParts.join('&');
+	const url = `${SPOTIFY_API_BASE_URL}/recommendations?${queryString}`;
+
 	console.log('🎵 Spotify Recommendations API Call:');
 	console.log('URL:', url);
 	console.log('Seeds:', { genres: seedGenres, artists: seedArtists, tracks: seedTracks, total: totalSeeds });
-	console.log('Query Params:', Object.fromEntries(queryParams.entries()));
 
 	const response = await fetch(url, {
 		headers: {
@@ -384,8 +385,7 @@ export async function getRecommendations(
 			status: response.status,
 			statusText: response.statusText,
 			body: errorBody,
-			url: url,
-			params: Object.fromEntries(queryParams.entries())
+			url: url
 		});
 		throw new Error(`Failed to get recommendations: ${response.statusText}`);
 	}
