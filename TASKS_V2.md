@@ -128,21 +128,21 @@ Phase 2 transforms SonoLens from an authentication-only MVP into a functional ph
 
 ---
 
-## 💾 Milestone 7 — Save Playlist to Spotify
+## 💾 Milestone 7 — Save Playlist to Spotify ✅ COMPLETED
 
 ### Create Playlist Endpoint
-- [ ] Create `/api/spotify/create-playlist/+server.ts` endpoint
-- [ ] Accept playlist title and track URIs
-- [ ] Create playlist in user's Spotify account
-- [ ] Add tracks to playlist
-- [ ] Return playlist URL and ID
+- [x] Create `/api/spotify/create-playlist/+server.ts` endpoint
+- [x] Accept playlist title and track URIs
+- [x] Create playlist in user's Spotify account
+- [x] Add tracks to playlist
+- [x] Return playlist URL and ID
 
 ### Save Playlist UI
-- [ ] Add "Save to Spotify" button
-- [ ] Show success message with Spotify link
-- [ ] Handle errors (duplicate names, API limits)
-- [ ] Add option to make playlist public/private
-- [ ] Redirect to dashboard or show success state
+- [x] Add "Save to Spotify" button
+- [x] Show success message with Spotify link
+- [x] Handle errors (duplicate names, API limits)
+- [x] Add option to make playlist public/private
+- [x] Redirect to dashboard or show success state
 
 ---
 
