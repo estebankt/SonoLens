@@ -7,7 +7,7 @@
 		GeneratePlaylistResponse,
 		SpotifyTrack
 	} from '$lib/types/phase2';
-	import { fileToBase64 } from '$lib/utils/image';
+	import { fileToBase64, fileToBase64ForAI } from '$lib/utils/image';
 	import MoodAnalysisDisplay from '$lib/components/MoodAnalysisDisplay.svelte';
 	import PlaylistDisplay from '$lib/components/PlaylistDisplay.svelte';
 	import ProgressIndicator from '$lib/components/ProgressIndicator.svelte';
@@ -140,21 +140,26 @@
 		uploadState.error = null;
 
 		try {
-			// Convert file to base64
-			const base64Image = await fileToBase64(uploadState.file);
+			// Convert file to base64 - two versions:
+			// 1. Compressed/downscaled for AI analysis (saves tokens)
+			// 2. Original quality for playlist cover
+			const [compressedBase64, fullQualityBase64] = await Promise.all([
+				fileToBase64ForAI(uploadState.file),
+				fileToBase64(uploadState.file)
+			]);
 
-			// Store base64 image for playlist cover
-			imageBase64 = base64Image;
+			// Store full quality image for playlist cover
+			imageBase64 = fullQualityBase64;
 
-			// Call API to analyze image
+			// Call API to analyze image with compressed version
 			const response = await fetch('/api/analyze-image', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					image: base64Image,
-					image_type: uploadState.file.type
+					image: compressedBase64,
+					image_type: 'image/jpeg' // Always JPEG after compression
 				})
 			});
 
