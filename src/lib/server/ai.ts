@@ -25,10 +25,9 @@ async function analyzeWithFallback(
 ): Promise<string> {
 	// Build model list with environment variable first, then fallbacks
 	const models = [
-		OPENAI_MODEL || 'gpt-4o',
+		OPENAI_MODEL || 'gpt-4-turbo',
 		'gpt-4o',
-		'gpt-4-vision-preview',
-		'gpt-4-turbo'
+		'gpt-4-vision-preview'
 	];
 
 	// Remove duplicates while preserving order
@@ -126,9 +125,20 @@ export async function analyzeImage(
 	imageBase64: string,
 	imageType: string
 ): Promise<MoodAnalysis> {
-	const prompt = `You are a music mood analyst. Analyze this image and extract musical mood and atmosphere information.
+	const prompt = `You are an expert music-mood analyst. Analyze this image and extract musical mood and atmosphere information.
 
-Please provide a detailed analysis in JSON format with these fields:
+You MUST follow these strict rules:
+
+1. For "recommended_genres", ONLY return Spotify-supported genre seeds.
+2. ALL genres must be from the allowed list below.
+3. Choose 3-6 genres that best match the mood.
+4. Do NOT invent new genres.
+5. Do NOT output multi-word genres unless they appear EXACTLY in the list below.
+
+ALLOWED SPOTIFY GENRE SEEDS (choose from this list ONLY):
+["acoustic","afrobeat","alt-rock","alternative","ambient","anime","black-metal","bluegrass","blues","bossanova","brazil","breakbeat","british","cantopop","chicago-house","children","chill","classical","club","comedy","country","dance","dancehall","death-metal","deep-house","detroit-techno","disco","disney","drum-and-bass","dub","dubstep","edm","electro","electronic","emo","folk","forro","french","funk","garage","german","gospel","goth","grindcore","groove","grunge","guitar","happy","hard-rock","hardcore","hardstyle","heavy-metal","hip-hop","holidays","honky-tonk","house","idm","indian","indie","indie-pop","industrial","iranian","j-dance","j-idol","j-pop","j-rock","jazz","k-pop","kids","latin","latino","malay","mandopop","metal","metalcore","minimal-techno","movies","mpb","new-age","new-release","opera","pagode","party","philippines-opm","piano","pop","pop-film","post-dubstep","power-pop","progressive-house","psych-rock","punk","punk-rock","r-n-b","rainy-day","reggae","reggaeton","road-trip","rock","rock-n-roll","rockabilly","romance","sad","salsa","samba","sertanejo","show-tunes","singer-songwriter","ska","sleep","songwriter","soul","soundtracks","spanish","study","summer","swedish","synth-pop","tango","techno","trance","trip-hop","turkish","work-out","world-music"]
+
+Your JSON format:
 
 {
   "mood_tags": [...],
@@ -144,18 +154,18 @@ Please provide a detailed analysis in JSON format with these fields:
 }
 
 Guidelines:
-- mood_tags: 3-6 words describing the emotional/atmospheric qualities (e.g., "nostalgic", "energetic", "melancholic", "uplifting")
+- mood_tags: 3-6 words describing the emotional/atmospheric qualities
 - color_palette: 3-5 dominant colors you observe
 - energy_level: Rate the visual energy as low, medium, or high
 - emotional_descriptors: 3-5 emotional qualities the image evokes
 - atmosphere: 1-2 sentence description of the overall vibe
-- recommended_genres: 3-6 music genres that would match this mood (e.g., "indie", "electronic", "jazz", "rock")
-- seed_artists: LEAVE EMPTY ARRAY [] - we will use genres only
-- seed_tracks: LEAVE EMPTY ARRAY [] - we will use genres only
+- recommended_genres: 3-6 genres from the ALLOWED LIST ONLY that match this mood
+- seed_artists: MUST be empty array []
+- seed_tracks: MUST be empty array []
 - suggested_playlist_title: A creative, evocative title for a playlist matching this mood
 - confidence_score: Your confidence in the analysis (0.0-1.0)
 
-IMPORTANT: Do NOT include any artist or track names. Leave seed_artists and seed_tracks as empty arrays [].
+CRITICAL: Seed artists and seed tracks MUST remain empty arrays [].
 
 Respond ONLY with valid JSON, no additional text.`;
 
