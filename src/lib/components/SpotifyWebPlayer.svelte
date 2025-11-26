@@ -480,7 +480,7 @@
 		<div class="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center bg-white">
 			{#if currentTrack}
 				<!-- Large Album Art -->
-				<div class="w-full max-w-sm aspect-square mb-8 border-4 border-black shadow-neo-lg">
+				<div class="w-full max-w-sm aspect-square my-8 border-4 border-black shadow-neo-lg">
 					{#if currentTrack.album.images[0]}
 						<img
 							src={currentTrack.album.images[0].url}
