@@ -139,7 +139,7 @@
 
 	<!-- Track List -->
 	<div class="space-y-2 mb-6" role="list">
-		{#each tracks as track, index (track.id)}
+		{#each tracks as track, index (index)}
 			<div
 				role="listitem"
 				draggable={isEditable && !!onReorderTracks}
