@@ -70,6 +70,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 				if (response.ok) {
 					const trackData = await response.json();
+					const hasPreview = !!trackData.preview_url;
 					foundTracks.push({
 						id: trackData.id,
 						uri: trackData.uri,
@@ -90,7 +91,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 						popularity: trackData.popularity
 					});
 					console.log(
-						`  ✓ Found: "${trackData.name}" by ${trackData.artists.map((a: any) => a.name).join(', ')}`
+						`  ✓ Found: "${trackData.name}" by ${trackData.artists.map((a: any) => a.name).join(', ')}${hasPreview ? ' [Preview ✓]' : ' [No Preview ✗]'}`
 					);
 				}
 			} else {
@@ -104,8 +105,12 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			}
 		}
 
+		const tracksWithPreview = foundTracks.filter((t) => t.preview_url).length;
+		const tracksWithoutPreview = foundTracks.length - tracksWithPreview;
+
 		console.log('═══════════════════════════════════════════════════');
 		console.log(`✅ SUCCESS: Found ${foundTracks.length} tracks on Spotify`);
+		console.log(`🎵 Preview availability: ${tracksWithPreview} have previews, ${tracksWithoutPreview} don't`);
 		if (notFound.length > 0) {
 			console.log(`⚠️  Could not find ${notFound.length} tracks:`, notFound.slice(0, 3));
 		}
