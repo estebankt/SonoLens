@@ -627,15 +627,10 @@
 								onkeydown={(e) => e.stopPropagation()}
 								role="group"
 								aria-label="Volume control slider"
-								class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-60 bg-white border-4 border-black shadow-neo-lg p-4 w-[80px] h-[160px] flex flex-col items-center justify-center gap-3"
+								class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-60 bg-white border-4 border-black shadow-neo-lg p-6 w-[80px] h-[140px] flex items-center justify-center"
 							>
-								<!-- Volume Percentage Display -->
-								<div class="text-center font-bold text-sm whitespace-nowrap">
-									{Math.round(volume * 100)}%
-								</div>
-
 								<!-- Vertical Slider Container -->
-								<div class="flex items-center justify-center w-full h-[120px]">
+								<div class="flex items-center justify-center w-full h-full">
 									<input
 										type="range"
 										min="0"
@@ -644,6 +639,7 @@
 										value={volume}
 										oninput={handleVolumeChange}
 										class="volume-slider-vertical"
+										style="--volume-percent: {volume * 100}%"
 										aria-label="Volume percentage"
 										aria-valuemin="0"
 										aria-valuemax="100"
@@ -797,7 +793,13 @@
 		appearance: none;
 		width: 120px; /* This becomes the height after rotation */
 		height: 12px; /* This becomes the width after rotation */
-		background: white;
+		background: linear-gradient(
+			to right,
+			#fbbf24 0%,
+			#fbbf24 var(--volume-percent),
+			white var(--volume-percent),
+			white 100%
+		);
 		border: 4px solid black;
 		border-radius: 0;
 		outline: none;
@@ -810,7 +812,13 @@
 	.volume-slider-vertical::-webkit-slider-runnable-track {
 		width: 120px;
 		height: 12px;
-		background: white;
+		background: linear-gradient(
+			to right,
+			#fbbf24 0%,
+			#fbbf24 var(--volume-percent),
+			white var(--volume-percent),
+			white 100%
+		);
 		border: none;
 	}
 
@@ -835,7 +843,13 @@
 	.volume-slider-vertical::-moz-range-track {
 		width: 120px;
 		height: 12px;
-		background: white;
+		background: linear-gradient(
+			to right,
+			#fbbf24 0%,
+			#fbbf24 var(--volume-percent),
+			white var(--volume-percent),
+			white 100%
+		);
 		border: none;
 	}
 
