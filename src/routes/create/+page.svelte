@@ -301,23 +301,25 @@
 	<div class="max-w-3xl mx-auto">
 		<!-- Header with Navigation -->
 		<div class="mb-6 relative z-20">
-			<div class="flex items-center justify-between gap-4 min-h-[3.5rem]">
+			<div class="flex items-center justify-between gap-2 sm:gap-4 min-h-[3.5rem]">
 				<!-- Left: Back Button -->
 				<div class="flex-1 flex justify-start">
 					{#if currentStep > 0}
 						<button
 							onclick={goBack}
-							class="neo-button p-2 text-sm font-bold flex items-center gap-2"
+							class="neo-button p-1 sm:p-2 text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2"
 							aria-label="Go back to previous step"
 						>
-							<span>←</span> BACK
+							<span>←</span> <span class="hidden sm:inline">BACK</span>
 						</button>
 					{/if}
 				</div>
 
 				<!-- Center: Title & Subtitle -->
 				<div class="flex-none text-center">
-					<h1 class="text-4xl sm:text-5xl mb-2 font-bold">Create Playlist</h1>
+					<h1 class="text-2xl sm:text-5xl mb-1 sm:mb-2 font-bold whitespace-nowrap">
+						Create Playlist
+					</h1>
 					<p class="text-lg text-gray-600 hidden sm:block">
 						Upload an image to generate a mood-based playlist
 					</p>
@@ -328,16 +330,17 @@
 					{#if currentStep > 0 || uploadState.preview_url}
 						<button
 							onclick={startOver}
-							class="neo-button text-sm px-4 py-2 font-bold whitespace-nowrap"
+							class="neo-button text-xs sm:text-sm px-2 sm:px-4 py-1 sm:py-2 font-bold whitespace-nowrap"
 							title="Start over from scratch"
 						>
-							START OVER
+							<span class="sm:hidden">RESTART</span>
+							<span class="hidden sm:inline">START OVER</span>
 						</button>
 					{/if}
 				</div>
 			</div>
 			<!-- Mobile Subtitle -->
-			<p class="text-lg text-gray-600 text-center sm:hidden mt-2">
+			<p class="text-sm sm:text-lg text-gray-600 text-center sm:hidden mt-2">
 				Upload an image to generate a mood-based playlist
 			</p>
 		</div>
