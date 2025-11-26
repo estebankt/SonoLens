@@ -1,7 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { searchTracksByMood, getUserProfile } from '$lib/spotify';
-import { moodToSpotifyParams } from '$lib/utils/mood-to-spotify';
+import { searchTrack, getUserProfile } from '$lib/spotify';
 import type { GeneratePlaylistRequest, GeneratePlaylistResponse } from '$lib/types/phase2';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
@@ -36,65 +35,93 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		console.log('═══════════════════════════════════════════════════');
 		console.log(JSON.stringify(body.mood_analysis, null, 2));
 
-		// Prepare search parameters from mood analysis
-		const genres = body.mood_analysis.recommended_genres || [];
-		const moodTags = body.mood_analysis.mood_tags || [];
-		const energyLevel = body.mood_analysis.energy_level;
+		// Get track suggestions from AI
+		const suggestedTracks = body.mood_analysis.seed_tracks || [];
 
-		// Fallback genres if none provided
-		const searchGenres = genres.length > 0 ? genres : ['pop', 'indie'];
-
-		console.log('───────────────────────────────────────────────────');
-		console.log('🎯 SEARCH PARAMETERS:');
-		console.log('  Genres:', searchGenres);
-		console.log('  Mood tags:', moodTags);
-		console.log('  Energy level:', energyLevel);
-		console.log('  Limit:', body.limit || 20);
-
-		// Get user's market/country
-		let userMarket: string | undefined;
-		try {
-			const profile = await getUserProfile(accessToken);
-			if (profile.country) {
-				userMarket = profile.country;
-				console.log('  Market:', profile.country);
-			}
-		} catch (e) {
-			console.log('  Market: Not available');
-		}
-		console.log('───────────────────────────────────────────────────');
-
-		// Search for tracks using genre and mood
-		const searchResults = await searchTracksByMood(accessToken, {
-			genres: searchGenres,
-			energy: energyLevel,
-			mood: moodTags,
-			limit: body.limit || 20,
-			market: userMarket
-		});
-
-		if (!searchResults.tracks || searchResults.tracks.length === 0) {
-			console.log('❌ No tracks found in search results');
+		if (suggestedTracks.length === 0) {
+			console.log('❌ No track suggestions from AI');
 			return json(
 				{
 					success: false,
-					error: 'No tracks found for this mood. Try a different image.'
+					error: 'AI did not suggest any tracks. Please try again.'
+				} satisfies GeneratePlaylistResponse,
+				{ status: 400 }
+			);
+		}
+
+		console.log('───────────────────────────────────────────────────');
+		console.log(`🎵 AI suggested ${suggestedTracks.length} tracks`);
+		console.log('Searching for these tracks on Spotify...');
+		console.log('───────────────────────────────────────────────────');
+
+		// Search for each track on Spotify to get full track objects
+		const foundTracks: any[] = [];
+		const notFound: string[] = [];
+
+		for (const trackName of suggestedTracks) {
+			console.log(`🔍 Searching: "${trackName}"`);
+			const trackId = await searchTrack(accessToken, trackName);
+
+			if (trackId) {
+				// Get full track details
+				const response = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
+					headers: { Authorization: `Bearer ${accessToken}` }
+				});
+
+				if (response.ok) {
+					const trackData = await response.json();
+					foundTracks.push({
+						id: trackData.id,
+						uri: trackData.uri,
+						name: trackData.name,
+						artists: trackData.artists.map((a: any) => ({
+							id: a.id,
+							name: a.name,
+							uri: a.uri
+						})),
+						album: {
+							id: trackData.album.id,
+							name: trackData.album.name,
+							images: trackData.album.images
+						},
+						duration_ms: trackData.duration_ms,
+						preview_url: trackData.preview_url,
+						external_urls: trackData.external_urls,
+						popularity: trackData.popularity
+					});
+					console.log(`  ✓ Found: "${trackData.name}" by ${trackData.artists.map((a: any) => a.name).join(', ')}`);
+				}
+			} else {
+				notFound.push(trackName);
+				console.log(`  ✗ Not found: "${trackName}"`);
+			}
+
+			// Limit to requested number
+			if (foundTracks.length >= (body.limit || 20)) {
+				break;
+			}
+		}
+
+		console.log('═══════════════════════════════════════════════════');
+		console.log(`✅ SUCCESS: Found ${foundTracks.length} tracks on Spotify`);
+		if (notFound.length > 0) {
+			console.log(`⚠️  Could not find ${notFound.length} tracks:`, notFound.slice(0, 3));
+		}
+		console.log('═══════════════════════════════════════════════════');
+
+		if (foundTracks.length === 0) {
+			return json(
+				{
+					success: false,
+					error: 'Could not find any of the suggested tracks on Spotify.'
 				} satisfies GeneratePlaylistResponse,
 				{ status: 404 }
 			);
 		}
 
-		console.log('═══════════════════════════════════════════════════');
-		console.log(`✅ SUCCESS: Found ${searchResults.tracks.length} tracks`);
-		console.log('Top 3 tracks:');
-		searchResults.tracks.slice(0, 3).forEach((track, i) => {
-			console.log(`  ${i + 1}. "${track.name}" by ${track.artists.map((a) => a.name).join(', ')}`);
-		});
-		console.log('═══════════════════════════════════════════════════');
-
 		return json({
 			success: true,
-			tracks: searchResults.tracks
+			tracks: foundTracks
 		} satisfies GeneratePlaylistResponse);
 	} catch (error) {
 		console.error('Error in recommend endpoint:', error);
