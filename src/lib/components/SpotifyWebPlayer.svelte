@@ -602,7 +602,7 @@
 				<button
 					onclick={playPrevious}
 					disabled={!canPlayPrevious || !isReady}
-					class="p-3 bg-white text-black border-4 border-white hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+					class="neo-button bg-yellow-400 text-black p-3 disabled:opacity-50 disabled:cursor-not-allowed"
 					title="Previous (J or ←)"
 				>
 					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -616,7 +616,7 @@
 				<button
 					onclick={togglePlayPause}
 					disabled={!isReady}
-					class="p-4 bg-white text-black border-4 border-white hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+					class="neo-button bg-yellow-400 text-black p-4 disabled:opacity-50 disabled:cursor-not-allowed"
 					title={isPlaying ? 'Pause (Space or K)' : 'Play (Space or K)'}
 				>
 					{#if isPlaying}
@@ -642,7 +642,7 @@
 				<button
 					onclick={playNext}
 					disabled={!canPlayNext || !isReady}
-					class="p-3 bg-white text-black border-4 border-white hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+					class="neo-button bg-yellow-400 text-black p-3 disabled:opacity-50 disabled:cursor-not-allowed"
 					title="Next (L or →)"
 				>
 					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
