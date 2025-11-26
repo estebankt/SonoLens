@@ -1,9 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import {
-	generateCodeVerifier,
-	generateCodeChallenge,
-	getAuthorizationUrl
-} from './spotify';
+import { generateCodeVerifier, generateCodeChallenge, getAuthorizationUrl } from './spotify';
 
 describe('PKCE Utilities', () => {
 	describe('generateCodeVerifier', () => {
@@ -130,11 +126,7 @@ describe('PKCE Utilities', () => {
 		it('should properly URL-encode the redirect URI', async () => {
 			const challenge = await generateCodeChallenge(generateCodeVerifier());
 			const redirectUri = 'http://localhost:5173/auth/callback?state=test';
-			const url = getAuthorizationUrl(
-				mockEnv.SPOTIFY_CLIENT_ID,
-				redirectUri,
-				challenge
-			);
+			const url = getAuthorizationUrl(mockEnv.SPOTIFY_CLIENT_ID, redirectUri, challenge);
 
 			expect(url).toContain('redirect_uri=');
 			// URL should encode the query parameter

@@ -246,18 +246,12 @@
 						/>
 
 						<div class="flex flex-col sm:flex-row gap-3 justify-center">
-							<label for="file-input" class="neo-button cursor-pointer">
-								Choose File
-							</label>
+							<label for="file-input" class="neo-button cursor-pointer"> Choose File </label>
 
-							<label for="file-input" class="neo-button cursor-pointer">
-								Take Photo
-							</label>
+							<label for="file-input" class="neo-button cursor-pointer"> Take Photo </label>
 						</div>
 
-						<p class="text-sm text-gray-500 mt-4">
-							Supported formats: JPG, PNG, WebP (Max 10MB)
-						</p>
+						<p class="text-sm text-gray-500 mt-4">Supported formats: JPG, PNG, WebP (Max 10MB)</p>
 					</div>
 
 					{#if uploadState.error}
@@ -281,7 +275,9 @@
 						<!-- Progress Bar -->
 						<div class="mb-4 p-6 bg-yellow-100 border-4 border-black">
 							<div class="flex items-center gap-3 mb-3">
-								<div class="animate-spin h-6 w-6 border-4 border-black border-t-transparent rounded-full"></div>
+								<div
+									class="animate-spin h-6 w-6 border-4 border-black border-t-transparent rounded-full"
+								></div>
 								<h3 class="text-xl font-bold">Analyzing Image...</h3>
 							</div>
 							<p class="text-sm mb-3">AI is extracting mood and atmosphere from your image</p>

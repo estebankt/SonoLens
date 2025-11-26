@@ -6,11 +6,11 @@
 
 <div class="min-h-screen p-4 sm:p-8">
 	<div class="max-w-4xl mx-auto">
-		<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4">
+		<div
+			class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4"
+		>
 			<h1 class="text-4xl sm:text-5xl">Dashboard</h1>
-			<a href="/create" class="neo-button">
-				Create Playlist from Image
-			</a>
+			<a href="/create" class="neo-button"> Create Playlist from Image </a>
 		</div>
 
 		<div class="neo-card mb-6">

@@ -34,7 +34,8 @@
 	<div class="mb-6">
 		<h2 class="text-3xl sm:text-4xl font-bold mb-2">{title}</h2>
 		<p class="text-lg text-gray-600">
-			{tracks.length} {tracks.length === 1 ? 'track' : 'tracks'} • {calculateTotalDuration(tracks)}
+			{tracks.length}
+			{tracks.length === 1 ? 'track' : 'tracks'} • {calculateTotalDuration(tracks)}
 		</p>
 	</div>
 
