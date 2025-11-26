@@ -86,7 +86,9 @@ export async function getTokensFromSpotify(
 			statusText: response.statusText,
 			body: errorBody
 		});
-		throw new Error(`Failed to get tokens: ${response.status} ${response.statusText} - ${errorBody}`);
+		throw new Error(
+			`Failed to get tokens: ${response.status} ${response.statusText} - ${errorBody}`
+		);
 	}
 
 	return response.json();
@@ -121,9 +123,7 @@ export async function refreshToken(
 /**
  * Get current user's Spotify profile
  */
-export async function getUserProfile(
-	accessToken: string
-): Promise<{
+export async function getUserProfile(accessToken: string): Promise<{
 	id: string;
 	display_name: string;
 	email: string;
@@ -376,7 +376,12 @@ export async function getRecommendations(
 
 	console.log('🎵 Spotify Recommendations API Call:');
 	console.log('URL:', url);
-	console.log('Seeds:', { genres: seedGenres, artists: seedArtists, tracks: seedTracks, total: totalSeeds });
+	console.log('Seeds:', {
+		genres: seedGenres,
+		artists: seedArtists,
+		tracks: seedTracks,
+		total: totalSeeds
+	});
 
 	const response = await fetch(url, {
 		headers: {

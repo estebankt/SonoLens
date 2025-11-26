@@ -1,0 +1,7 @@
+.svelte-kit/
+build/
+.vercel/
+node_modules/
+*.md
+package-lock.json
+pnpm-lock.yaml

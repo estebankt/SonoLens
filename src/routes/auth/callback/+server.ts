@@ -1,4 +1,4 @@
-import { redirect, error as svelteError } from '@sveltejs/kit';
+import { redirect } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getTokensFromSpotify } from '$lib/spotify';
 import { SPOTIFY_CLIENT_ID, SPOTIFY_REDIRECT_URI } from '$env/static/private';
