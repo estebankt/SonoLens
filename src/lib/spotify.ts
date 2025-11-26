@@ -447,14 +447,15 @@ export async function searchTracksByMood(
 		market: params.market
 	});
 
-	// Build search query from genres and mood
-	const genreQuery = params.genres.slice(0, 3).join(' OR genre:');
-	const moodQuery = params.mood ? params.mood.slice(0, 2).join(' ') : '';
-
-	// Combine genre and mood into search query
-	const query = `genre:${genreQuery}${moodQuery ? ' ' + moodQuery : ''}`;
+	// Build search query from genres only
+	// Note: Mood tags don't work well with Spotify search, so we rely on genre filtering
+	const query = params.genres
+		.slice(0, 3)
+		.map((g) => `genre:"${g}"`)
+		.join(' OR ');
 
 	console.log('🔍 Built search query:', query);
+	console.log('ℹ️  Note: Mood tags ignored for search (not effective with Spotify API)');
 
 	const searchParams = new URLSearchParams({
 		q: query,
