@@ -7,13 +7,12 @@ export default defineConfig({
 	test: {
 		// Updated to include 'tests' folder AND 'src' folder
 		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
-		// Exclude server-side tests and Svelte component tests for now
+		// Exclude server-side tests (require Node environment, not jsdom)
 		exclude: [
 			'**/node_modules/**',
 			'**/dist/**',
 			'**/.svelte-kit/**',
-			'src/lib/server/**/*.test.ts',
-			'tests/example.test.ts'
+			'src/lib/server/**/*.test.ts'
 		],
 		environment: 'jsdom',
 		globals: true,
