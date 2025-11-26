@@ -37,6 +37,56 @@ export function fileToBase64(file: File): Promise<string> {
 }
 
 /**
+ * Compress and convert image to base64 for AI analysis
+ * Optimized for token efficiency - downscales to max 512x512 at 0.7 quality
+ */
+export async function fileToBase64ForAI(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+
+		if (!ctx) {
+			reject(new Error('Failed to get canvas context'));
+			return;
+		}
+
+		img.onload = () => {
+			let { width, height } = img;
+
+			// Downscale to max 512x512 for AI analysis (saves tokens)
+			const maxDimension = 512;
+			if (width > maxDimension || height > maxDimension) {
+				const ratio = Math.min(maxDimension / width, maxDimension / height);
+				width *= ratio;
+				height *= ratio;
+			}
+
+			canvas.width = width;
+			canvas.height = height;
+
+			// Draw and compress
+			ctx.drawImage(img, 0, 0, width, height);
+
+			// Convert to base64 with 0.7 quality for smaller size
+			const dataURL = canvas.toDataURL('image/jpeg', 0.7);
+			// Remove data URL prefix to get just the base64 string
+			const base64 = dataURL.split(',')[1];
+
+			URL.revokeObjectURL(img.src);
+			resolve(base64);
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(img.src);
+			reject(new Error('Failed to load image for compression'));
+		};
+
+		img.src = URL.createObjectURL(file);
+	});
+}
+
+/**
  * Get image dimensions
  */
 export function getImageDimensions(file: File): Promise<{ width: number; height: number }> {

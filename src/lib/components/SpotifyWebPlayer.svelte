@@ -29,15 +29,19 @@
 	let isInitializing = $state(true);
 	let volume = $state(0.5);
 	let needsReauth = $state(false); // Indicates user needs to re-authenticate
+	let showVolumeSlider = $state(false); // Show/hide volume dropdown
 
 	// Computed values
 	let currentTrack = $derived(tracks[currentIndex] || null);
 	let canPlayPrevious = $derived(currentIndex > 0);
 	let canPlayNext = $derived(currentIndex < tracks.length - 1);
 
+	let previousTrackIndex = currentTrackIndex;
+
 	// Update current index when prop changes and trigger playback
 	$effect(() => {
-		if (currentTrackIndex !== currentIndex) {
+		if (currentTrackIndex !== previousTrackIndex) {
+			previousTrackIndex = currentTrackIndex;
 			currentIndex = currentTrackIndex;
 			// Only auto-play if player is ready and we have a device
 			if (isReady && deviceId && tracks[currentIndex]) {
@@ -332,6 +336,11 @@
 		setVolume(newVolume);
 	}
 
+	// Toggle volume slider dropdown
+	function toggleVolumeSlider() {
+		showVolumeSlider = !showVolumeSlider;
+	}
+
 	// Keyboard controls
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
@@ -410,7 +419,14 @@
 	});
 </script>
 
-<svelte:window onkeydown={handleKeydown} />
+<svelte:window
+	onkeydown={handleKeydown}
+	onclick={(e) => {
+		if (showVolumeSlider && !(e.target as Element)?.closest('.volume-control')) {
+			showVolumeSlider = false;
+		}
+	}}
+/>
 
 <div class="neo-card bg-black text-white sticky bottom-0 z-50">
 	<div class="p-4">
@@ -501,25 +517,68 @@
 					{/if}
 				</div>
 
-				<!-- Volume control -->
-				<div class="flex items-center gap-2">
-					<svg class="w-5 h-5 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
-						<path
-							fill-rule="evenodd"
-							d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-					<input
-						type="range"
-						min="0"
-						max="1"
-						step="0.01"
-						value={volume}
-						oninput={handleVolumeChange}
+				<!-- Volume control with dropdown -->
+				<div class="relative volume-control">
+					<!-- Volume Button -->
+					<button
+						onclick={toggleVolumeSlider}
+						class="neo-button bg-yellow-400 text-black p-2"
+						title="Volume (M to mute)"
+						aria-label="Volume control"
+						class:cursor-not-allowed={!isReady}
 						disabled={!isReady}
-						class="w-20 h-2"
-					/>
+						class:opacity-50={!isReady}
+					>
+						{#if volume === 0}
+							<!-- Muted Icon -->
+							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						{:else if volume < 0.5}
+							<!-- Low Volume Icon -->
+							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM11.828 7.757a1 1 0 011.415 0A3.984 3.984 0 0114 10a3.983 3.983 0 01-1.172 2.828 1 1 0 01-1.415-1.415A1.984 1.984 0 0012 10a1.983 1.983 0 00-.586-1.414 1 1 0 010-1.415z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						{:else}
+							<!-- High Volume Icon -->
+							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						{/if}
+					</button>
+
+					<!-- Dropdown Slider -->
+					{#if showVolumeSlider}
+						<div
+							class="absolute bottom-full right-0 mb-2 p-4 bg-white border-4 border-black"
+							style="box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1); min-width: 200px;"
+						>
+							<input
+								type="range"
+								min="0"
+								max="1"
+								step="0.01"
+								value={volume}
+								oninput={handleVolumeChange}
+								disabled={!isReady}
+								class="volume-slider w-full"
+								style="--volume-percent: {volume * 100}"
+								aria-label="Volume level"
+							/>
+						</div>
+					{/if}
 				</div>
 			</div>
 
@@ -546,7 +605,7 @@
 				<button
 					onclick={playPrevious}
 					disabled={!canPlayPrevious || !isReady}
-					class="p-3 bg-white text-black border-4 border-white hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+					class="neo-button bg-yellow-400 text-black p-3 disabled:opacity-50 disabled:cursor-not-allowed"
 					title="Previous (J or ←)"
 				>
 					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -560,7 +619,7 @@
 				<button
 					onclick={togglePlayPause}
 					disabled={!isReady}
-					class="p-4 bg-white text-black border-4 border-white hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+					class="neo-button bg-yellow-400 text-black p-4 disabled:opacity-50 disabled:cursor-not-allowed"
 					title={isPlaying ? 'Pause (Space or K)' : 'Play (Space or K)'}
 				>
 					{#if isPlaying}
@@ -586,7 +645,7 @@
 				<button
 					onclick={playNext}
 					disabled={!canPlayNext || !isReady}
-					class="p-3 bg-white text-black border-4 border-white hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+					class="neo-button bg-yellow-400 text-black p-3 disabled:opacity-50 disabled:cursor-not-allowed"
 					title="Next (L or →)"
 				>
 					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -611,6 +670,67 @@
 </div>
 
 <style>
+	/* Volume Slider - Neo-Brutalism Style */
+	.volume-slider {
+		-webkit-appearance: none;
+		appearance: none;
+		height: 8px;
+		background: transparent;
+		outline: none;
+		border: 4px solid black;
+		background: linear-gradient(
+			to right,
+			black 0%,
+			black calc(var(--volume-percent) * 1%),
+			white calc(var(--volume-percent) * 1%),
+			white 100%
+		);
+	}
+
+	.volume-slider::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 24px;
+		height: 24px;
+		background: black;
+		border: 4px solid white;
+		box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+		cursor: pointer;
+	}
+
+	.volume-slider::-moz-range-thumb {
+		width: 24px;
+		height: 24px;
+		background: black;
+		border: 4px solid white;
+		box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
+		cursor: pointer;
+		border-radius: 0;
+	}
+
+	.volume-slider:disabled {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+
+	.volume-slider:disabled::-webkit-slider-thumb {
+		cursor: not-allowed;
+	}
+
+	.volume-slider:disabled::-moz-range-thumb {
+		cursor: not-allowed;
+	}
+
+	/* Hover effects */
+	.volume-slider:hover::-webkit-slider-thumb {
+		background: #ffe500; /* Yellow accent */
+	}
+
+	.volume-slider:hover::-moz-range-thumb {
+		background: #ffe500;
+	}
+
+	/* Progress bar styles (existing) */
 	input[type='range'] {
 		-webkit-appearance: none;
 		appearance: none;

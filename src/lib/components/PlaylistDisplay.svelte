@@ -2,6 +2,7 @@
 	import { fade, fly } from 'svelte/transition';
 	import type { SpotifyTrack } from '$lib/types/phase2';
 	import SpotifyWebPlayer from './SpotifyWebPlayer.svelte';
+	import AddTrackModal from './AddTrackModal.svelte';
 
 	interface Props {
 		title: string;
@@ -9,6 +10,7 @@
 		onSavePlaylist?: () => void;
 		onRemoveTrack?: (trackId: string) => void;
 		onReorderTracks?: (reorderedTracks: SpotifyTrack[]) => void;
+		onAddTrack?: (track: SpotifyTrack) => void;
 		isLoading?: boolean;
 		isEditable?: boolean;
 	}
@@ -19,6 +21,7 @@
 		onSavePlaylist,
 		onRemoveTrack,
 		onReorderTracks,
+		onAddTrack,
 		isLoading = false,
 		isEditable = true
 	}: Props = $props();
@@ -26,6 +29,7 @@
 	let currentTrackIndex = $state(0);
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
+	let showAddTrackModal = $state(false);
 
 	function handleTrackChange(newIndex: number) {
 		currentTrackIndex = newIndex;
@@ -112,12 +116,25 @@
 
 <div class="neo-card">
 	<!-- Playlist Header -->
-	<div class="mb-6">
-		<h2 class="text-3xl sm:text-4xl font-bold mb-2">{title}</h2>
-		<p class="text-lg text-gray-600">
-			{tracks.length}
-			{tracks.length === 1 ? 'track' : 'tracks'} • {calculateTotalDuration(tracks)}
-		</p>
+	<div class="mb-6 flex items-start justify-between gap-4">
+		<div class="flex-1">
+			<h2 class="text-3xl sm:text-4xl font-bold mb-2">{title}</h2>
+			<p class="text-lg text-gray-600">
+				{tracks.length}
+				{tracks.length === 1 ? 'track' : 'tracks'} • {calculateTotalDuration(tracks)}
+			</p>
+		</div>
+
+		{#if isEditable && onAddTrack}
+			<button
+				onclick={() => (showAddTrackModal = true)}
+				class="neo-button bg-yellow-400 text-black px-4 py-2 text-2xl font-bold flex-shrink-0"
+				title="Add track to playlist"
+				aria-label="Add track to playlist"
+			>
+				+
+			</button>
+		{/if}
 	</div>
 
 	<!-- Track List -->
@@ -133,7 +150,7 @@
 				ondragend={handleDragEnd}
 				ondblclick={() => handlePlayTrack(index)}
 				transition:fly={{ y: -20, duration: 300 }}
-				class="flex items-center gap-3 p-3 bg-white border-2 border-black transition-colors"
+				class="flex items-center gap-4 p-4 bg-white border-2 border-black transition-colors"
 				class:hover:bg-gray-50={draggedIndex === null}
 				class:bg-yellow-100={currentTrackIndex === index && draggedIndex !== index}
 				class:border-yellow-600={currentTrackIndex === index && draggedIndex !== index}
@@ -190,14 +207,14 @@
 					<img
 						src={track.album.images[track.album.images.length - 1].url}
 						alt={track.album.name}
-						class="w-12 h-12 border-2 border-black flex-shrink-0"
+						class="w-20 h-20 border-4 border-black flex-shrink-0"
 					/>
 				{/if}
 
 				<!-- Track Info -->
 				<div class="flex-grow min-w-0">
-					<h3 class="font-bold truncate">{track.name}</h3>
-					<p class="text-sm text-gray-600 truncate">
+					<h3 class="font-bold text-lg truncate">{track.name}</h3>
+					<p class="text-base text-gray-600 truncate">
 						{track.artists.map((a) => a.name).join(', ')}
 					</p>
 				</div>
@@ -263,6 +280,19 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Add Track Modal -->
+{#if onAddTrack}
+	<AddTrackModal
+		isOpen={showAddTrackModal}
+		existingTrackIds={tracks.map((t) => t.id)}
+		onAddTrack={(track) => {
+			onAddTrack(track);
+			showAddTrackModal = false;
+		}}
+		onClose={() => (showAddTrackModal = false)}
+	/>
+{/if}
 
 <!-- Spotify Web Player -->
 <SpotifyWebPlayer {tracks} {currentTrackIndex} onTrackChange={handleTrackChange} />
