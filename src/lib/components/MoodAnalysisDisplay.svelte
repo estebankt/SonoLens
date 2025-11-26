@@ -107,10 +107,7 @@
 		{:else}
 			<!-- Button State -->
 			<div class="text-center">
-				<button
-					onclick={onGeneratePlaylist}
-					class="neo-button text-xl px-8 py-4"
-				>
+				<button onclick={onGeneratePlaylist} class="neo-button text-xl px-8 py-4">
 					Generate Playlist
 				</button>
 			</div>

@@ -421,9 +421,7 @@
 									<!-- Progress Bar -->
 									<div class="mb-4 p-6 bg-yellow-100 border-4 border-black">
 										<LoadingSpinner message="Analyzing Image..." />
-										<p class="text-sm mt-3">
-											AI is extracting mood and atmosphere from your image
-										</p>
+										<p class="text-sm mt-3">AI is extracting mood and atmosphere from your image</p>
 
 										<!-- Progress Bar -->
 										<div class="w-full bg-white border-4 border-black h-8 overflow-hidden mt-4">
@@ -456,11 +454,9 @@
 
 								{#if uploadState.file}
 									<p class="text-sm text-gray-600 mt-4">
-										File: {uploadState.file.name} ({(
-											uploadState.file.size /
-											1024 /
-											1024
-										).toFixed(2)} MB)
+										File: {uploadState.file.name} ({(uploadState.file.size / 1024 / 1024).toFixed(
+											2
+										)} MB)
 									</p>
 								{/if}
 							</div>
