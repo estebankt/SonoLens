@@ -519,9 +519,10 @@
 					<!-- Volume Button -->
 					<button
 						onclick={toggleVolumeSlider}
-						class="p-2 border-2 border-white bg-black hover:bg-gray-800 transition-colors"
+						class="neo-button bg-yellow-400 text-black p-2"
 						title="Volume (M to mute)"
 						aria-label="Volume control"
+						class:cursor-not-allowed={!isReady}
 						disabled={!isReady}
 						class:opacity-50={!isReady}
 					>
