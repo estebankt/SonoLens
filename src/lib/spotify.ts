@@ -399,6 +399,107 @@ export async function getRecommendations(
 }
 
 /**
+ * Search for tracks using genre and mood parameters
+ * More reliable than the deprecated recommendations endpoint
+ */
+export async function searchTracksByMood(
+	accessToken: string,
+	params: {
+		genres: string[];
+		energy?: 'low' | 'medium' | 'high';
+		mood?: string[];
+		limit?: number;
+		market?: string;
+	}
+): Promise<{
+	tracks: Array<{
+		id: string;
+		uri: string;
+		name: string;
+		artists: Array<{
+			id: string;
+			name: string;
+			uri: string;
+		}>;
+		album: {
+			id: string;
+			name: string;
+			images: Array<{
+				url: string;
+				height: number;
+				width: number;
+			}>;
+		};
+		duration_ms: number;
+		preview_url: string | null;
+		external_urls: {
+			spotify: string;
+		};
+		popularity: number;
+	}>;
+}> {
+	// Build search query from genres and mood
+	const genreQuery = params.genres.slice(0, 3).join(' OR genre:');
+	const moodQuery = params.mood ? params.mood.slice(0, 2).join(' ') : '';
+
+	// Combine genre and mood into search query
+	const query = `genre:${genreQuery}${moodQuery ? ' ' + moodQuery : ''}`;
+
+	console.log('🔍 Search query:', query);
+
+	const searchParams = new URLSearchParams({
+		q: query,
+		type: 'track',
+		limit: (params.limit || 20).toString()
+	});
+
+	if (params.market) {
+		searchParams.append('market', params.market);
+	}
+
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/search?${searchParams.toString()}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		const errorBody = await response.text();
+		console.error('❌ Spotify search failed:', {
+			status: response.status,
+			statusText: response.statusText,
+			body: errorBody
+		});
+		throw new Error(`Failed to search tracks: ${response.statusText}`);
+	}
+
+	const data = await response.json();
+
+	// Map search results to expected format
+	return {
+		tracks: (data.tracks?.items || []).map((track: any) => ({
+			id: track.id,
+			uri: track.uri,
+			name: track.name,
+			artists: track.artists.map((artist: any) => ({
+				id: artist.id,
+				name: artist.name,
+				uri: artist.uri
+			})),
+			album: {
+				id: track.album.id,
+				name: track.album.name,
+				images: track.album.images
+			},
+			duration_ms: track.duration_ms,
+			preview_url: track.preview_url,
+			external_urls: track.external_urls,
+			popularity: track.popularity
+		}))
+	};
+}
+
+/**
  * Search for an artist by name and return their Spotify ID
  */
 export async function searchArtist(
