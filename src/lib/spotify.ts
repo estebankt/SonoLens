@@ -37,7 +37,12 @@ export function getAuthorizationUrl(
 	clientId: string,
 	redirectUri: string,
 	codeChallenge: string,
-	scopes: string[] = ['user-read-email', 'user-read-private']
+	scopes: string[] = [
+		'user-read-email',
+		'user-read-private',
+		'playlist-modify-public',
+		'playlist-modify-private'
+	]
 ): string {
 	const params = new URLSearchParams({
 		client_id: clientId,
