@@ -42,7 +42,8 @@ export function getAuthorizationUrl(
 		'user-read-private',
 		'playlist-modify-public',
 		'playlist-modify-private',
-		'streaming'
+		'streaming',
+		'ugc-image-upload'
 	]
 ): string {
 	const params = new URLSearchParams({
@@ -674,4 +675,44 @@ export async function addTracksToPlaylist(
 	}
 
 	return response.json();
+}
+
+/**
+ * Upload a custom cover image to a playlist
+ * @param accessToken Spotify access token
+ * @param playlistId The playlist ID
+ * @param imageBase64 Base64-encoded JPEG image (max 256KB)
+ * @returns void
+ *
+ * Note: The image must be:
+ * - In JPEG format
+ * - Base64-encoded without the data:image/jpeg;base64, prefix
+ * - Maximum 256KB
+ */
+export async function uploadPlaylistCover(
+	accessToken: string,
+	playlistId: string,
+	imageBase64: string
+): Promise<void> {
+	// Remove data URI prefix if present (data:image/jpeg;base64, or data:image/png;base64,)
+	const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '');
+
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/playlists/${playlistId}/images`, {
+		method: 'PUT',
+		headers: {
+			Authorization: `Bearer ${accessToken}`,
+			'Content-Type': 'image/jpeg'
+		},
+		body: base64Data
+	});
+
+	if (!response.ok) {
+		const errorBody = await response.text();
+		console.error('Upload playlist cover failed:', {
+			status: response.status,
+			statusText: response.statusText,
+			body: errorBody
+		});
+		throw new Error(`Failed to upload playlist cover: ${response.statusText}`);
+	}
 }
