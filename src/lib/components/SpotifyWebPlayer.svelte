@@ -822,21 +822,19 @@
 		border: none;
 	}
 
-	/* WebKit slider thumb */
+	/* WebKit slider thumb - Hidden */
 	.volume-slider-vertical::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
-		width: 24px;
-		height: 24px;
-		background: black;
-		border: 3px solid white;
-		border-radius: 50%;
-		cursor: grab;
-		margin-top: -6px; /* Center the thumb on the track */
+		width: 0;
+		height: 0;
+		background: transparent;
+		border: none;
+		cursor: pointer;
 	}
 
 	.volume-slider-vertical::-webkit-slider-thumb:active {
-		cursor: grabbing;
+		cursor: pointer;
 	}
 
 	/* Firefox slider track */
@@ -853,18 +851,16 @@
 		border: none;
 	}
 
-	/* Firefox slider thumb */
+	/* Firefox slider thumb - Hidden */
 	.volume-slider-vertical::-moz-range-thumb {
-		width: 24px;
-		height: 24px;
-		background: black;
-		border: 3px solid white;
-		border-radius: 50%;
-		cursor: grab;
-		border: none; /* Remove default border */
+		width: 0;
+		height: 0;
+		background: transparent;
+		border: none;
+		cursor: pointer;
 	}
 
 	.volume-slider-vertical::-moz-range-thumb:active {
-		cursor: grabbing;
+		cursor: pointer;
 	}
 </style>
