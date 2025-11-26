@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { fade, fly } from 'svelte/transition';
 	import type { SpotifyTrack } from '$lib/types/phase2';
 	import SpotifyWebPlayer from './SpotifyWebPlayer.svelte';
 
@@ -131,6 +132,7 @@
 				ondrop={(e) => handleDrop(e, index)}
 				ondragend={handleDragEnd}
 				ondblclick={() => handlePlayTrack(index)}
+				transition:fly={{ y: -20, duration: 300 }}
 				class="flex items-center gap-3 p-3 bg-white border-2 border-black transition-colors"
 				class:hover:bg-gray-50={draggedIndex === null}
 				class:bg-yellow-100={currentTrackIndex === index && draggedIndex !== index}
