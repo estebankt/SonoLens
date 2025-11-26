@@ -29,19 +29,13 @@
 	let currentIndex = $state(currentTrackIndex);
 	let errorMessage = $state<string | null>(null);
 	let isInitializing = $state(true);
-	let volume = $state(0.5);
 	let needsReauth = $state(false); // Indicates user needs to re-authenticate
-	let showVolumeSlider = $state(false); // Show/hide volume dropdown
 	let isExpanded = $state(false); // Player expansion state
-	let previousVolume = $state(0.5); // For mute/unmute toggle
 
 	// Computed values
 	let currentTrack = $derived(tracks[currentIndex] || null);
 	let canPlayPrevious = $derived(currentIndex > 0);
 	let canPlayNext = $derived(currentIndex < tracks.length - 1);
-	let volumeIcon = $derived(
-		volume === 0 ? 'muted' : volume <= 0.33 ? 'low' : volume <= 0.66 ? 'medium' : 'high'
-	);
 
 	let previousTrackIndex = currentTrackIndex;
 
@@ -135,7 +129,7 @@
 						console.error('Error refreshing token:', error);
 					}
 				},
-				volume: volume
+				volume: 0.5
 			});
 
 			// Setup event listeners
@@ -229,9 +223,8 @@
 
 		try {
 			const token = await getAccessToken();
-			const track = tracks[index];
 
-			// Use Spotify Web API to start playback
+			// Use Spotify Web API to start playback with the full context
 			const response = await fetch(
 				`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
 				{
@@ -241,7 +234,8 @@
 						'Content-Type': 'application/json'
 					},
 					body: JSON.stringify({
-						uris: [track.uri]
+						uris: tracks.map((t) => t.uri), // Send all tracks to establish context
+						offset: { position: index } // Start at the selected track
 					})
 				}
 			);
@@ -272,6 +266,16 @@
 	async function togglePlayPause(e?: Event) {
 		if (e) e.stopPropagation();
 		if (!player || !isReady) return;
+
+		const state = await player.getCurrentState();
+
+		// If no track is currently loaded in the player, start playback at current index
+		if (!state || !state.track_window.current_track) {
+			if (tracks[currentIndex]) {
+				await playTrackAtIndex(currentIndex);
+			}
+			return;
+		}
 
 		try {
 			await player.togglePlay();
@@ -307,62 +311,11 @@
 		}
 	}
 
-	// Set volume
-	async function setVolume(newVolume: number) {
-		volume = newVolume;
-
-		if (!deviceId || !isReady) return;
-
-		try {
-			// Use Web API for more reliable volume control
-			const token = await getAccessToken();
-			const volumePercent = Math.round(newVolume * 100);
-
-			const response = await fetch(
-				`https://api.spotify.com/v1/me/player/volume?volume_percent=${volumePercent}&device_id=${deviceId}`,
-				{
-					method: 'PUT',
-					headers: {
-						Authorization: `Bearer ${token}`
-					}
-				}
-			);
-
-			if (!response.ok && response.status !== 204) {
-				console.error('Failed to set volume:', response.statusText);
-			}
-		} catch (error) {
-			console.error('Error setting volume:', error);
-		}
-	}
-
 	// Handle seek bar input
 	function handleSeek(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const newPosition = parseInt(target.value);
 		seek(newPosition);
-	}
-
-	// Handle volume change
-	function handleVolumeChange(event: Event) {
-		const target = event.target as HTMLInputElement;
-		const newVolume = parseFloat(target.value);
-		setVolume(newVolume);
-	}
-
-	// Toggle volume slider dropdown
-	function toggleVolumeSlider() {
-		showVolumeSlider = !showVolumeSlider;
-	}
-
-	// Toggle mute/unmute
-	function toggleMute() {
-		if (volume === 0) {
-			setVolume(previousVolume || 0.5);
-		} else {
-			previousVolume = volume;
-			setVolume(0);
-		}
 	}
 
 	// Keyboard controls
@@ -386,11 +339,6 @@
 			case 'j':
 				event.preventDefault();
 				if (canPlayPrevious) playPrevious();
-				break;
-			case 'm':
-			case 'M':
-				event.preventDefault();
-				toggleMute();
 				break;
 		}
 	}
@@ -444,14 +392,7 @@
 	});
 </script>
 
-<svelte:window
-	onkeydown={handleKeydown}
-	onclick={(e) => {
-		if (showVolumeSlider && !(e.target as Element)?.closest('.volume-control')) {
-			showVolumeSlider = false;
-		}
-	}}
-/>
+<svelte:window onkeydown={handleKeydown} />
 
 {#if isExpanded}
 	<!-- Expanded Player Overlay/Sheet -->
@@ -578,77 +519,6 @@
 							/>
 						</svg>
 					</button>
-
-					<!-- Volume Control -->
-					<div class="volume-control relative">
-						<!-- Icon Button (Always Visible) -->
-						<button
-							onclick={toggleVolumeSlider}
-							aria-label="Volume control"
-							aria-expanded={showVolumeSlider}
-							class="p-4 neo-button bg-white text-black hover:bg-gray-100 transition-colors"
-						>
-							{#if volumeIcon === 'muted'}
-								<!-- Muted SVG: Speaker with X -->
-								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-									<path
-										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
-									/>
-								</svg>
-							{:else if volumeIcon === 'low'}
-								<!-- Low Volume: Speaker with 1 wave -->
-								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-									<path
-										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 7.757a1 1 0 00-1.414 1.415A1.999 1.999 0 0114 11a1.999 1.999 0 01-.757 1.828 1 1 0 001.414 1.415A3.999 3.999 0 0016 11a3.999 3.999 0 00-1.343-3.243z"
-									/>
-								</svg>
-							{:else if volumeIcon === 'medium'}
-								<!-- Medium Volume: Speaker with 2 waves -->
-								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-									<path
-										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM11.828 7.757a1 1 0 011.415 0 5.983 5.983 0 010 8.485 1 1 0 01-1.415-1.414A3.984 3.984 0 0013 11a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-									/>
-								</svg>
-							{:else}
-								<!-- High Volume: Speaker with 3 waves -->
-								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-									<path
-										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
-									/>
-								</svg>
-							{/if}
-						</button>
-
-						<!-- Dropdown Slider (Conditional) -->
-						{#if showVolumeSlider}
-							<div
-								transition:fly={{ y: 10, duration: 200 }}
-								onclick={(e) => e.stopPropagation()}
-								onkeydown={(e) => e.stopPropagation()}
-								role="group"
-								aria-label="Volume control slider"
-								class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-60 bg-white border-4 border-black shadow-neo-lg p-6 w-[80px] h-[140px] flex items-center justify-center"
-							>
-								<!-- Vertical Slider Container -->
-								<div class="flex items-center justify-center w-full h-full">
-									<input
-										type="range"
-										min="0"
-										max="1"
-										step="0.01"
-										value={volume}
-										oninput={handleVolumeChange}
-										class="volume-slider-vertical"
-										style="--volume-percent: {volume * 100}%"
-										aria-label="Volume percentage"
-										aria-valuemin="0"
-										aria-valuemax="100"
-										aria-valuenow={Math.round(volume * 100)}
-									/>
-								</div>
-							</div>
-						{/if}
-					</div>
 				</div>
 			{/if}
 		</div>
@@ -663,7 +533,7 @@
 		tabindex="0"
 		aria-label="Expand player"
 	>
-		<div class="p-3 sm:p-4 max-w-screen-xl mx-auto flex items-center gap-3 sm:gap-4">
+		<div class="p-2 sm:p-3 max-w-screen-xl mx-auto flex items-center gap-3 sm:gap-4">
 			{#if isInitializing}
 				<div class="flex-1 text-center">
 					<p class="text-sm">Initializing Player...</p>
@@ -682,7 +552,7 @@
 					<img
 						src={currentTrack.album.images[0].url}
 						alt={currentTrack.album.name}
-						class="w-10 h-10 sm:w-12 sm:h-12 border-2 border-white"
+						class="w-8 h-8 sm:w-10 sm:h-10 border-2 border-white"
 					/>
 				{/if}
 
@@ -768,7 +638,6 @@
 		height: 20px;
 		background: black;
 		border: 3px solid white;
-		cursor: pointer;
 	}
 
 	input[type='range']::-moz-range-thumb {
@@ -776,7 +645,6 @@
 		height: 20px;
 		background: black;
 		border: 3px solid white;
-		cursor: pointer;
 	}
 
 	input[type='range']:disabled::-webkit-slider-thumb {
@@ -785,105 +653,5 @@
 
 	input[type='range']:disabled::-moz-range-thumb {
 		cursor: not-allowed;
-	}
-
-	/* Vertical Volume Slider - Using transform rotation */
-	.volume-slider-vertical {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 120px; /* This becomes the height after rotation */
-		height: 20px; /* This becomes the width after rotation (includes border) */
-		box-sizing: border-box;
-		background: linear-gradient(
-			to right,
-			#fbbf24 0%,
-			#fbbf24 var(--volume-percent),
-			white var(--volume-percent),
-			white 100%
-		);
-		border: 4px solid black;
-		border-radius: 0;
-		outline: none;
-		cursor: pointer;
-		transform: rotate(-90deg);
-		transform-origin: center;
-	}
-
-	/* WebKit (Chrome, Safari) slider track */
-	.volume-slider-vertical::-webkit-slider-runnable-track {
-		width: 120px;
-		height: 12px; /* Inner height (without border) */
-		background: linear-gradient(
-			to right,
-			#fbbf24 0%,
-			#fbbf24 var(--volume-percent),
-			white var(--volume-percent),
-			white 100%
-		);
-		border: none;
-	}
-
-	/* WebKit slider thumb - Hidden */
-	.volume-slider-vertical::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 0;
-		height: 0;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-	}
-
-	.volume-slider-vertical::-webkit-slider-thumb:active {
-		cursor: pointer;
-	}
-
-	/* Firefox slider track */
-	.volume-slider-vertical::-moz-range-track {
-		width: 120px;
-		height: 12px;
-		background: linear-gradient(
-			to right,
-			#fbbf24 0%,
-			#fbbf24 var(--volume-percent),
-			white var(--volume-percent),
-			white 100%
-		);
-		border: none;
-	}
-
-	/* Firefox slider thumb - Hidden */
-	.volume-slider-vertical::-moz-range-thumb {
-		width: 0;
-		height: 0;
-		background: transparent;
-		border: none;
-		cursor: pointer;
-		opacity: 0;
-	}
-
-	.volume-slider-vertical::-moz-range-thumb:active {
-		cursor: pointer;
-	}
-
-	/* Firefox progress indicator - Hidden */
-	.volume-slider-vertical::-moz-range-progress {
-		background: transparent;
-		border: none;
-	}
-
-	/* Additional browser-specific resets */
-	.volume-slider-vertical::-ms-thumb {
-		width: 0;
-		height: 0;
-		opacity: 0;
-	}
-
-	.volume-slider-vertical::-ms-fill-lower {
-		background: transparent;
-	}
-
-	.volume-slider-vertical::-ms-fill-upper {
-		background: transparent;
 	}
 </style>
