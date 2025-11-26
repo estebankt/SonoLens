@@ -6,13 +6,11 @@
 // AI Image Analysis Types
 export interface MoodAnalysis {
 	mood_tags: string[];
-	color_palette: string[];
 	energy_level: 'low' | 'medium' | 'high';
 	emotional_descriptors: string[];
 	atmosphere: string;
 	recommended_genres: string[];
-	seed_artists?: string[];
-	seed_tracks?: string[];
+	seed_tracks?: string[]; // 8-12 tracks (optimized from 15-25)
 	suggested_playlist_title: string;
 	confidence_score?: number;
 }

@@ -42,19 +42,6 @@
 			</div>
 		</div>
 
-		<!-- Color Palette -->
-		{#if analysis.color_palette && analysis.color_palette.length > 0}
-			<div>
-				<h3 class="text-xl font-bold mb-3">Colors</h3>
-				<div class="flex flex-wrap gap-2">
-					{#each analysis.color_palette as color}
-						<span class="px-3 py-1 bg-white border-2 border-black text-sm">
-							{color}
-						</span>
-					{/each}
-				</div>
-			</div>
-		{/if}
 
 		<!-- Recommended Genres -->
 		<div>

@@ -354,11 +354,6 @@ export function moodToSpotifyParams(
 		params.seed_genres = normalizeGenres(moodAnalysis.recommended_genres);
 	}
 
-	// Add seed artists if provided
-	if (moodAnalysis.seed_artists && moodAnalysis.seed_artists.length > 0) {
-		params.seed_artists = moodAnalysis.seed_artists.slice(0, 5);
-	}
-
 	// Add seed tracks if provided
 	if (moodAnalysis.seed_tracks && moodAnalysis.seed_tracks.length > 0) {
 		params.seed_tracks = moodAnalysis.seed_tracks.slice(0, 5);

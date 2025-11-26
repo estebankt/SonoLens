@@ -45,7 +45,7 @@ async function analyzeWithFallback(
 								type: 'image_url',
 								image_url: {
 									url: `data:${imageType};base64,${imageBase64}`,
-									detail: 'high'
+									detail: 'low' // Optimized for 512x512 images - saves 20-30% tokens
 								}
 							},
 							{
@@ -55,7 +55,7 @@ async function analyzeWithFallback(
 						]
 					}
 				],
-				max_tokens: 1024,
+				max_tokens: 800, // Reduced from 1024 - sufficient for 8-12 tracks
 				response_format: { type: 'json_object' }
 			});
 
@@ -124,12 +124,10 @@ Your JSON format:
 
 {
   "mood_tags": [...],
-  "color_palette": [...],
   "energy_level": "low" | "medium" | "high",
   "emotional_descriptors": [...],
   "atmosphere": "...",
   "recommended_genres": [...],
-  "seed_artists": [],
   "seed_tracks": [...],
   "suggested_playlist_title": "...",
   "confidence_score": 0.0-1.0
@@ -137,13 +135,11 @@ Your JSON format:
 
 Guidelines:
 - mood_tags: 3-6 words describing the emotional/atmospheric qualities
-- color_palette: 3-5 dominant colors you observe
 - energy_level: Rate the visual energy as low, medium, or high
 - emotional_descriptors: 3-5 emotional qualities the image evokes
 - atmosphere: 1-2 sentence description of the overall vibe
 - recommended_genres: 3-6 music genres that match this mood (any genres are fine)
-- seed_artists: MUST be empty array []
-- seed_tracks: Array of 15-25 REAL song names that match this mood and energy level
+- seed_tracks: Array of 8-12 REAL song names that match this mood and energy level
   * Include artist name with track: "Song Name - Artist Name"
   * Choose well-known songs that exist on Spotify
   * Match the mood, energy, and atmosphere of the image
@@ -152,10 +148,12 @@ Guidelines:
 - suggested_playlist_title: A creative, evocative title for this playlist
 - confidence_score: Your confidence in the analysis (0.0-1.0)
 
-CRITICAL:
-- seed_artists MUST be empty array []
-- seed_tracks MUST contain 15-25 real song names with artist
-- Format: "Track Name - Artist Name"
+CRITICAL: The output MUST:
+1. Be valid JSON matching the exact structure above
+2. Include ALL required fields
+3. Use only Spotify-compatible genre names
+4. Provide 8-12 diverse seed_tracks with artist names
+5. Format seed_tracks as "Track Name - Artist Name"
 
 Respond ONLY with valid JSON, no additional text.`;
 
@@ -194,7 +192,6 @@ export function validateMoodAnalysis(analysis: any): analysis is MoodAnalysis {
 	return (
 		typeof analysis === 'object' &&
 		Array.isArray(analysis.mood_tags) &&
-		Array.isArray(analysis.color_palette) &&
 		['low', 'medium', 'high'].includes(analysis.energy_level) &&
 		Array.isArray(analysis.recommended_genres) &&
 		typeof analysis.suggested_playlist_title === 'string'
