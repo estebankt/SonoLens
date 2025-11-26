@@ -177,39 +177,41 @@
 
 				<!-- Track Number / Play Button -->
 				<div class="flex-shrink-0 w-8 text-center">
-					{#if currentTrackIndex === index}
-						<button
-							onclick={() => handlePlayTrack(index)}
-							class="text-yellow-600"
-							title="Currently playing"
+					<button
+						onclick={() => handlePlayTrack(index)}
+						class="text-gray-500 hover:text-black w-full h-full flex items-center justify-center"
+						title="Play track"
+					>
+						<span
+							class="text-lg font-bold"
+							class:text-yellow-600={currentTrackIndex === index}
 						>
-							<svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+							{index + 1}
+						</span>
+					</button>
+				</div>
+
+				<!-- Album Art -->
+				<div class="relative flex-shrink-0">
+					{#if track.album.images && track.album.images.length > 0}
+						<img
+							src={track.album.images[track.album.images.length - 1].url}
+							alt={track.album.name}
+							class="w-20 h-20 border-4 border-black"
+						/>
+					{/if}
+					{#if currentTrackIndex === index}
+						<div class="absolute inset-0 flex items-center justify-center bg-black/30">
+							<svg class="w-8 h-8 text-yellow-400 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
 									clip-rule="evenodd"
 								/>
 							</svg>
-						</button>
-					{:else}
-						<button
-							onclick={() => handlePlayTrack(index)}
-							class="text-gray-500 hover:text-black"
-							title="Play track"
-						>
-							<span class="text-lg font-bold">{index + 1}</span>
-						</button>
+						</div>
 					{/if}
 				</div>
-
-				<!-- Album Art -->
-				{#if track.album.images && track.album.images.length > 0}
-					<img
-						src={track.album.images[track.album.images.length - 1].url}
-						alt={track.album.name}
-						class="w-20 h-20 border-4 border-black flex-shrink-0"
-					/>
-				{/if}
 
 				<!-- Track Info -->
 				<div class="flex-grow min-w-0">
@@ -226,21 +228,6 @@
 
 				<!-- Action Buttons -->
 				<div class="flex items-center gap-2 flex-shrink-0">
-					<!-- Spotify Link -->
-					<a
-						href={track.external_urls.spotify}
-						target="_blank"
-						rel="noopener noreferrer"
-						class="p-2 hover:bg-gray-200 border-2 border-black transition-colors"
-						title="Open in Spotify"
-					>
-						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-							<path
-								d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"
-							/>
-						</svg>
-					</a>
-
 					{#if isEditable}
 						<!-- Remove Button -->
 						{#if onRemoveTrack}
