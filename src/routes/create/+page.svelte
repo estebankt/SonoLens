@@ -300,8 +300,17 @@
 <div class="min-h-screen p-4 sm:p-8 overflow-x-hidden">
 	<div class="max-w-3xl mx-auto">
 		<!-- Header with Navigation -->
-		<div class="mb-6 relative z-20">
-			<div class="flex items-center justify-between gap-2 sm:gap-4 min-h-[3.5rem]">
+		<div class="mb-6 relative z-20 flex flex-col items-center gap-4">
+			<!-- Title & Subtitle -->
+			<div class="text-center">
+				<h1 class="text-3xl sm:text-5xl mb-2 font-bold whitespace-nowrap">Create Playlist</h1>
+				<p class="text-sm sm:text-lg text-gray-600">
+					Upload an image to generate a mood-based playlist
+				</p>
+			</div>
+
+			<!-- Navigation Buttons -->
+			<div class="w-full flex items-center justify-between min-h-[2.5rem]">
 				<!-- Left: Back Button -->
 				<div class="flex-1 flex justify-start">
 					{#if currentStep > 0}
@@ -313,16 +322,6 @@
 							<span>←</span> <span>BACK</span>
 						</button>
 					{/if}
-				</div>
-
-				<!-- Center: Title & Subtitle -->
-				<div class="flex-none text-center">
-					<h1 class="text-2xl sm:text-5xl mb-1 sm:mb-2 font-bold whitespace-nowrap">
-						Create Playlist
-					</h1>
-					<p class="text-lg text-gray-600 hidden sm:block">
-						Upload an image to generate a mood-based playlist
-					</p>
 				</div>
 
 				<!-- Right: Start Over Button -->
@@ -339,10 +338,6 @@
 					{/if}
 				</div>
 			</div>
-			<!-- Mobile Subtitle -->
-			<p class="text-sm sm:text-lg text-gray-600 text-center sm:hidden mt-2">
-				Upload an image to generate a mood-based playlist
-			</p>
 		</div>
 
 		<!-- Progress Indicator -->
