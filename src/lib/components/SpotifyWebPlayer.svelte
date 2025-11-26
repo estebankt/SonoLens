@@ -1,5 +1,7 @@
 <script lang="ts">
 	import { onMount, onDestroy } from 'svelte';
+	import { fly } from 'svelte/transition';
+	import { cubicOut } from 'svelte/easing';
 	import type { SpotifyTrack } from '$lib/types/phase2';
 
 	interface SpotifyWebPlayerProps {
@@ -30,6 +32,7 @@
 	let volume = $state(0.5);
 	let needsReauth = $state(false); // Indicates user needs to re-authenticate
 	let showVolumeSlider = $state(false); // Show/hide volume dropdown
+	let isExpanded = $state(false); // Player expansion state
 
 	// Computed values
 	let currentTrack = $derived(tracks[currentIndex] || null);
@@ -56,6 +59,10 @@
 			onTrackChange(currentIndex);
 		}
 	});
+
+	function toggleExpanded() {
+		isExpanded = !isExpanded;
+	}
 
 	// Load Spotify Web Playback SDK
 	function loadSpotifySDK(): Promise<void> {
@@ -258,7 +265,8 @@
 	}
 
 	// Toggle play/pause
-	async function togglePlayPause() {
+	async function togglePlayPause(e?: Event) {
+		if (e) e.stopPropagation();
 		if (!player || !isReady) return;
 
 		try {
@@ -269,14 +277,16 @@
 	}
 
 	// Play next track
-	function playNext() {
+	function playNext(e?: Event) {
+		if (e) e.stopPropagation();
 		if (canPlayNext) {
 			playTrackAtIndex(currentIndex + 1);
 		}
 	}
 
 	// Play previous track
-	function playPrevious() {
+	function playPrevious(e?: Event) {
+		if (e) e.stopPropagation();
 		if (canPlayPrevious) {
 			playTrackAtIndex(currentIndex - 1);
 		}
@@ -428,308 +438,259 @@
 	}}
 />
 
-<div class="neo-card bg-black text-white sticky bottom-0 z-50">
-	<div class="p-4">
-		{#if isInitializing}
-			<!-- Loading state -->
-			<div class="text-center py-4">
-				<div
-					class="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto mb-2"
-				></div>
-				<p class="text-sm">Initializing Spotify Player...</p>
-			</div>
-		{:else if errorMessage}
-			<!-- Error state -->
-			<div class="text-center py-4">
-				<p class="text-red-400 mb-2">⚠️ {errorMessage}</p>
-				{#if needsReauth}
-					<!-- Scope/Permission error - needs re-authentication -->
-					<p class="text-sm text-gray-400 mb-3">
-						The playback feature requires additional permissions. Please log out and log back in to
-						grant the required permissions.
-					</p>
-					<div class="flex gap-3 justify-center">
-						<a href="/auth/logout" class="neo-button bg-red-500 text-white border-red-700 text-sm">
-							Log Out & Re-authenticate
-						</a>
-						<button onclick={initializePlayer} class="neo-button bg-white text-black text-sm">
-							Retry
-						</button>
-					</div>
-				{:else if !isPremium}
-					<!-- Premium required error -->
-					<p class="text-sm text-gray-400 mb-3">
-						Web playback requires Spotify Premium. You can still save playlists and open tracks in
-						Spotify.
-					</p>
-					<a
-						href="https://www.spotify.com/premium/"
-						target="_blank"
-						rel="noopener noreferrer"
-						class="neo-button bg-green-500 text-white border-green-700 text-sm inline-block"
-					>
-						Upgrade to Premium
-					</a>
-				{:else}
-					<!-- Generic error -->
-					<button onclick={initializePlayer} class="neo-button bg-white text-black text-sm">
-						Retry
-					</button>
-				{/if}
-			</div>
-		{:else if !currentTrack}
-			<!-- No track selected -->
-			<div class="text-center text-gray-400">
-				<p>No track selected</p>
-			</div>
-		{:else if isReady && !isPlaying && currentPosition === 0}
-			<!-- Ready to play - show play prompt -->
-			<div class="text-center py-4">
-				<p class="text-lg mb-3">Ready to play</p>
-				<p class="text-gray-400 mb-4">Click play to start listening</p>
-				<button
-					onclick={() => playTrackAtIndex(currentIndex)}
-					class="neo-button bg-green-500 text-white border-green-700 text-lg px-8 py-4"
+{#if isExpanded}
+	<!-- Expanded Player Overlay/Sheet -->
+	<div
+		class="fixed inset-0 bg-black/50 z-40"
+		onclick={toggleExpanded}
+		onkeydown={(e) => e.key === 'Escape' && toggleExpanded()}
+		role="button"
+		tabindex="0"
+		aria-label="Close expanded player"
+		transition:fly={{ duration: 200, opacity: 0 }}
+	></div>
+	<div
+		class="fixed bottom-0 left-0 right-0 z-50 h-[90vh] bg-white border-t-4 border-black flex flex-col shadow-neo-lg"
+		transition:fly={{ y: 1000, duration: 300, easing: cubicOut }}
+	>
+		<!-- Expanded Player Header -->
+		<div class="flex items-center justify-between p-4 border-b-4 border-black bg-black text-white">
+			<button onclick={toggleExpanded} class="p-2 hover:text-gray-300" aria-label="Collapse player">
+				<svg
+					class="w-8 h-8"
+					fill="none"
+					stroke="currentColor"
+					viewBox="0 0 24 24"
+					xmlns="http://www.w3.org/2000/svg"
 				>
-					▶️ Start Playing
-				</button>
-			</div>
-		{:else}
-			<!-- Player controls -->
-			<div class="flex items-center gap-4 mb-3">
-				<!-- Album art -->
-				{#if currentTrack.album.images[0]}
-					<img
-						src={currentTrack.album.images[0].url}
-						alt={currentTrack.album.name}
-						class="w-16 h-16 border-4 border-white"
-					/>
-				{/if}
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						stroke-width="3"
+						d="M19 9l-7 7-7-7"
+					></path>
+				</svg>
+			</button>
+			<span class="font-bold text-lg">Now Playing</span>
+			<div class="w-8"></div>
+			<!-- Spacer for centering -->
+		</div>
 
-				<!-- Track details -->
-				<div class="flex-1 min-w-0">
-					<p class="font-bold text-lg truncate">{currentTrack.name}</p>
-					<p class="text-gray-300 truncate">
-						{currentTrack.artists.map((a) => a.name).join(', ')}
-					</p>
-					{#if !isReady}
-						<p class="text-yellow-400 text-sm">Connecting to Spotify...</p>
+		<!-- Expanded Player Content -->
+		<div class="flex-1 overflow-y-auto p-6 flex flex-col items-center justify-center bg-white">
+			{#if currentTrack}
+				<!-- Large Album Art -->
+				<div class="w-full max-w-sm aspect-square mb-8 border-4 border-black shadow-neo-lg">
+					{#if currentTrack.album.images[0]}
+						<img
+							src={currentTrack.album.images[0].url}
+							alt={currentTrack.album.name}
+							class="w-full h-full object-cover"
+						/>
 					{/if}
 				</div>
 
-				<!-- Volume control with dropdown -->
-				<div class="relative volume-control">
-					<!-- Volume Button -->
-					<button
-						onclick={toggleVolumeSlider}
-						class="neo-button bg-yellow-400 text-black p-2"
-						title="Volume (M to mute)"
-						aria-label="Volume control"
-						class:cursor-not-allowed={!isReady}
+				<!-- Track Info -->
+				<div class="text-center mb-8 w-full">
+					<h2 class="text-3xl font-bold mb-2 truncate">{currentTrack.name}</h2>
+					<p class="text-xl text-gray-600 truncate">
+						{currentTrack.artists.map((a) => a.name).join(', ')}
+					</p>
+				</div>
+
+				<!-- Progress Bar -->
+				<div class="w-full mb-8">
+					<input
+						type="range"
+						min="0"
+						max={duration}
+						value={currentPosition}
+						oninput={handleSeek}
 						disabled={!isReady}
-						class:opacity-50={!isReady}
+						class="w-full h-4 bg-white border-4 border-black appearance-none cursor-pointer disabled:opacity-50"
+					/>
+					<div class="flex justify-between text-sm font-bold mt-2">
+						<span>{formatTime(currentPosition)}</span>
+						<span>{formatTime(duration)}</span>
+					</div>
+				</div>
+
+				<!-- Controls -->
+				<div class="flex items-center justify-center gap-6 mb-8 w-full">
+					<button
+						onclick={playPrevious}
+						disabled={!canPlayPrevious || !isReady}
+						class="p-4 neo-button bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+						aria-label="Previous track"
 					>
-						{#if volume === 0}
-							<!-- Muted Icon -->
-							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+						<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+							<path
+								d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z"
+							/>
+						</svg>
+					</button>
+
+					<button
+						onclick={togglePlayPause}
+						disabled={!isReady}
+						class="p-6 neo-button bg-yellow-400 text-black hover:translate-y-1 hover:shadow-none disabled:opacity-50 rounded-full border-4 border-black shadow-neo"
+						aria-label={isPlaying ? 'Pause' : 'Play'}
+					>
+						{#if isPlaying}
+							<svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
-									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
-									clip-rule="evenodd"
-								/>
-							</svg>
-						{:else if volume < 0.5}
-							<!-- Low Volume Icon -->
-							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-								<path
-									fill-rule="evenodd"
-									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM11.828 7.757a1 1 0 011.415 0A3.984 3.984 0 0114 10a3.983 3.983 0 01-1.172 2.828 1 1 0 01-1.415-1.415A1.984 1.984 0 0012 10a1.983 1.983 0 00-.586-1.414 1 1 0 010-1.415z"
+									d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
 									clip-rule="evenodd"
 								/>
 							</svg>
 						{:else}
-							<!-- High Volume Icon -->
-							<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+							<svg class="w-12 h-12" fill="currentColor" viewBox="0 0 20 20">
 								<path
 									fill-rule="evenodd"
-									d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
 									clip-rule="evenodd"
 								/>
 							</svg>
 						{/if}
 					</button>
 
-					<!-- Dropdown Slider -->
-					{#if showVolumeSlider}
-						<div
-							class="absolute bottom-full right-0 mb-2 p-4 bg-white border-4 border-black"
-							style="box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1); min-width: 200px;"
+					<button
+						onclick={playNext}
+						disabled={!canPlayNext || !isReady}
+						class="p-4 neo-button bg-white text-black hover:bg-gray-100 disabled:opacity-50"
+						aria-label="Next track"
+					>
+						<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+							<path
+								d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z"
+							/>
+						</svg>
+					</button>
+				</div>
+
+				<!-- Volume -->
+				<div class="w-full max-w-xs flex items-center gap-4">
+					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							fill-rule="evenodd"
+							d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+					<input
+						type="range"
+						min="0"
+						max="1"
+						step="0.01"
+						value={volume}
+						oninput={handleVolumeChange}
+						class="w-full h-4 bg-white border-4 border-black appearance-none cursor-pointer"
+					/>
+				</div>
+			{/if}
+		</div>
+	</div>
+{:else}
+	<!-- Minimized Bottom Bar Player -->
+	<div
+		class="fixed bottom-0 left-0 right-0 z-50 bg-black text-white border-t-4 border-black cursor-pointer hover:bg-gray-900 transition-colors"
+		onclick={toggleExpanded}
+		onkeydown={(e) => e.key === 'Enter' && toggleExpanded()}
+		role="button"
+		tabindex="0"
+		aria-label="Expand player"
+	>
+		<div class="p-3 sm:p-4 max-w-screen-xl mx-auto flex items-center gap-3 sm:gap-4">
+			{#if isInitializing}
+				<div class="flex-1 text-center">
+					<p class="text-sm">Initializing Player...</p>
+				</div>
+			{:else if errorMessage}
+				<div class="flex-1 text-center text-red-400">
+					<p class="text-sm truncate">{errorMessage}</p>
+				</div>
+			{:else if !currentTrack}
+				<div class="flex-1 text-center text-gray-400">
+					<p class="text-sm">No track selected</p>
+				</div>
+			{:else}
+				<!-- Album Art (Small) -->
+				{#if currentTrack.album.images[0]}
+					<img
+						src={currentTrack.album.images[0].url}
+						alt={currentTrack.album.name}
+						class="w-10 h-10 sm:w-12 sm:h-12 border-2 border-white"
+					/>
+				{/if}
+
+				<!-- Track Info -->
+				<div class="flex-1 min-w-0">
+					<p class="font-bold text-sm sm:text-base truncate">{currentTrack.name}</p>
+					<p class="text-gray-300 text-xs sm:text-sm truncate">
+						{currentTrack.artists.map((a) => a.name).join(', ')}
+					</p>
+				</div>
+
+				<!-- Quick Controls -->
+				<div class="flex items-center gap-2 sm:gap-4">
+					<button
+						onclick={togglePlayPause}
+						class="p-2 text-white hover:text-yellow-400 transition-colors"
+						aria-label={isPlaying ? 'Pause' : 'Play'}
+					>
+						{#if isPlaying}
+							<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						{:else}
+							<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						{/if}
+					</button>
+
+					<!-- Expand Button -->
+					<button class="p-2 text-white hover:text-gray-300" aria-label="Expand player">
+						<svg
+							class="w-6 h-6"
+							fill="none"
+							stroke="currentColor"
+							viewBox="0 0 24 24"
+							xmlns="http://www.w3.org/2000/svg"
 						>
-							<input
-								type="range"
-								min="0"
-								max="1"
-								step="0.01"
-								value={volume}
-								oninput={handleVolumeChange}
-								disabled={!isReady}
-								class="volume-slider w-full"
-								style="--volume-percent: {volume * 100}"
-								aria-label="Volume level"
-							/>
-						</div>
-					{/if}
-				</div>
-			</div>
-
-			<!-- Progress bar -->
-			<div class="mb-3">
-				<input
-					type="range"
-					min="0"
-					max={duration}
-					value={currentPosition}
-					oninput={handleSeek}
-					disabled={!isReady}
-					class="w-full h-2 bg-white border-2 border-white appearance-none cursor-pointer disabled:opacity-50"
-				/>
-				<div class="flex justify-between text-xs text-gray-400 mt-1">
-					<span>{formatTime(currentPosition)}</span>
-					<span>{formatTime(duration)}</span>
-				</div>
-			</div>
-
-			<!-- Controls -->
-			<div class="flex items-center justify-center gap-3">
-				<!-- Previous button -->
-				<button
-					onclick={playPrevious}
-					disabled={!canPlayPrevious || !isReady}
-					class="neo-button bg-yellow-400 text-black p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-					title="Previous (J or ←)"
-				>
-					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-						<path
-							d="M8.445 14.832A1 1 0 0010 14v-2.798l5.445 3.63A1 1 0 0017 14V6a1 1 0 00-1.555-.832L10 8.798V6a1 1 0 00-1.555-.832l-6 4a1 1 0 000 1.664l6 4z"
-						/>
-					</svg>
-				</button>
-
-				<!-- Play/Pause button -->
-				<button
-					onclick={togglePlayPause}
-					disabled={!isReady}
-					class="neo-button bg-yellow-400 text-black p-4 disabled:opacity-50 disabled:cursor-not-allowed"
-					title={isPlaying ? 'Pause (Space or K)' : 'Play (Space or K)'}
-				>
-					{#if isPlaying}
-						<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
 							<path
-								fill-rule="evenodd"
-								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
-								clip-rule="evenodd"
-							/>
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								stroke-width="2"
+								d="M5 15l7-7 7 7"
+							></path>
 						</svg>
-					{:else}
-						<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-							<path
-								fill-rule="evenodd"
-								d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
-								clip-rule="evenodd"
-							/>
-						</svg>
-					{/if}
-				</button>
-
-				<!-- Next button -->
-				<button
-					onclick={playNext}
-					disabled={!canPlayNext || !isReady}
-					class="neo-button bg-yellow-400 text-black p-3 disabled:opacity-50 disabled:cursor-not-allowed"
-					title="Next (L or →)"
-				>
-					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-						<path
-							d="M4.555 5.168A1 1 0 003 6v8a1 1 0 001.555.832L10 11.202V14a1 1 0 001.555.832l6-4a1 1 0 000-1.664l-6-4A1 1 0 0010 6v2.798l-5.445-3.63z"
-						/>
-					</svg>
-				</button>
-			</div>
-
-			<!-- Keyboard shortcuts hint -->
-			<div class="text-center text-xs text-gray-500 mt-3">
-				<p>
-					Keyboard: <span class="text-gray-400">Space/K = Play/Pause</span> •
-					<span class="text-gray-400">J/← = Previous</span> •
-					<span class="text-gray-400">L/→ = Next</span> •
-					<span class="text-gray-400">M = Mute</span>
-				</p>
+					</button>
+				</div>
+			{/if}
+		</div>
+		<!-- Progress Bar (Thin line at top of minimized player) -->
+		{#if duration > 0}
+			<div class="absolute top-0 left-0 right-0 h-1 bg-gray-800">
+				<div
+					class="h-full bg-yellow-400 transition-all duration-1000 ease-linear"
+					style="width: {(currentPosition / duration) * 100}%"
+				></div>
 			</div>
 		{/if}
 	</div>
-</div>
+{/if}
 
 <style>
-	/* Volume Slider - Neo-Brutalism Style */
-	.volume-slider {
-		-webkit-appearance: none;
-		appearance: none;
-		height: 8px;
-		background: transparent;
-		outline: none;
-		border: 4px solid black;
-		background: linear-gradient(
-			to right,
-			black 0%,
-			black calc(var(--volume-percent) * 1%),
-			white calc(var(--volume-percent) * 1%),
-			white 100%
-		);
-	}
-
-	.volume-slider::-webkit-slider-thumb {
-		-webkit-appearance: none;
-		appearance: none;
-		width: 24px;
-		height: 24px;
-		background: black;
-		border: 4px solid white;
-		box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-		cursor: pointer;
-	}
-
-	.volume-slider::-moz-range-thumb {
-		width: 24px;
-		height: 24px;
-		background: black;
-		border: 4px solid white;
-		box-shadow: 2px 2px 0px 0px rgba(0, 0, 0, 1);
-		cursor: pointer;
-		border-radius: 0;
-	}
-
-	.volume-slider:disabled {
-		opacity: 0.5;
-		cursor: not-allowed;
-	}
-
-	.volume-slider:disabled::-webkit-slider-thumb {
-		cursor: not-allowed;
-	}
-
-	.volume-slider:disabled::-moz-range-thumb {
-		cursor: not-allowed;
-	}
-
-	/* Hover effects */
-	.volume-slider:hover::-webkit-slider-thumb {
-		background: #ffe500; /* Yellow accent */
-	}
-
-	.volume-slider:hover::-moz-range-thumb {
-		background: #ffe500;
-	}
-
 	/* Progress bar styles (existing) */
 	input[type='range'] {
 		-webkit-appearance: none;
