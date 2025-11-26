@@ -214,6 +214,12 @@
 		editableTracks = reorderedTracks;
 	}
 
+	function handleAddTrack(track: SpotifyTrack) {
+		if (!editableTracks) return;
+		// Insert at the beginning of the playlist
+		editableTracks = [track, ...editableTracks];
+	}
+
 	async function handleSavePlaylist() {
 		if (!moodAnalysis || !editableTracks || editableTracks.length === 0) {
 			console.error('Cannot save playlist: missing analysis or tracks');
@@ -431,6 +437,7 @@
 						onSavePlaylist={handleSavePlaylist}
 						onRemoveTrack={handleRemoveTrack}
 						onReorderTracks={handleReorderTracks}
+						onAddTrack={handleAddTrack}
 						isLoading={isSavingPlaylist}
 						isEditable={true}
 					/>
