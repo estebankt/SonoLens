@@ -41,7 +41,8 @@ export function getAuthorizationUrl(
 		'user-read-email',
 		'user-read-private',
 		'playlist-modify-public',
-		'playlist-modify-private'
+		'playlist-modify-private',
+		'streaming'
 	]
 ): string {
 	const params = new URLSearchParams({
@@ -263,6 +264,7 @@ export async function getRecentlyPlayed(
 
 /**
  * Get track recommendations based on seed data and audio features
+ * @deprecated The Spotify /recommendations endpoint is deprecated. Use searchTracksByMood or AI-suggested tracks instead.
  */
 export async function getRecommendations(
 	accessToken: string,
@@ -582,6 +584,7 @@ export async function searchTrack(accessToken: string, trackName: string): Promi
 
 /**
  * Get available genre seeds for recommendations
+ * @deprecated The Spotify /recommendations endpoint is deprecated. This function may not be reliable.
  */
 export async function getAvailableGenreSeeds(accessToken: string): Promise<{ genres: string[] }> {
 	const response = await fetch(`${SPOTIFY_API_BASE_URL}/recommendations/available-genre-seeds`, {
