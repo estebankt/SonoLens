@@ -20,7 +20,9 @@
 
 	// Computed values
 	let currentTrack = $derived(tracks[currentIndex] || null);
-	let hasPreview = $derived(currentTrack?.preview_url !== null && currentTrack?.preview_url !== undefined);
+	let hasPreview = $derived(
+		currentTrack?.preview_url !== null && currentTrack?.preview_url !== undefined
+	);
 	let canPlayPrevious = $derived(currentIndex > 0);
 	let canPlayNext = $derived(currentIndex < tracks.length - 1);
 
@@ -81,7 +83,8 @@
 			audioElement?.pause();
 			isPlaying = false;
 		} else {
-			audioElement?.play()
+			audioElement
+				?.play()
 				.then(() => {
 					isPlaying = true;
 				})
@@ -102,7 +105,11 @@
 			// If the new track doesn't have a preview, skip to the next one
 			const maxAttempts = tracks.length;
 			let attempts = 0;
-			while (attempts < maxAttempts && !tracks[currentIndex]?.preview_url && currentIndex < tracks.length - 1) {
+			while (
+				attempts < maxAttempts &&
+				!tracks[currentIndex]?.preview_url &&
+				currentIndex < tracks.length - 1
+			) {
 				currentIndex += 1;
 				attempts++;
 			}
@@ -111,7 +118,8 @@
 			setTimeout(() => {
 				const trackHasPreview = tracks[currentIndex]?.preview_url;
 				if (trackHasPreview) {
-					audioElement?.play()
+					audioElement
+						?.play()
 						.then(() => {
 							isPlaying = true;
 						})
@@ -143,7 +151,8 @@
 			setTimeout(() => {
 				const trackHasPreview = tracks[currentIndex]?.preview_url;
 				if (trackHasPreview) {
-					audioElement?.play()
+					audioElement
+						?.play()
 						.then(() => {
 							isPlaying = true;
 						})
@@ -249,8 +258,12 @@
 						>
 							⚠️ No preview - Listen on Spotify
 							<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-								<path d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z" />
-								<path d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z" />
+								<path
+									d="M11 3a1 1 0 100 2h2.586l-6.293 6.293a1 1 0 101.414 1.414L15 6.414V9a1 1 0 102 0V4a1 1 0 00-1-1h-5z"
+								/>
+								<path
+									d="M5 5a2 2 0 00-2 2v8a2 2 0 002 2h8a2 2 0 002-2v-3a1 1 0 10-2 0v3H5V7h3a1 1 0 000-2H5z"
+								/>
 							</svg>
 						</a>
 					{/if}
@@ -339,12 +352,20 @@
 					onclick={togglePlayPause}
 					disabled={!hasPreview}
 					class="p-4 bg-white text-black border-4 border-white hover:bg-gray-200 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-					title={hasPreview ? (isPlaying ? 'Pause (Space or K)' : 'Play (Space or K)') : 'No preview available'}
+					title={hasPreview
+						? isPlaying
+							? 'Pause (Space or K)'
+							: 'Play (Space or K)'
+						: 'No preview available'}
 				>
 					{#if isPlaying}
 						<!-- Pause icon -->
 						<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+							<path
+								fill-rule="evenodd"
+								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+								clip-rule="evenodd"
+							/>
 						</svg>
 					{:else}
 						<!-- Play icon -->

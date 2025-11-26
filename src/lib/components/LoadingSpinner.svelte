@@ -13,7 +13,9 @@
 		lg: 'h-12 w-12 border-4'
 	};
 
-	const containerClasses = centered ? 'flex items-center justify-center' : 'flex items-center gap-3';
+	const containerClasses = centered
+		? 'flex items-center justify-center'
+		: 'flex items-center gap-3';
 </script>
 
 <div class={containerClasses}>
