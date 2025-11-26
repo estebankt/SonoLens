@@ -307,10 +307,10 @@
 					{#if currentStep > 0}
 						<button
 							onclick={goBack}
-							class="neo-button p-1 sm:p-2 text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2"
+							class="neo-button px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2"
 							aria-label="Go back to previous step"
 						>
-							<span>←</span> <span class="hidden sm:inline">BACK</span>
+							<span>←</span> <span>BACK</span>
 						</button>
 					{/if}
 				</div>
