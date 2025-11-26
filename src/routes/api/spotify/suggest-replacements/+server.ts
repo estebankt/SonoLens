@@ -1,7 +1,7 @@
 import { json, error } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { getRecommendations } from '$lib/spotify';
-import type { MoodAnalysis, SpotifyTrack } from '$lib/types/phase2';
+import type { MoodAnalysis } from '$lib/types/phase2';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
