@@ -114,7 +114,7 @@
 	}
 </script>
 
-<div class="neo-card">
+<div class="neo-card mb-24">
 	<!-- Playlist Header -->
 	<div class="mb-6 flex items-start justify-between gap-4">
 		<div class="flex-1">
