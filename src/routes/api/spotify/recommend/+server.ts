@@ -31,17 +31,25 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			);
 		}
 
-		console.log('Mood Analysis:', body.mood_analysis);
+		console.log('═══════════════════════════════════════════════════');
+		console.log('🎨 MOOD ANALYSIS RECEIVED:');
+		console.log('═══════════════════════════════════════════════════');
+		console.log(JSON.stringify(body.mood_analysis, null, 2));
 
 		// Prepare search parameters from mood analysis
 		const genres = body.mood_analysis.recommended_genres || [];
 		const moodTags = body.mood_analysis.mood_tags || [];
+		const energyLevel = body.mood_analysis.energy_level;
 
 		// Fallback genres if none provided
 		const searchGenres = genres.length > 0 ? genres : ['pop', 'indie'];
 
-		console.log('Search genres:', searchGenres);
-		console.log('Mood tags:', moodTags);
+		console.log('───────────────────────────────────────────────────');
+		console.log('🎯 SEARCH PARAMETERS:');
+		console.log('  Genres:', searchGenres);
+		console.log('  Mood tags:', moodTags);
+		console.log('  Energy level:', energyLevel);
+		console.log('  Limit:', body.limit || 20);
 
 		// Get user's market/country
 		let userMarket: string | undefined;
@@ -49,22 +57,24 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			const profile = await getUserProfile(accessToken);
 			if (profile.country) {
 				userMarket = profile.country;
-				console.log('Using user market:', profile.country);
+				console.log('  Market:', profile.country);
 			}
 		} catch (e) {
-			console.log('Could not get user market, continuing without it');
+			console.log('  Market: Not available');
 		}
+		console.log('───────────────────────────────────────────────────');
 
 		// Search for tracks using genre and mood
 		const searchResults = await searchTracksByMood(accessToken, {
 			genres: searchGenres,
-			energy: body.mood_analysis.energy_level,
+			energy: energyLevel,
 			mood: moodTags,
 			limit: body.limit || 20,
 			market: userMarket
 		});
 
 		if (!searchResults.tracks || searchResults.tracks.length === 0) {
+			console.log('❌ No tracks found in search results');
 			return json(
 				{
 					success: false,
@@ -74,7 +84,13 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 			);
 		}
 
-		console.log(`✓ Found ${searchResults.tracks.length} tracks`);
+		console.log('═══════════════════════════════════════════════════');
+		console.log(`✅ SUCCESS: Found ${searchResults.tracks.length} tracks`);
+		console.log('Top 3 tracks:');
+		searchResults.tracks.slice(0, 3).forEach((track, i) => {
+			console.log(`  ${i + 1}. "${track.name}" by ${track.artists.map((a) => a.name).join(', ')}`);
+		});
+		console.log('═══════════════════════════════════════════════════');
 
 		return json({
 			success: true,

@@ -438,6 +438,15 @@ export async function searchTracksByMood(
 		popularity: number;
 	}>;
 }> {
+	console.log('🎵 Starting Spotify Search API call...');
+	console.log('Input params:', {
+		genres: params.genres,
+		energy: params.energy,
+		mood: params.mood,
+		limit: params.limit,
+		market: params.market
+	});
+
 	// Build search query from genres and mood
 	const genreQuery = params.genres.slice(0, 3).join(' OR genre:');
 	const moodQuery = params.mood ? params.mood.slice(0, 2).join(' ') : '';
@@ -445,7 +454,7 @@ export async function searchTracksByMood(
 	// Combine genre and mood into search query
 	const query = `genre:${genreQuery}${moodQuery ? ' ' + moodQuery : ''}`;
 
-	console.log('🔍 Search query:', query);
+	console.log('🔍 Built search query:', query);
 
 	const searchParams = new URLSearchParams({
 		q: query,
@@ -457,23 +466,36 @@ export async function searchTracksByMood(
 		searchParams.append('market', params.market);
 	}
 
-	const response = await fetch(`${SPOTIFY_API_BASE_URL}/search?${searchParams.toString()}`, {
+	const url = `${SPOTIFY_API_BASE_URL}/search?${searchParams.toString()}`;
+	console.log('📡 Full URL:', url);
+	console.log('🔑 Authorization header:', `Bearer ${accessToken.substring(0, 20)}...`);
+
+	const response = await fetch(url, {
 		headers: {
 			Authorization: `Bearer ${accessToken}`
 		}
 	});
+
+	console.log('📥 Response status:', response.status, response.statusText);
 
 	if (!response.ok) {
 		const errorBody = await response.text();
 		console.error('❌ Spotify search failed:', {
 			status: response.status,
 			statusText: response.statusText,
-			body: errorBody
+			body: errorBody,
+			url: url
 		});
 		throw new Error(`Failed to search tracks: ${response.statusText}`);
 	}
 
 	const data = await response.json();
+	console.log('✅ Search successful!');
+	console.log('📊 Results:', {
+		totalTracks: data.tracks?.items?.length || 0,
+		firstTrack: data.tracks?.items?.[0]?.name || 'N/A',
+		firstArtist: data.tracks?.items?.[0]?.artists?.[0]?.name || 'N/A'
+	});
 
 	// Map search results to expected format
 	return {
