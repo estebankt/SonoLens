@@ -165,6 +165,16 @@ Phase 2 transforms SonoLens from an authentication-only MVP into a functional ph
 
 ## 🧪 Milestone 9 — Testing & Error Handling
 
+### Unit and UI testing
+- [ ] Configure Vitest
+- [ ] Set up mocks for Spotify API
+- [ ] Add tests for PKCE utilities
+- [ ] Add tests for recommendations builder
+- [ ] Add tests for AI image analysis fallback
+- [ ] Add integration tests for /api/spotify/recommend
+- [ ] Configure playwright and add tests
+
+
 ### Error Scenarios
 - [ ] Handle AI analysis failures gracefully
 - [ ] Handle Spotify API rate limits

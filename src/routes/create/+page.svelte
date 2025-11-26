@@ -24,6 +24,11 @@
 	let playlistError = $state<string | null>(null);
 	let fileInput = $state<HTMLInputElement>();
 
+	// Save playlist state
+	let isSavingPlaylist = $state(false);
+	let saveError = $state<string | null>(null);
+	let savedPlaylist = $state<{ id: string; name: string; url: string; uri: string } | null>(null);
+
 	function handleFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
 		const file = target.files?.[0];
@@ -143,9 +148,59 @@
 		}
 	}
 
-	function handleSavePlaylist() {
-		// TODO: Implement save to Spotify
-		console.log('Saving playlist...');
+	async function handleSavePlaylist() {
+		if (!moodAnalysis || !generatedTracks || generatedTracks.length === 0) {
+			console.error('Cannot save playlist: missing analysis or tracks');
+			return;
+		}
+
+		isSavingPlaylist = true;
+		saveError = null;
+		savedPlaylist = null;
+
+		try {
+			// Extract track URIs from generated tracks
+			const trackUris = generatedTracks.map((track) => track.uri);
+
+			console.log('═══════════════════════════════════════════════════');
+			console.log('💾 SAVING PLAYLIST TO SPOTIFY');
+			console.log('═══════════════════════════════════════════════════');
+			console.log('Title:', moodAnalysis.suggested_playlist_title);
+			console.log('Tracks:', trackUris.length);
+
+			// Call API to create playlist
+			const response = await fetch('/api/spotify/create-playlist', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					title: moodAnalysis.suggested_playlist_title,
+					description: `Created with SonoLens - A ${moodAnalysis.atmosphere} playlist inspired by your image`,
+					track_uris: trackUris,
+					is_public: true
+				})
+			});
+
+			const data = await response.json();
+
+			if (!data.success || !data.playlist) {
+				throw new Error(data.error || 'Failed to save playlist to Spotify');
+			}
+
+			savedPlaylist = data.playlist;
+
+			console.log('✅ SUCCESS: Playlist saved to Spotify');
+			console.log('Playlist ID:', data.playlist.id);
+			console.log('Playlist URL:', data.playlist.url);
+			console.log('═══════════════════════════════════════════════════');
+		} catch (error) {
+			console.error('Error saving playlist:', error);
+			saveError =
+				error instanceof Error ? error.message : 'Failed to save playlist. Please try again.';
+		} finally {
+			isSavingPlaylist = false;
+		}
 	}
 </script>
 
@@ -292,7 +347,44 @@
 					title={moodAnalysis.suggested_playlist_title}
 					tracks={generatedTracks}
 					onSavePlaylist={handleSavePlaylist}
+					isLoading={isSavingPlaylist}
 				/>
+			</div>
+		{/if}
+
+		{#if saveError}
+			<div class="mt-6 p-4 bg-red-100 border-4 border-red-500 text-red-700">
+				<p class="font-bold">Error saving playlist:</p>
+				<p>{saveError}</p>
+			</div>
+		{/if}
+
+		{#if savedPlaylist}
+			<div class="mt-6 p-6 bg-green-100 border-4 border-green-600">
+				<div class="flex items-center gap-3 mb-4">
+					<svg class="w-8 h-8 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+						<path
+							fill-rule="evenodd"
+							d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+							clip-rule="evenodd"
+						/>
+					</svg>
+					<h3 class="text-2xl font-bold">Playlist Saved to Spotify!</h3>
+				</div>
+				<p class="mb-4 text-lg">
+					<strong>{savedPlaylist.name}</strong> has been added to your Spotify library.
+				</p>
+				<div class="flex flex-col sm:flex-row gap-3">
+					<a
+						href={savedPlaylist.url}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="neo-button bg-green-500 text-white border-green-700 text-center"
+					>
+						Open in Spotify
+					</a>
+					<a href="/dashboard" class="neo-button bg-white text-center"> Back to Dashboard </a>
+				</div>
 			</div>
 		{/if}
 
