@@ -623,27 +623,33 @@
 						{#if showVolumeSlider}
 							<div
 								transition:fly={{ y: 10, duration: 200 }}
-								class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-60 bg-white border-4 border-black shadow-neo-lg p-4 w-[60px] h-[180px] flex flex-col items-center gap-3"
+								onclick={(e) => e.stopPropagation()}
+								onkeydown={(e) => e.stopPropagation()}
+								role="group"
+								aria-label="Volume control slider"
+								class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-60 bg-white border-4 border-black shadow-neo-lg p-4 w-[80px] h-[160px] flex flex-col items-center justify-center gap-3"
 							>
 								<!-- Volume Percentage Display -->
-								<div class="text-center font-bold text-sm">
+								<div class="text-center font-bold text-sm whitespace-nowrap">
 									{Math.round(volume * 100)}%
 								</div>
 
-								<!-- Vertical Slider -->
-								<input
-									type="range"
-									min="0"
-									max="1"
-									step="0.01"
-									value={volume}
-									oninput={handleVolumeChange}
-									class="volume-slider-vertical"
-									aria-label="Volume percentage"
-									aria-valuemin="0"
-									aria-valuemax="100"
-									aria-valuenow={Math.round(volume * 100)}
-								/>
+								<!-- Vertical Slider Container -->
+								<div class="flex items-center justify-center w-full h-[120px]">
+									<input
+										type="range"
+										min="0"
+										max="1"
+										step="0.01"
+										value={volume}
+										oninput={handleVolumeChange}
+										class="volume-slider-vertical"
+										aria-label="Volume percentage"
+										aria-valuemin="0"
+										aria-valuemax="100"
+										aria-valuenow={Math.round(volume * 100)}
+									/>
+								</div>
 							</div>
 						{/if}
 					</div>
@@ -785,42 +791,30 @@
 		cursor: not-allowed;
 	}
 
-	/* Vertical Volume Slider */
+	/* Vertical Volume Slider - Using transform rotation */
 	.volume-slider-vertical {
-		writing-mode: bt-lr; /* IE */
-		-webkit-appearance: slider-vertical; /* WebKit */
-		appearance: slider-vertical;
-		width: 12px;
-		height: 120px;
-		cursor: pointer;
+		-webkit-appearance: none;
+		appearance: none;
+		width: 120px; /* This becomes the height after rotation */
+		height: 12px; /* This becomes the width after rotation */
 		background: white;
 		border: 4px solid black;
 		border-radius: 0;
 		outline: none;
+		cursor: pointer;
+		transform: rotate(-90deg);
+		transform-origin: center;
 	}
 
-	/* Firefox vertical slider */
-	.volume-slider-vertical::-moz-range-track {
-		width: 12px;
-		height: 120px;
+	/* WebKit (Chrome, Safari) slider track */
+	.volume-slider-vertical::-webkit-slider-runnable-track {
+		width: 120px;
+		height: 12px;
 		background: white;
 		border: none;
 	}
 
-	.volume-slider-vertical::-moz-range-thumb {
-		width: 24px;
-		height: 24px;
-		background: black;
-		border: 3px solid white;
-		border-radius: 50%;
-		cursor: grab;
-	}
-
-	.volume-slider-vertical::-moz-range-thumb:active {
-		cursor: grabbing;
-	}
-
-	/* WebKit vertical slider */
+	/* WebKit slider thumb */
 	.volume-slider-vertical::-webkit-slider-thumb {
 		-webkit-appearance: none;
 		appearance: none;
@@ -830,16 +824,33 @@
 		border: 3px solid white;
 		border-radius: 50%;
 		cursor: grab;
+		margin-top: -6px; /* Center the thumb on the track */
 	}
 
 	.volume-slider-vertical::-webkit-slider-thumb:active {
 		cursor: grabbing;
 	}
 
-	.volume-slider-vertical::-webkit-slider-runnable-track {
-		width: 12px;
-		height: 120px;
+	/* Firefox slider track */
+	.volume-slider-vertical::-moz-range-track {
+		width: 120px;
+		height: 12px;
 		background: white;
 		border: none;
+	}
+
+	/* Firefox slider thumb */
+	.volume-slider-vertical::-moz-range-thumb {
+		width: 24px;
+		height: 24px;
+		background: black;
+		border: 3px solid white;
+		border-radius: 50%;
+		cursor: grab;
+		border: none; /* Remove default border */
+	}
+
+	.volume-slider-vertical::-moz-range-thumb:active {
+		cursor: grabbing;
 	}
 </style>
