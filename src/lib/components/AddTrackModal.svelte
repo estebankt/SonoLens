@@ -200,7 +200,7 @@
 							{@const isDuplicate = isTrackInPlaylist(track.id)}
 							<div
 								role="listitem"
-								class="flex items-center gap-3 p-3 bg-white border-2 border-black transition-colors"
+								class="flex items-center gap-4 p-4 bg-white border-2 border-black transition-colors"
 								class:opacity-50={isDuplicate}
 								class:cursor-not-allowed={isDuplicate}
 								class:hover:bg-gray-50={!isDuplicate}
@@ -210,14 +210,14 @@
 									<img
 										src={track.album.images[track.album.images.length - 1].url}
 										alt={track.album.name}
-										class="w-12 h-12 border-2 border-black flex-shrink-0"
+										class="w-20 h-20 border-4 border-black flex-shrink-0"
 									/>
 								{/if}
 
 								<!-- Track Info -->
 								<div class="flex-1 min-w-0">
-									<h3 class="font-bold truncate">{track.name}</h3>
-									<p class="text-sm text-gray-600 truncate">
+									<h3 class="font-bold text-lg truncate">{track.name}</h3>
+									<p class="text-base text-gray-600 truncate">
 										{track.artists.map((a) => a.name).join(', ')}
 									</p>
 								</div>
