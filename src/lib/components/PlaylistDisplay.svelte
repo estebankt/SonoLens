@@ -146,9 +146,14 @@
 			>
 				<!-- Drag Handle (only show if reordering is enabled) -->
 				{#if isEditable && onReorderTracks}
-					<div class="flex-shrink-0 cursor-move text-gray-400 hover:text-gray-600" title="Drag to reorder">
+					<div
+						class="flex-shrink-0 cursor-move text-gray-400 hover:text-gray-600"
+						title="Drag to reorder"
+					>
 						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-							<path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+							<path
+								d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"
+							/>
 						</svg>
 					</div>
 				{/if}

@@ -103,23 +103,31 @@
 	let steps = $derived<Array<{ label: string; status: 'completed' | 'current' | 'upcoming' }>>([
 		{
 			label: 'Upload Image',
-			status: (uploadState.preview_url ? 'completed' : 'current') as 'completed' | 'current' | 'upcoming'
+			status: (uploadState.preview_url ? 'completed' : 'current') as
+				| 'completed'
+				| 'current'
+				| 'upcoming'
 		},
 		{
 			label: 'Analyze Mood',
-			status: (moodAnalysis ? 'completed' : uploadState.preview_url ? 'current' : 'upcoming') as 'completed' | 'current' | 'upcoming'
+			status: (moodAnalysis ? 'completed' : uploadState.preview_url ? 'current' : 'upcoming') as
+				| 'completed'
+				| 'current'
+				| 'upcoming'
 		},
 		{
 			label: 'Generate Playlist',
-			status: (editableTracks
-				? 'completed'
-				: moodAnalysis
-					? 'current'
-					: 'upcoming') as 'completed' | 'current' | 'upcoming'
+			status: (editableTracks ? 'completed' : moodAnalysis ? 'current' : 'upcoming') as
+				| 'completed'
+				| 'current'
+				| 'upcoming'
 		},
 		{
 			label: 'Save to Spotify',
-			status: (savedPlaylist ? 'completed' : editableTracks ? 'current' : 'upcoming') as 'completed' | 'current' | 'upcoming'
+			status: (savedPlaylist ? 'completed' : editableTracks ? 'current' : 'upcoming') as
+				| 'completed'
+				| 'current'
+				| 'upcoming'
 		}
 	]);
 

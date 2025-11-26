@@ -9,7 +9,12 @@
 		autoPlay?: boolean; // Auto-play first track when ready
 	}
 
-	let { tracks, currentTrackIndex = 0, onTrackChange, autoPlay = false }: SpotifyWebPlayerProps = $props();
+	let {
+		tracks,
+		currentTrackIndex = 0,
+		onTrackChange,
+		autoPlay = false
+	}: SpotifyWebPlayerProps = $props();
 
 	// Player state
 	let player = $state<Spotify.Player | null>(null);
@@ -164,7 +169,8 @@
 
 				// Check if it's a scope issue
 				if (message.toLowerCase().includes('scope')) {
-					errorMessage = 'Missing required permissions. Please log out and log in again to enable playback.';
+					errorMessage =
+						'Missing required permissions. Please log out and log in again to enable playback.';
 					needsReauth = true;
 				} else {
 					errorMessage = 'Authentication failed. Please try logging in again.';
@@ -211,16 +217,19 @@
 			const track = tracks[index];
 
 			// Use Spotify Web API to start playback
-			const response = await fetch(`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`, {
-				method: 'PUT',
-				headers: {
-					'Authorization': `Bearer ${token}`,
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					uris: [track.uri]
-				})
-			});
+			const response = await fetch(
+				`https://api.spotify.com/v1/me/player/play?device_id=${deviceId}`,
+				{
+					method: 'PUT',
+					headers: {
+						Authorization: `Bearer ${token}`,
+						'Content-Type': 'application/json'
+					},
+					body: JSON.stringify({
+						uris: [track.uri]
+					})
+				}
+			);
 
 			if (!response.ok) {
 				const errorData = await response.json();
@@ -296,7 +305,7 @@
 				{
 					method: 'PUT',
 					headers: {
-						'Authorization': `Bearer ${token}`
+						Authorization: `Bearer ${token}`
 					}
 				}
 			);
@@ -408,7 +417,9 @@
 		{#if isInitializing}
 			<!-- Loading state -->
 			<div class="text-center py-4">
-				<div class="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto mb-2"></div>
+				<div
+					class="animate-spin h-8 w-8 border-4 border-white border-t-transparent rounded-full mx-auto mb-2"
+				></div>
 				<p class="text-sm">Initializing Spotify Player...</p>
 			</div>
 		{:else if errorMessage}
@@ -418,7 +429,8 @@
 				{#if needsReauth}
 					<!-- Scope/Permission error - needs re-authentication -->
 					<p class="text-sm text-gray-400 mb-3">
-						The playback feature requires additional permissions. Please log out and log back in to grant the required permissions.
+						The playback feature requires additional permissions. Please log out and log back in to
+						grant the required permissions.
 					</p>
 					<div class="flex gap-3 justify-center">
 						<a href="/auth/logout" class="neo-button bg-red-500 text-white border-red-700 text-sm">
@@ -431,7 +443,8 @@
 				{:else if !isPremium}
 					<!-- Premium required error -->
 					<p class="text-sm text-gray-400 mb-3">
-						Web playback requires Spotify Premium. You can still save playlists and open tracks in Spotify.
+						Web playback requires Spotify Premium. You can still save playlists and open tracks in
+						Spotify.
 					</p>
 					<a
 						href="https://www.spotify.com/premium/"
@@ -552,7 +565,11 @@
 				>
 					{#if isPlaying}
 						<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
-							<path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+							<path
+								fill-rule="evenodd"
+								d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z"
+								clip-rule="evenodd"
+							/>
 						</svg>
 					{:else}
 						<svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
