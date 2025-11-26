@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type { SpotifyTrack } from '$lib/types/phase2';
+	import SpotifyWebPlayer from './SpotifyWebPlayer.svelte';
 
 	interface Props {
 		title: string;
 		tracks: SpotifyTrack[];
 		onSavePlaylist?: () => void;
 		onRemoveTrack?: (trackId: string) => void;
-		onReplaceTrack?: (trackId: string) => void;
+		onReorderTracks?: (reorderedTracks: SpotifyTrack[]) => void;
 		isLoading?: boolean;
 		isEditable?: boolean;
 	}
@@ -16,10 +17,78 @@
 		tracks,
 		onSavePlaylist,
 		onRemoveTrack,
-		onReplaceTrack,
+		onReorderTracks,
 		isLoading = false,
 		isEditable = true
 	}: Props = $props();
+
+	let currentTrackIndex = $state(0);
+	let draggedIndex = $state<number | null>(null);
+	let dragOverIndex = $state<number | null>(null);
+
+	function handleTrackChange(newIndex: number) {
+		currentTrackIndex = newIndex;
+	}
+
+	function handlePlayTrack(index: number) {
+		currentTrackIndex = index;
+	}
+
+	// Drag and Drop handlers
+	function handleDragStart(event: DragEvent, index: number) {
+		if (!isEditable || !onReorderTracks) return;
+
+		draggedIndex = index;
+		if (event.dataTransfer) {
+			event.dataTransfer.effectAllowed = 'move';
+			event.dataTransfer.setData('text/plain', index.toString());
+		}
+	}
+
+	function handleDragOver(event: DragEvent, index: number) {
+		if (!isEditable || !onReorderTracks || draggedIndex === null) return;
+
+		event.preventDefault();
+		if (event.dataTransfer) {
+			event.dataTransfer.dropEffect = 'move';
+		}
+		dragOverIndex = index;
+	}
+
+	function handleDragLeave() {
+		dragOverIndex = null;
+	}
+
+	function handleDrop(event: DragEvent, dropIndex: number) {
+		if (!isEditable || !onReorderTracks || draggedIndex === null) return;
+
+		event.preventDefault();
+
+		if (draggedIndex !== dropIndex) {
+			const newTracks = [...tracks];
+			const [draggedTrack] = newTracks.splice(draggedIndex, 1);
+			newTracks.splice(dropIndex, 0, draggedTrack);
+
+			// Update current track index if the playing track was moved
+			if (currentTrackIndex === draggedIndex) {
+				currentTrackIndex = dropIndex;
+			} else if (draggedIndex < currentTrackIndex && dropIndex >= currentTrackIndex) {
+				currentTrackIndex -= 1;
+			} else if (draggedIndex > currentTrackIndex && dropIndex <= currentTrackIndex) {
+				currentTrackIndex += 1;
+			}
+
+			onReorderTracks(newTracks);
+		}
+
+		draggedIndex = null;
+		dragOverIndex = null;
+	}
+
+	function handleDragEnd() {
+		draggedIndex = null;
+		dragOverIndex = null;
+	}
 
 	function formatDuration(ms: number): string {
 		const minutes = Math.floor(ms / 60000);
@@ -51,14 +120,62 @@
 	</div>
 
 	<!-- Track List -->
-	<div class="space-y-2 mb-6">
-		{#each tracks as track, index}
+	<div class="space-y-2 mb-6" role="list">
+		{#each tracks as track, index (track.id)}
 			<div
-				class="flex items-center gap-3 p-3 bg-white border-2 border-black hover:bg-gray-50 transition-colors"
+				role="listitem"
+				draggable={isEditable && !!onReorderTracks}
+				ondragstart={(e) => handleDragStart(e, index)}
+				ondragover={(e) => handleDragOver(e, index)}
+				ondragleave={handleDragLeave}
+				ondrop={(e) => handleDrop(e, index)}
+				ondragend={handleDragEnd}
+				ondblclick={() => handlePlayTrack(index)}
+				class="flex items-center gap-3 p-3 bg-white border-2 border-black transition-colors"
+				class:hover:bg-gray-50={draggedIndex === null}
+				class:bg-yellow-100={currentTrackIndex === index && draggedIndex !== index}
+				class:border-yellow-600={currentTrackIndex === index && draggedIndex !== index}
+				class:border-4={currentTrackIndex === index && draggedIndex !== index}
+				class:opacity-50={draggedIndex === index}
+				class:bg-blue-50={dragOverIndex === index && draggedIndex !== index}
+				class:border-blue-500={dragOverIndex === index && draggedIndex !== index}
+				class:border-dashed={dragOverIndex === index && draggedIndex !== index}
+				class:cursor-move={isEditable && !!onReorderTracks}
 			>
-				<!-- Track Number -->
+				<!-- Drag Handle (only show if reordering is enabled) -->
+				{#if isEditable && onReorderTracks}
+					<div class="flex-shrink-0 cursor-move text-gray-400 hover:text-gray-600" title="Drag to reorder">
+						<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+							<path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+						</svg>
+					</div>
+				{/if}
+
+				<!-- Track Number / Play Button -->
 				<div class="flex-shrink-0 w-8 text-center">
-					<span class="text-lg font-bold text-gray-500">{index + 1}</span>
+					{#if currentTrackIndex === index}
+						<button
+							onclick={() => handlePlayTrack(index)}
+							class="text-yellow-600"
+							title="Currently playing"
+						>
+							<svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 20 20">
+								<path
+									fill-rule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"
+									clip-rule="evenodd"
+								/>
+							</svg>
+						</button>
+					{:else}
+						<button
+							onclick={() => handlePlayTrack(index)}
+							class="text-gray-500 hover:text-black"
+							title="Play track"
+						>
+							<span class="text-lg font-bold">{index + 1}</span>
+						</button>
+					{/if}
 				</div>
 
 				<!-- Album Art -->
@@ -101,24 +218,6 @@
 					</a>
 
 					{#if isEditable}
-						<!-- Replace Button -->
-						{#if onReplaceTrack}
-							<button
-								onclick={() => onReplaceTrack(track.id)}
-								class="p-2 hover:bg-blue-100 border-2 border-black transition-colors"
-								title="Replace track"
-							>
-								<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-									<path
-										stroke-linecap="round"
-										stroke-linejoin="round"
-										stroke-width="2"
-										d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-									/>
-								</svg>
-							</button>
-						{/if}
-
 						<!-- Remove Button -->
 						{#if onRemoveTrack}
 							<button
@@ -157,3 +256,6 @@
 		</div>
 	{/if}
 </div>
+
+<!-- Spotify Web Player -->
+<SpotifyWebPlayer {tracks} {currentTrackIndex} onTrackChange={handleTrackChange} />

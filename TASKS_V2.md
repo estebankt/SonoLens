@@ -91,40 +91,52 @@ Phase 2 transforms SonoLens from an authentication-only MVP into a functional ph
 ### Edit Functionality
 - [x] Add remove track button to each track
 - [x] Implement track removal logic (client-side state)
-- [x] Add "Replace Track" functionality
-- [x] Show loading state while fetching replacements
+- [x] Add drag-and-drop reordering functionality
+- [x] Visual feedback during drag operations
+- [~~] ~~Add "Replace Track" functionality~~ (REMOVED - recommendations endpoint deprecated)
+- [~~] ~~Show loading state while fetching replacements~~ (REMOVED)
+
+### Drag-and-Drop Reordering
+- [x] Add drag handles to track items
+- [x] Implement HTML5 drag-and-drop event handlers
+- [x] Visual feedback (opacity, blue highlight on drag-over)
+- [x] Update track order state on drop
+- [x] Maintain currently playing track when reordering
+- [x] Add ARIA roles for accessibility
 
 ### Replacement Suggestions Endpoint
-- [x] Create `/api/spotify/suggest-replacements/+server.ts` endpoint
-- [x] Accept removed track + mood context
-- [x] Fetch 5 alternative tracks
-- [x] Return suggestions with metadata
+- [~~] ~~Create `/api/spotify/suggest-replacements/+server.ts` endpoint~~ (REMOVED - recommendations endpoint deprecated)
+- [~~] ~~Accept removed track + mood context~~ (REMOVED)
+- [~~] ~~Fetch 5 alternative tracks~~ (REMOVED)
+- [~~] ~~Return suggestions with metadata~~ (REMOVED)
 
 ### Replacement UI
-- [x] Create track replacement modal
-- [x] Display alternative track suggestions
-- [x] Add "Use This Track" button for each suggestion
-- [x] Update playlist state on selection
-- [x] Close modal after selection
+- [~~] ~~Create track replacement modal~~ (REMOVED)
+- [~~] ~~Display alternative track suggestions~~ (REMOVED)
+- [~~] ~~Add "Use This Track" button for each suggestion~~ (REMOVED)
+- [~~] ~~Update playlist state on selection~~ (REMOVED)
+- [~~] ~~Close modal after selection~~ (REMOVED)
+
+**Note:** Track replacement functionality was removed because the Spotify `/recommendations` endpoint is deprecated. Users can remove and reorder tracks in generated playlists.
 
 ---
 
-## 🎧 Milestone 6 — Mini Audio Player
+## 🎧 Milestone 6 — Mini Audio Player ✅ COMPLETED
 
 ### Player Integration
-- [ ] Research Spotify Web Playback SDK requirements
-- [ ] Add `streaming` scope to auth if needed
-- [ ] Create audio player component
-- [ ] Implement preview_url fallback for non-Premium users
-- [ ] Add play/pause controls
-- [ ] Show currently playing track
-- [ ] Style with neo-brutalist design
+- [x] Research Spotify Web Playback SDK requirements
+- [x] Add `streaming` scope to auth if needed
+- [x] Create audio player component
+- [x] Implement preview_url fallback for non-Premium users
+- [x] Add play/pause controls
+- [x] Show currently playing track
+- [x] Style with neo-brutalist design
 
 ### Player State Management
-- [ ] Track current playing position in playlist
-- [ ] Handle track switching
-- [ ] Add keyboard controls (space for play/pause)
-- [ ] Handle preview expiration (30s clips)
+- [x] Track current playing position in playlist
+- [x] Handle track switching
+- [x] Add keyboard controls (space for play/pause)
+- [x] Handle preview expiration (30s clips)
 
 ---
 

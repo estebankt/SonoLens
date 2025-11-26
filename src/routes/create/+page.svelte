@@ -10,7 +10,6 @@
 	import { fileToBase64 } from '$lib/utils/image';
 	import MoodAnalysisDisplay from '$lib/components/MoodAnalysisDisplay.svelte';
 	import PlaylistDisplay from '$lib/components/PlaylistDisplay.svelte';
-	import TrackReplacementModal from '$lib/components/TrackReplacementModal.svelte';
 
 	let uploadState = $state<ImageUploadState>({
 		file: null,
@@ -30,11 +29,6 @@
 	let isSavingPlaylist = $state(false);
 	let saveError = $state<string | null>(null);
 	let savedPlaylist = $state<{ id: string; name: string; url: string; uri: string } | null>(null);
-
-	// Track replacement state
-	let replacingTrackId = $state<string | null>(null);
-	let replacementSuggestions = $state<SpotifyTrack[] | null>(null);
-	let isLoadingReplacements = $state(false);
 
 	function handleFileSelect(event: Event) {
 		const target = event.target as HTMLInputElement;
@@ -161,62 +155,8 @@
 		editableTracks = editableTracks.filter((track) => track.id !== trackId);
 	}
 
-	async function handleReplaceTrack(trackId: string) {
-		if (!moodAnalysis || !editableTracks) return;
-
-		const trackToReplace = editableTracks.find((t) => t.id === trackId);
-		if (!trackToReplace) return;
-
-		replacingTrackId = trackId;
-		isLoadingReplacements = true;
-		replacementSuggestions = null;
-
-		try {
-			const response = await fetch('/api/spotify/suggest-replacements', {
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify({
-					track: trackToReplace,
-					mood_analysis: moodAnalysis,
-					limit: 5
-				})
-			});
-
-			const data = await response.json();
-
-			if (!data.success || !data.suggestions) {
-				throw new Error(data.error || 'Failed to get replacement suggestions');
-			}
-
-			replacementSuggestions = data.suggestions;
-		} catch (error) {
-			console.error('Error getting replacements:', error);
-			// Show error but don't block the UI
-			replacementSuggestions = [];
-		} finally {
-			isLoadingReplacements = false;
-		}
-	}
-
-	function handleSelectReplacement(newTrack: SpotifyTrack) {
-		if (!editableTracks || !replacingTrackId) return;
-
-		const index = editableTracks.findIndex((t) => t.id === replacingTrackId);
-		if (index !== -1) {
-			editableTracks[index] = newTrack;
-			editableTracks = [...editableTracks]; // Trigger reactivity
-		}
-
-		// Close modal
-		replacingTrackId = null;
-		replacementSuggestions = null;
-	}
-
-	function handleCancelReplacement() {
-		replacingTrackId = null;
-		replacementSuggestions = null;
+	function handleReorderTracks(reorderedTracks: SpotifyTrack[]) {
+		editableTracks = reorderedTracks;
 	}
 
 	async function handleSavePlaylist() {
@@ -415,7 +355,7 @@
 					tracks={editableTracks}
 					onSavePlaylist={handleSavePlaylist}
 					onRemoveTrack={handleRemoveTrack}
-					onReplaceTrack={handleReplaceTrack}
+					onReorderTracks={handleReorderTracks}
 					isLoading={isSavingPlaylist}
 					isEditable={true}
 				/>
@@ -462,16 +402,4 @@
 			<a href="/dashboard" class="text-lg hover:underline"> ← Back to Dashboard </a>
 		</div>
 	</div>
-
-	<!-- Track Replacement Modal -->
-	<TrackReplacementModal
-		isOpen={replacingTrackId !== null}
-		originalTrack={replacingTrackId && editableTracks
-			? editableTracks.find((t) => t.id === replacingTrackId) || null
-			: null}
-		suggestions={replacementSuggestions}
-		isLoading={isLoadingReplacements}
-		onSelect={handleSelectReplacement}
-		onCancel={handleCancelReplacement}
-	/>
 </div>

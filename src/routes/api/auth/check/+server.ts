@@ -5,7 +5,12 @@ export const GET: RequestHandler = async ({ cookies }) => {
 	const accessToken = cookies.get('spotify_access_token');
 	const refreshToken = cookies.get('spotify_refresh_token');
 
-	if (accessToken || refreshToken) {
+	if (accessToken) {
+		return json({ authenticated: true, accessToken });
+	}
+
+	if (refreshToken) {
+		// TODO: Refresh the token here if needed
 		return json({ authenticated: true });
 	}
 

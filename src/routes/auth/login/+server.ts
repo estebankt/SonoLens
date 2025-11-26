@@ -24,7 +24,10 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		'user-top-read',
 		'user-read-recently-played',
 		'playlist-modify-public',
-		'playlist-modify-private'
+		'playlist-modify-private',
+		'streaming', // Required for Web Playback SDK
+		'user-modify-playback-state', // Required for playback controls (volume, seek, etc.)
+		'user-read-playback-state' // Required to read current playback state
 	]);
 
 	throw redirect(302, authUrl);
