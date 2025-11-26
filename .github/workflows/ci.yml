@@ -8,9 +8,8 @@ on:
 
 env:
   NODE_VERSION: '20.x'
-  SPOTIFY_CLIENT_ID: test_client_id
-  OPENAI_API_KEY: test_openai_key
-  OPENAI_MODEL: gpt-4o-mini
+  # Note: Test values for SPOTIFY_CLIENT_ID and OPENAI_API_KEY
+  # are set per-job to avoid overriding Vercel's production values
 
 jobs:
   lint:
@@ -29,6 +28,10 @@ jobs:
   test:
     name: Run Tests
     runs-on: ubuntu-latest
+    env:
+      SPOTIFY_CLIENT_ID: test_client_id
+      OPENAI_API_KEY: test_openai_key
+      OPENAI_MODEL: gpt-4o-mini
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -44,6 +47,10 @@ jobs:
     name: Type Check and Build
     runs-on: ubuntu-latest
     needs: [lint, test]
+    env:
+      SPOTIFY_CLIENT_ID: test_client_id
+      OPENAI_API_KEY: test_openai_key
+      OPENAI_MODEL: gpt-4o-mini
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
