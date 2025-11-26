@@ -386,7 +386,7 @@
 							class:opacity-50={uploadState.is_uploading}
 							class:cursor-not-allowed={uploadState.is_uploading}
 						>
-							{uploadState.is_uploading ? 'Analyzing...' : 'Analyze & Generate Playlist'}
+							{uploadState.is_uploading ? 'Analyzing...' : 'Analyze'}
 						</button>
 
 						<button
