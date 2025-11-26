@@ -10,6 +10,9 @@
 	import { fileToBase64 } from '$lib/utils/image';
 	import MoodAnalysisDisplay from '$lib/components/MoodAnalysisDisplay.svelte';
 	import PlaylistDisplay from '$lib/components/PlaylistDisplay.svelte';
+	import ProgressIndicator from '$lib/components/ProgressIndicator.svelte';
+	import LoadingSpinner from '$lib/components/LoadingSpinner.svelte';
+	import EmptyState from '$lib/components/EmptyState.svelte';
 
 	let uploadState = $state<ImageUploadState>({
 		file: null,
@@ -75,6 +78,50 @@
 			fileInput.value = '';
 		}
 	}
+
+	function startOver() {
+		uploadState = {
+			file: null,
+			preview_url: null,
+			is_uploading: false,
+			error: null
+		};
+		moodAnalysis = null;
+		generatedTracks = null;
+		editableTracks = null;
+		playlistError = null;
+		saveError = null;
+		savedPlaylist = null;
+		isSavingPlaylist = false;
+		isGeneratingPlaylist = false;
+		if (fileInput) {
+			fileInput.value = '';
+		}
+	}
+
+	// Progress indicator steps
+	let steps = $derived<Array<{ label: string; status: 'completed' | 'current' | 'upcoming' }>>([
+		{
+			label: 'Upload Image',
+			status: (uploadState.preview_url ? 'completed' : 'current') as 'completed' | 'current' | 'upcoming'
+		},
+		{
+			label: 'Analyze Mood',
+			status: (moodAnalysis ? 'completed' : uploadState.preview_url ? 'current' : 'upcoming') as 'completed' | 'current' | 'upcoming'
+		},
+		{
+			label: 'Generate Playlist',
+			status: (editableTracks
+				? 'completed'
+				: moodAnalysis
+					? 'current'
+					: 'upcoming') as 'completed' | 'current' | 'upcoming'
+		},
+		{
+			label: 'Save to Spotify',
+			status: (savedPlaylist ? 'completed' : editableTracks ? 'current' : 'upcoming') as 'completed' | 'current' | 'upcoming'
+		}
+	]);
 
 	async function handleAnalyze() {
 		if (!uploadState.file || !uploadState.preview_url) return;
@@ -217,15 +264,30 @@
 
 <div class="min-h-screen p-4 sm:p-8">
 	<div class="max-w-3xl mx-auto">
-		<div class="mb-6">
-			<h1 class="text-4xl sm:text-5xl mb-2">Create Playlist</h1>
-			<p class="text-lg text-gray-600">Upload an image to generate a mood-based playlist</p>
+		<!-- Header with Start Over button -->
+		<div class="mb-6 flex items-start justify-between gap-4">
+			<div class="flex-1">
+				<h1 class="text-4xl sm:text-5xl mb-2">Create Playlist</h1>
+				<p class="text-lg text-gray-600">Upload an image to generate a mood-based playlist</p>
+			</div>
+			{#if uploadState.preview_url || moodAnalysis || editableTracks}
+				<button
+					onclick={startOver}
+					class="neo-button bg-white text-sm px-4 py-2 whitespace-nowrap"
+					title="Start over from scratch"
+				>
+					Start Over
+				</button>
+			{/if}
 		</div>
+
+		<!-- Progress Indicator -->
+		<ProgressIndicator {steps} />
 
 		<div class="neo-card">
 			{#if !uploadState.preview_url}
 				<!-- Upload Area -->
-				<div class="text-center">
+				<div class="text-center" role="region" aria-label="Image upload section">
 					<div class="border-4 border-dashed border-black p-8 sm:p-12 bg-gray-50">
 						<svg
 							class="mx-auto mb-4 w-16 h-16"
@@ -254,6 +316,7 @@
 							onchange={handleFileSelect}
 							class="hidden"
 							id="file-input"
+							aria-label="Select or capture an image file"
 						/>
 
 						<div class="flex flex-col sm:flex-row gap-3 justify-center">
@@ -285,16 +348,11 @@
 					{#if uploadState.is_uploading}
 						<!-- Progress Bar -->
 						<div class="mb-4 p-6 bg-yellow-100 border-4 border-black">
-							<div class="flex items-center gap-3 mb-3">
-								<div
-									class="animate-spin h-6 w-6 border-4 border-black border-t-transparent rounded-full"
-								></div>
-								<h3 class="text-xl font-bold">Analyzing Image...</h3>
-							</div>
-							<p class="text-sm mb-3">AI is extracting mood and atmosphere from your image</p>
+							<LoadingSpinner message="Analyzing Image..." />
+							<p class="text-sm mt-3">AI is extracting mood and atmosphere from your image</p>
 
 							<!-- Progress Bar -->
-							<div class="w-full bg-white border-4 border-black h-8 overflow-hidden">
+							<div class="w-full bg-white border-4 border-black h-8 overflow-hidden mt-4">
 								<div class="h-full bg-black animate-pulse" style="width: 100%"></div>
 							</div>
 						</div>
@@ -350,15 +408,25 @@
 
 		{#if editableTracks && moodAnalysis}
 			<div class="mt-6">
-				<PlaylistDisplay
-					title={moodAnalysis.suggested_playlist_title}
-					tracks={editableTracks}
-					onSavePlaylist={handleSavePlaylist}
-					onRemoveTrack={handleRemoveTrack}
-					onReorderTracks={handleReorderTracks}
-					isLoading={isSavingPlaylist}
-					isEditable={true}
-				/>
+				{#if editableTracks.length === 0}
+					<EmptyState
+						title="No Tracks in Playlist"
+						description="You've removed all tracks from the playlist. Generate a new playlist or start over."
+						icon="music"
+						actionLabel="Generate New Playlist"
+						onAction={handleGeneratePlaylist}
+					/>
+				{:else}
+					<PlaylistDisplay
+						title={moodAnalysis.suggested_playlist_title}
+						tracks={editableTracks}
+						onSavePlaylist={handleSavePlaylist}
+						onRemoveTrack={handleRemoveTrack}
+						onReorderTracks={handleReorderTracks}
+						isLoading={isSavingPlaylist}
+						isEditable={true}
+					/>
+				{/if}
 			</div>
 		{/if}
 
