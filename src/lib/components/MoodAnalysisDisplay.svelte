@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { MoodAnalysis } from '$lib/types/phase2';
+	import LoadingSpinner from './LoadingSpinner.svelte';
 
 	interface Props {
 		analysis: MoodAnalysis;
@@ -92,16 +93,27 @@
 
 	<!-- Generate Playlist Button -->
 	{#if onGeneratePlaylist}
-		<div class="text-center">
-			<button
-				onclick={onGeneratePlaylist}
-				disabled={isGenerating}
-				class="neo-button text-xl px-8 py-4"
-				class:opacity-50={isGenerating}
-				class:cursor-not-allowed={isGenerating}
-			>
-				{isGenerating ? 'Generating Playlist...' : 'Generate Playlist'}
-			</button>
-		</div>
+		{#if isGenerating}
+			<!-- Loading State -->
+			<div class="p-6 bg-green-100 border-4 border-black">
+				<LoadingSpinner message="Generating Playlist..." />
+				<p class="text-sm mt-3">AI is finding the perfect tracks to match your mood</p>
+
+				<!-- Progress Bar -->
+				<div class="w-full bg-white border-4 border-black h-8 overflow-hidden mt-4">
+					<div class="h-full bg-black animate-pulse" style="width: 100%"></div>
+				</div>
+			</div>
+		{:else}
+			<!-- Button State -->
+			<div class="text-center">
+				<button
+					onclick={onGeneratePlaylist}
+					class="neo-button text-xl px-8 py-4"
+				>
+					Generate Playlist
+				</button>
+			</div>
+		{/if}
 	{/if}
 </div>
