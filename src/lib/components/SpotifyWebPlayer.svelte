@@ -33,11 +33,15 @@
 	let needsReauth = $state(false); // Indicates user needs to re-authenticate
 	let showVolumeSlider = $state(false); // Show/hide volume dropdown
 	let isExpanded = $state(false); // Player expansion state
+	let previousVolume = $state(0.5); // For mute/unmute toggle
 
 	// Computed values
 	let currentTrack = $derived(tracks[currentIndex] || null);
 	let canPlayPrevious = $derived(currentIndex > 0);
 	let canPlayNext = $derived(currentIndex < tracks.length - 1);
+	let volumeIcon = $derived(
+		volume === 0 ? 'muted' : volume <= 0.33 ? 'low' : volume <= 0.66 ? 'medium' : 'high'
+	);
 
 	let previousTrackIndex = currentTrackIndex;
 
@@ -351,6 +355,16 @@
 		showVolumeSlider = !showVolumeSlider;
 	}
 
+	// Toggle mute/unmute
+	function toggleMute() {
+		if (volume === 0) {
+			setVolume(previousVolume || 0.5);
+		} else {
+			previousVolume = volume;
+			setVolume(0);
+		}
+	}
+
 	// Keyboard controls
 	function handleKeydown(event: KeyboardEvent) {
 		if (event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement) {
@@ -374,8 +388,9 @@
 				if (canPlayPrevious) playPrevious();
 				break;
 			case 'm':
+			case 'M':
 				event.preventDefault();
-				setVolume(volume === 0 ? 0.5 : 0);
+				toggleMute();
 				break;
 		}
 	}
@@ -463,11 +478,7 @@
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
 				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="3"
-						d="M19 9l-7 7-7-7"
+					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"
 					></path>
 				</svg>
 			</button>
@@ -567,26 +578,75 @@
 							/>
 						</svg>
 					</button>
-				</div>
 
-				<!-- Volume -->
-				<div class="w-full max-w-xs flex items-center gap-4">
-					<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-						<path
-							fill-rule="evenodd"
-							d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
-							clip-rule="evenodd"
-						/>
-					</svg>
-					<input
-						type="range"
-						min="0"
-						max="1"
-						step="0.01"
-						value={volume}
-						oninput={handleVolumeChange}
-						class="w-full h-4 bg-white border-4 border-black appearance-none cursor-pointer"
-					/>
+					<!-- Volume Control -->
+					<div class="volume-control relative">
+						<!-- Icon Button (Always Visible) -->
+						<button
+							onclick={toggleVolumeSlider}
+							aria-label="Volume control"
+							aria-expanded={showVolumeSlider}
+							class="p-4 neo-button bg-white text-black hover:bg-gray-100 transition-colors"
+						>
+							{#if volumeIcon === 'muted'}
+								<!-- Muted SVG: Speaker with X -->
+								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM12.293 7.293a1 1 0 011.414 0L15 8.586l1.293-1.293a1 1 0 111.414 1.414L16.414 10l1.293 1.293a1 1 0 01-1.414 1.414L15 11.414l-1.293 1.293a1 1 0 01-1.414-1.414L13.586 10l-1.293-1.293a1 1 0 010-1.414z"
+									/>
+								</svg>
+							{:else if volumeIcon === 'low'}
+								<!-- Low Volume: Speaker with 1 wave -->
+								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 7.757a1 1 0 00-1.414 1.415A1.999 1.999 0 0114 11a1.999 1.999 0 01-.757 1.828 1 1 0 001.414 1.415A3.999 3.999 0 0016 11a3.999 3.999 0 00-1.343-3.243z"
+									/>
+								</svg>
+							{:else if volumeIcon === 'medium'}
+								<!-- Medium Volume: Speaker with 2 waves -->
+								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM11.828 7.757a1 1 0 011.415 0 5.983 5.983 0 010 8.485 1 1 0 01-1.415-1.414A3.984 3.984 0 0013 11a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+									/>
+								</svg>
+							{:else}
+								<!-- High Volume: Speaker with 3 waves -->
+								<svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+									<path
+										d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z"
+									/>
+								</svg>
+							{/if}
+						</button>
+
+						<!-- Dropdown Slider (Conditional) -->
+						{#if showVolumeSlider}
+							<div
+								transition:fly={{ y: 10, duration: 200 }}
+								class="absolute bottom-full mb-2 left-1/2 -translate-x-1/2 z-60 bg-white border-4 border-black shadow-neo-lg p-4 w-[60px] h-[180px] flex flex-col items-center gap-3"
+							>
+								<!-- Volume Percentage Display -->
+								<div class="text-center font-bold text-sm">
+									{Math.round(volume * 100)}%
+								</div>
+
+								<!-- Vertical Slider -->
+								<input
+									type="range"
+									min="0"
+									max="1"
+									step="0.01"
+									value={volume}
+									oninput={handleVolumeChange}
+									class="volume-slider-vertical"
+									aria-label="Volume percentage"
+									aria-valuemin="0"
+									aria-valuemax="100"
+									aria-valuenow={Math.round(volume * 100)}
+								/>
+							</div>
+						{/if}
+					</div>
 				</div>
 			{/if}
 		</div>
@@ -723,5 +783,63 @@
 
 	input[type='range']:disabled::-moz-range-thumb {
 		cursor: not-allowed;
+	}
+
+	/* Vertical Volume Slider */
+	.volume-slider-vertical {
+		writing-mode: bt-lr; /* IE */
+		-webkit-appearance: slider-vertical; /* WebKit */
+		appearance: slider-vertical;
+		width: 12px;
+		height: 120px;
+		cursor: pointer;
+		background: white;
+		border: 4px solid black;
+		border-radius: 0;
+		outline: none;
+	}
+
+	/* Firefox vertical slider */
+	.volume-slider-vertical::-moz-range-track {
+		width: 12px;
+		height: 120px;
+		background: white;
+		border: none;
+	}
+
+	.volume-slider-vertical::-moz-range-thumb {
+		width: 24px;
+		height: 24px;
+		background: black;
+		border: 3px solid white;
+		border-radius: 50%;
+		cursor: grab;
+	}
+
+	.volume-slider-vertical::-moz-range-thumb:active {
+		cursor: grabbing;
+	}
+
+	/* WebKit vertical slider */
+	.volume-slider-vertical::-webkit-slider-thumb {
+		-webkit-appearance: none;
+		appearance: none;
+		width: 24px;
+		height: 24px;
+		background: black;
+		border: 3px solid white;
+		border-radius: 50%;
+		cursor: grab;
+	}
+
+	.volume-slider-vertical::-webkit-slider-thumb:active {
+		cursor: grabbing;
+	}
+
+	.volume-slider-vertical::-webkit-slider-runnable-track {
+		width: 12px;
+		height: 120px;
+		background: white;
+		border: none;
 	}
 </style>

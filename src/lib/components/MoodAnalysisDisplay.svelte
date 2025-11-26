@@ -42,7 +42,6 @@
 			</div>
 		</div>
 
-
 		<!-- Recommended Genres -->
 		<div>
 			<h3 class="text-xl font-bold mb-3">Genres</h3>

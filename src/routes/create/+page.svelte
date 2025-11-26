@@ -301,12 +301,35 @@
 	<div class="max-w-3xl mx-auto">
 		<!-- Header with Navigation -->
 		<div class="mb-6 relative z-20 flex flex-col items-center gap-4">
-			<!-- Title & Subtitle -->
-			<div class="text-center">
-				<h1 class="text-3xl sm:text-5xl mb-2 font-bold whitespace-nowrap">Create Playlist</h1>
-				<p class="text-sm sm:text-lg text-gray-600">
-					Upload an image to generate a mood-based playlist
-				</p>
+			<!-- Icon and Title -->
+			<div class="flex items-center gap-4">
+				<a
+					href="/dashboard"
+					class="neo-button p-2 !hidden sm:!flex items-center justify-center bg-white hover:bg-neo-accent"
+					aria-label="Go to Dashboard"
+				>
+					<svg
+						xmlns="http://www.w3.org/2000/svg"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						stroke="currentColor"
+						stroke-width="2"
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						class="w-6 h-6"
+					>
+						<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+						<polyline points="9 22 9 12 15 12 15 22"></polyline>
+					</svg>
+				</a>
+				<div class="text-center">
+					<h1 class="text-3xl sm:text-5xl mb-2 font-bold whitespace-nowrap">Create Playlist</h1>
+					<p class="text-sm sm:text-lg text-gray-600">
+						Upload an image to generate a mood-based playlist
+					</p>
+				</div>
 			</div>
 
 			<!-- Navigation Buttons -->
@@ -319,7 +342,7 @@
 							class="neo-button px-2 sm:px-4 py-1 sm:py-2 text-xs sm:text-sm font-bold flex items-center gap-1 sm:gap-2"
 							aria-label="Go back to previous step"
 						>
-							<span>←</span> <span>BACK</span>
+							<span>BACK</span>
 						</button>
 					{/if}
 				</div>

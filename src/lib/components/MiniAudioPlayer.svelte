@@ -233,20 +233,20 @@
 			</div>
 		{:else}
 			<!-- Track info -->
-			<div class="flex items-center gap-4 mb-3">
+			<div class="flex items-center gap-6 mb-3">
 				<!-- Album art -->
 				{#if currentTrack.album.images[0]}
 					<img
 						src={currentTrack.album.images[0].url}
 						alt={currentTrack.album.name}
-						class="w-16 h-16 border-4 border-white"
+						class="w-12 h-12 border-4 border-white"
 					/>
 				{/if}
 
 				<!-- Track details -->
 				<div class="flex-1 min-w-0">
-					<p class="font-bold text-lg truncate">{currentTrack.name}</p>
-					<p class="text-gray-300 truncate">
+					<p class="font-bold text-base truncate">{currentTrack.name}</p>
+					<p class="text-gray-300 text-sm truncate">
 						{currentTrack.artists.map((a) => a.name).join(', ')}
 					</p>
 					{#if !hasPreview}
