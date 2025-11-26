@@ -128,10 +128,43 @@ npm run preview
 - Run `npm run check` to see TypeScript errors
 - Ensure all environment variables are set (even dummy values for build)
 
-## CI/CD
+
+## 🪄 CI/CD Pipeline Overview
 
 The project includes GitHub Actions workflow that runs on every push:
-- Type checking with `npm run check`
-- Production build with `npm run build`
+flowchart TD
+
+    subgraph Dev["👨‍💻 Developer Workflow"]
+        A1[Create feature/* branch] --> A2[Commit & Push]
+        A2 --> A3[Open Pull Request → main]
+    end
+
+    subgraph CI["🔧 Continuous Integration"]
+        A3 --> B1[Run Lint]
+        B1 --> B2[Run Tests]
+        B2 --> B3[Type Check & Build]
+    end
+
+    %% Staging Deployment (Preview)
+    subgraph Staging["🧪 Staging / Preview"]
+        B3 --> C1{PR?}
+        C1 -->|Yes| C2[Deploy to Vercel Preview]
+        C2 --> C3[Comment Preview URL on PR]
+    end
+
+    %% Production Deployment
+    subgraph Production["🚀 Production"]
+        B3 --> D1{Push to main?}
+        D1 -->|Yes| D2[Deploy to Vercel Production]
+        D2 --> D3([https://sono-lens.vercel.app/])
+    end
+
+    %% Manual Workflow Dispatch
+    subgraph Manual["🎛 Manual Workflow"]
+        X1[workflow_dispatch] --> X2{Environment?}
+        X2 -->|staging| C2
+        X2 -->|production| D2
+    end
+
 
 Check `.github/workflows/ci.yml` for configuration.
