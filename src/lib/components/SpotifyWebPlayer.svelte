@@ -792,7 +792,8 @@
 		-webkit-appearance: none;
 		appearance: none;
 		width: 120px; /* This becomes the height after rotation */
-		height: 12px; /* This becomes the width after rotation */
+		height: 20px; /* This becomes the width after rotation (includes border) */
+		box-sizing: border-box;
 		background: linear-gradient(
 			to right,
 			#fbbf24 0%,
@@ -811,7 +812,7 @@
 	/* WebKit (Chrome, Safari) slider track */
 	.volume-slider-vertical::-webkit-slider-runnable-track {
 		width: 120px;
-		height: 12px;
+		height: 12px; /* Inner height (without border) */
 		background: linear-gradient(
 			to right,
 			#fbbf24 0%,
