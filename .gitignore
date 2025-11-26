@@ -30,3 +30,6 @@ vite.config.ts.timestamp-*
 CLAUDE.md
 TASKS.md
 PRD.md
+
+# Gemini
+.gemini-clipboard/
