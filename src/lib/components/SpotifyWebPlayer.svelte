@@ -859,9 +859,31 @@
 		background: transparent;
 		border: none;
 		cursor: pointer;
+		opacity: 0;
 	}
 
 	.volume-slider-vertical::-moz-range-thumb:active {
 		cursor: pointer;
+	}
+
+	/* Firefox progress indicator - Hidden */
+	.volume-slider-vertical::-moz-range-progress {
+		background: transparent;
+		border: none;
+	}
+
+	/* Additional browser-specific resets */
+	.volume-slider-vertical::-ms-thumb {
+		width: 0;
+		height: 0;
+		opacity: 0;
+	}
+
+	.volume-slider-vertical::-ms-fill-lower {
+		background: transparent;
+	}
+
+	.volume-slider-vertical::-ms-fill-upper {
+		background: transparent;
 	}
 </style>
