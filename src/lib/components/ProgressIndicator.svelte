@@ -14,7 +14,7 @@
 <div class="mb-16">
 	<div class="flex items-center justify-between">
 		{#each steps as step, index}
-			<div class="flex-1 relative">
+			<div class="relative" class:flex-1={index < steps.length - 1}>
 				<!-- Step Circle -->
 				<div class="flex items-center">
 					<div
@@ -49,7 +49,7 @@
 
 				<!-- Step Label -->
 				<div
-					class="absolute top-10 left-5 -translate-x-1/2 mt-3 w-32 text-center pointer-events-none"
+					class="absolute top-10 left-5 -translate-x-1/2 mt-2 sm:mt-3 w-20 sm:w-32 text-center pointer-events-none"
 				>
 					<p
 						class="text-xs sm:text-sm font-bold leading-tight"
