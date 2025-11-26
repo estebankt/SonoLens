@@ -86,26 +86,26 @@ Phase 2 transforms SonoLens from an authentication-only MVP into a functional ph
 
 ---
 
-## ✏️ Milestone 5 — Playlist Editing
+## ✏️ Milestone 5 — Playlist Editing ✅ COMPLETED
 
 ### Edit Functionality
-- [ ] Add remove track button to each track
-- [ ] Implement track removal logic (client-side state)
-- [ ] Add "Replace Track" functionality
-- [ ] Show loading state while fetching replacements
+- [x] Add remove track button to each track
+- [x] Implement track removal logic (client-side state)
+- [x] Add "Replace Track" functionality
+- [x] Show loading state while fetching replacements
 
 ### Replacement Suggestions Endpoint
-- [ ] Create `/api/spotify/suggest-replacements/+server.ts` endpoint
-- [ ] Accept removed track + mood context
-- [ ] Fetch 3-5 alternative tracks
-- [ ] Return suggestions with metadata
+- [x] Create `/api/spotify/suggest-replacements/+server.ts` endpoint
+- [x] Accept removed track + mood context
+- [x] Fetch 5 alternative tracks
+- [x] Return suggestions with metadata
 
 ### Replacement UI
-- [ ] Create track replacement modal/drawer
-- [ ] Display alternative track suggestions
-- [ ] Add "Use This Track" button for each suggestion
-- [ ] Update playlist state on selection
-- [ ] Close modal after selection
+- [x] Create track replacement modal
+- [x] Display alternative track suggestions
+- [x] Add "Use This Track" button for each suggestion
+- [x] Update playlist state on selection
+- [x] Close modal after selection
 
 ---
 
