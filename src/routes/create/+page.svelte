@@ -27,6 +27,7 @@
 	let isGeneratingPlaylist = $state(false);
 	let playlistError = $state<string | null>(null);
 	let fileInput = $state<HTMLInputElement>();
+	let imageBase64 = $state<string | null>(null); // Store base64 image for playlist cover
 
 	// Save playlist state
 	let isSavingPlaylist = $state(false);
@@ -94,6 +95,7 @@
 		savedPlaylist = null;
 		isSavingPlaylist = false;
 		isGeneratingPlaylist = false;
+		imageBase64 = null;
 		if (fileInput) {
 			fileInput.value = '';
 		}
@@ -140,6 +142,9 @@
 		try {
 			// Convert file to base64
 			const base64Image = await fileToBase64(uploadState.file);
+
+			// Store base64 image for playlist cover
+			imageBase64 = base64Image;
 
 			// Call API to analyze image
 			const response = await fetch('/api/analyze-image', {
@@ -250,7 +255,8 @@
 					title: moodAnalysis.suggested_playlist_title,
 					description: `Created with SonoLens - A ${moodAnalysis.atmosphere} playlist inspired by your image`,
 					track_uris: trackUris,
-					is_public: true
+					is_public: true,
+					cover_image: imageBase64 // Send base64 image for playlist cover
 				})
 			});
 

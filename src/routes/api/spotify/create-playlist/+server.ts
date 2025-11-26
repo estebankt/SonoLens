@@ -1,6 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { getUserProfile, createPlaylist, addTracksToPlaylist } from '$lib/spotify';
+import {
+	getUserProfile,
+	createPlaylist,
+	addTracksToPlaylist,
+	uploadPlaylistCover
+} from '$lib/spotify';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
@@ -18,7 +23,7 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		// Parse request body
 		const body = await request.json();
-		const { title, description, track_uris, is_public } = body;
+		const { title, description, track_uris, is_public, cover_image } = body;
 
 		if (!title || !track_uris || !Array.isArray(track_uris) || track_uris.length === 0) {
 			return json(
@@ -54,6 +59,20 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 		await addTracksToPlaylist(accessToken, playlist.id, track_uris);
 
 		console.log('✓ Tracks added to playlist');
+
+		// Upload cover image if provided
+		if (cover_image) {
+			console.log('📸 Uploading playlist cover image...');
+			try {
+				await uploadPlaylistCover(accessToken, playlist.id, cover_image);
+				console.log('✓ Cover image uploaded successfully');
+			} catch (imageError) {
+				// Don't fail the entire request if image upload fails
+				console.warn('⚠️  Failed to upload cover image:', imageError);
+				console.warn('Playlist was created successfully, but without custom cover');
+			}
+		}
+
 		console.log('═══════════════════════════════════════════════════');
 		console.log('✅ SUCCESS: Playlist saved to Spotify');
 		console.log('Playlist URL:', playlist.external_urls.spotify);
