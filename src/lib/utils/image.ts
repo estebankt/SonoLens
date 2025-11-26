@@ -132,20 +132,22 @@ export async function compressImage(
  * Format file size for display
  */
 export function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 Bytes';
+	if (bytes === 0) return '0 B';
+	if (bytes < 1024) return `${bytes} B`;
 
 	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
+	const sizes = ['B', 'KB', 'MB', 'GB'];
+	const i = Math.floor(Math.log(Math.abs(bytes)) / Math.log(k));
 
-	return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+	return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`;
 }
 
 /**
  * Get file extension from filename
  */
 export function getFileExtension(filename: string): string {
-	return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
+	const ext = filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
+	return ext.toLowerCase();
 }
 
 /**
