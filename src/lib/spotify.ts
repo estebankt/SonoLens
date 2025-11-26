@@ -559,7 +559,28 @@ export async function searchArtist(
 }
 
 /**
+ * Process array items in parallel batches
+ * Prevents overwhelming Spotify API while still gaining parallelization benefits
+ */
+export async function processBatches<T, R>(
+	items: T[],
+	batchSize: number,
+	processFn: (item: T) => Promise<R>
+): Promise<R[]> {
+	const results: R[] = [];
+
+	for (let i = 0; i < items.length; i += batchSize) {
+		const batch = items.slice(i, i + batchSize);
+		const batchResults = await Promise.all(batch.map((item) => processFn(item)));
+		results.push(...batchResults);
+	}
+
+	return results;
+}
+
+/**
  * Search for a track by name and return its Spotify ID
+ * @deprecated Use searchTrackFull() instead to get complete track data in one call
  */
 export async function searchTrack(accessToken: string, trackName: string): Promise<string | null> {
 	const params = new URLSearchParams({
@@ -581,6 +602,63 @@ export async function searchTrack(accessToken: string, trackName: string): Promi
 
 	const data = await response.json();
 	return data.tracks?.items?.[0]?.id || null;
+}
+
+/**
+ * Search for a track and return full track object
+ * Extracts all needed data from search response (no secondary call needed)
+ * More efficient than searchTrack() + separate /tracks/{id} call
+ */
+export async function searchTrackFull(
+	accessToken: string,
+	query: string
+): Promise<import('$lib/types/phase2').SpotifyTrack | null> {
+	const params = new URLSearchParams({
+		q: query,
+		type: 'track',
+		limit: '1'
+	});
+
+	const response = await fetch(`${SPOTIFY_API_BASE_URL}/search?${params.toString()}`, {
+		headers: {
+			Authorization: `Bearer ${accessToken}`
+		}
+	});
+
+	if (!response.ok) {
+		console.error(`Search failed for "${query}":`, response.statusText);
+		return null;
+	}
+
+	const data = await response.json();
+	const item = data.tracks.items[0];
+
+	if (!item) {
+		console.warn(`No results found for: "${query}"`);
+		return null;
+	}
+
+	// Extract all needed data from search response
+	return {
+		id: item.id,
+		name: item.name,
+		artists: item.artists.map((a: any) => ({
+			id: a.id,
+			name: a.name,
+			uri: a.uri
+		})),
+		album: {
+			id: item.album.id,
+			name: item.album.name,
+			images: item.album.images
+		},
+		duration_ms: item.duration_ms,
+		uri: item.uri,
+		external_urls: {
+			spotify: item.external_urls.spotify
+		},
+		preview_url: item.preview_url
+	};
 }
 
 /**

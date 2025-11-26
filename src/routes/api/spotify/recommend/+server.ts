@@ -1,7 +1,11 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { searchTrack } from '$lib/spotify';
-import type { GeneratePlaylistRequest, GeneratePlaylistResponse } from '$lib/types/phase2';
+import { searchTrackFull, processBatches } from '$lib/spotify';
+import type {
+	GeneratePlaylistRequest,
+	GeneratePlaylistResponse,
+	SpotifyTrack
+} from '$lib/types/phase2';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
@@ -51,59 +55,39 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		console.log('───────────────────────────────────────────────────');
 		console.log(`🎵 AI suggested ${suggestedTracks.length} tracks`);
-		console.log('Searching for these tracks on Spotify...');
+		console.log('Searching for tracks on Spotify in parallel batches...');
 		console.log('───────────────────────────────────────────────────');
 
-		// Search for each track on Spotify to get full track objects
-		const foundTracks: any[] = [];
-		const notFound: string[] = [];
+		// Configuration: Process tracks in parallel batches of 5 for optimal performance
+		const BATCH_SIZE = 5;
+		const limit = body.limit || 20;
 
-		for (const trackName of suggestedTracks) {
+		// Limit track list to requested number before searching
+		const tracksToSearch = suggestedTracks.slice(0, limit);
+
+		// Search for tracks in parallel batches (much faster than sequential)
+		const tracks = await processBatches(tracksToSearch, BATCH_SIZE, async (trackName) => {
 			console.log(`🔍 Searching: "${trackName}"`);
-			const trackId = await searchTrack(accessToken, trackName);
+			return await searchTrackFull(accessToken, trackName);
+		});
 
-			if (trackId) {
-				// Get full track details
-				const response = await fetch(`https://api.spotify.com/v1/tracks/${trackId}`, {
-					headers: { Authorization: `Bearer ${accessToken}` }
-				});
+		// Filter out null results (tracks not found) and extract valid tracks
+		const foundTracks = tracks.filter((track): track is SpotifyTrack => track !== null);
+		const notFound = tracksToSearch.filter(
+			(name) => !foundTracks.some((track) => track.name.toLowerCase().includes(name.toLowerCase()))
+		);
 
-				if (response.ok) {
-					const trackData = await response.json();
-					const hasPreview = !!trackData.preview_url;
-					foundTracks.push({
-						id: trackData.id,
-						uri: trackData.uri,
-						name: trackData.name,
-						artists: trackData.artists.map((a: any) => ({
-							id: a.id,
-							name: a.name,
-							uri: a.uri
-						})),
-						album: {
-							id: trackData.album.id,
-							name: trackData.album.name,
-							images: trackData.album.images
-						},
-						duration_ms: trackData.duration_ms,
-						preview_url: trackData.preview_url,
-						external_urls: trackData.external_urls,
-						popularity: trackData.popularity
-					});
-					console.log(
-						`  ✓ Found: "${trackData.name}" by ${trackData.artists.map((a: any) => a.name).join(', ')}${hasPreview ? ' [Preview ✓]' : ' [No Preview ✗]'}`
-					);
-				}
-			} else {
-				notFound.push(trackName);
-				console.log(`  ✗ Not found: "${trackName}"`);
-			}
+		// Log results with preview availability
+		foundTracks.forEach((track) => {
+			const hasPreview = !!track.preview_url;
+			console.log(
+				`  ✓ Found: "${track.name}" by ${track.artists.map((a) => a.name).join(', ')}${hasPreview ? ' [Preview ✓]' : ' [No Preview ✗]'}`
+			);
+		});
 
-			// Limit to requested number
-			if (foundTracks.length >= (body.limit || 20)) {
-				break;
-			}
-		}
+		notFound.forEach((trackName) => {
+			console.log(`  ✗ Not found: "${trackName}"`);
+		});
 
 		const tracksWithPreview = foundTracks.filter((t) => t.preview_url).length;
 		const tracksWithoutPreview = foundTracks.length - tracksWithPreview;
