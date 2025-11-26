@@ -24,11 +24,7 @@ async function analyzeWithFallback(
 	prompt: string
 ): Promise<string> {
 	// Build model list with environment variable first, then fallbacks
-	const models = [
-		OPENAI_MODEL || 'gpt-4-turbo',
-		'gpt-4o',
-		'gpt-4-vision-preview'
-	];
+	const models = [OPENAI_MODEL || 'gpt-4-turbo', 'gpt-4o', 'gpt-4-vision-preview'];
 
 	// Remove duplicates while preserving order
 	const uniqueModels = [...new Set(models)];
@@ -121,10 +117,7 @@ async function analyzeWithFallback(
 /**
  * Analyze image and extract mood/atmosphere data
  */
-export async function analyzeImage(
-	imageBase64: string,
-	imageType: string
-): Promise<MoodAnalysis> {
+export async function analyzeImage(imageBase64: string, imageType: string): Promise<MoodAnalysis> {
 	const prompt = `You are an expert music curator. Analyze this image and create a playlist of real songs that match its mood and atmosphere.
 
 Your JSON format:

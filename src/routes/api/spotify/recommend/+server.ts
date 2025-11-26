@@ -1,6 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
-import { searchTrack, getUserProfile } from '$lib/spotify';
+import { searchTrack } from '$lib/spotify';
 import type { GeneratePlaylistRequest, GeneratePlaylistResponse } from '$lib/types/phase2';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
@@ -89,7 +89,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 						external_urls: trackData.external_urls,
 						popularity: trackData.popularity
 					});
-					console.log(`  ✓ Found: "${trackData.name}" by ${trackData.artists.map((a: any) => a.name).join(', ')}`);
+					console.log(
+						`  ✓ Found: "${trackData.name}" by ${trackData.artists.map((a: any) => a.name).join(', ')}`
+					);
 				}
 			} else {
 				notFound.push(trackName);

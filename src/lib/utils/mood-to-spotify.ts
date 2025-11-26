@@ -73,10 +73,7 @@ function inferValence(moodTags: string[], emotionalDescriptors: string[]): numbe
 /**
  * Infer danceability from mood and energy
  */
-function inferDanceability(
-	moodTags: string[],
-	energyLevel: 'low' | 'medium' | 'high'
-): number {
+function inferDanceability(moodTags: string[], energyLevel: 'low' | 'medium' | 'high'): number {
 	const allTags = moodTags.map((t) => t.toLowerCase());
 
 	const danceKeywords = [
@@ -144,7 +141,13 @@ function inferAcousticness(moodTags: string[]): number | undefined {
 function inferInstrumentalness(moodTags: string[]): number | undefined {
 	const allTags = moodTags.map((t) => t.toLowerCase());
 
-	const instrumentalKeywords = ['instrumental', 'ambient', 'cinematic', 'atmospheric', 'soundscape'];
+	const instrumentalKeywords = [
+		'instrumental',
+		'ambient',
+		'cinematic',
+		'atmospheric',
+		'soundscape'
+	];
 
 	const isInstrumental = allTags.some((tag) =>
 		instrumentalKeywords.some((keyword) => tag.includes(keyword))
@@ -305,7 +308,10 @@ function normalizeGenres(genres: string[]): string[] {
 
 	const normalized = genres
 		.map((genre) => {
-			const lower = genre.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '');
+			const lower = genre
+				.toLowerCase()
+				.trim()
+				.replace(/[^a-z0-9\s-]/g, '');
 			// Check if it's in our mapping
 			if (genreMap[lower]) return genreMap[lower];
 			// Check if it's already valid
