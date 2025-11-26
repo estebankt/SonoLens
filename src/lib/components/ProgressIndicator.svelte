@@ -11,14 +11,14 @@
 	let { steps }: ProgressIndicatorProps = $props();
 </script>
 
-<div class="mb-8">
+<div class="mb-16">
 	<div class="flex items-center justify-between">
 		{#each steps as step, index}
 			<div class="flex-1 relative">
 				<!-- Step Circle -->
 				<div class="flex items-center">
 					<div
-						class="flex items-center justify-center w-10 h-10 border-4 border-black font-bold text-sm relative z-10"
+						class="flex items-center justify-center w-10 h-10 border-4 border-black font-bold text-sm relative z-10 shrink-0"
 						class:bg-black={step.status === 'completed'}
 						class:text-white={step.status === 'completed'}
 						class:bg-yellow-400={step.status === 'current'}
@@ -48,9 +48,11 @@
 				</div>
 
 				<!-- Step Label -->
-				<div class="mt-2 text-center">
+				<div
+					class="absolute top-10 left-5 -translate-x-1/2 mt-3 w-32 text-center pointer-events-none"
+				>
 					<p
-						class="text-sm font-bold"
+						class="text-xs sm:text-sm font-bold leading-tight"
 						class:text-black={step.status === 'completed' || step.status === 'current'}
 						class:text-gray-400={step.status === 'upcoming'}
 					>
