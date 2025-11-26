@@ -110,7 +110,9 @@ export const POST: RequestHandler = async ({ request, cookies }) => {
 
 		console.log('═══════════════════════════════════════════════════');
 		console.log(`✅ SUCCESS: Found ${foundTracks.length} tracks on Spotify`);
-		console.log(`🎵 Preview availability: ${tracksWithPreview} have previews, ${tracksWithoutPreview} don't`);
+		console.log(
+			`🎵 Preview availability: ${tracksWithPreview} have previews, ${tracksWithoutPreview} don't`
+		);
 		if (notFound.length > 0) {
 			console.log(`⚠️  Could not find ${notFound.length} tracks:`, notFound.slice(0, 3));
 		}
