@@ -36,9 +36,12 @@
 	let canPlayPrevious = $derived(currentIndex > 0);
 	let canPlayNext = $derived(currentIndex < tracks.length - 1);
 
+	let previousTrackIndex = currentTrackIndex;
+
 	// Update current index when prop changes and trigger playback
 	$effect(() => {
-		if (currentTrackIndex !== currentIndex) {
+		if (currentTrackIndex !== previousTrackIndex) {
+			previousTrackIndex = currentTrackIndex;
 			currentIndex = currentTrackIndex;
 			// Only auto-play if player is ready and we have a device
 			if (isReady && deviceId && tracks[currentIndex]) {
