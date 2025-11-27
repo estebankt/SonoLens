@@ -303,27 +303,6 @@
 		<div class="mb-6 relative z-20 flex flex-col items-center gap-4">
 			<!-- Icon and Title -->
 			<div class="flex items-center gap-4">
-				<a
-					href="/dashboard"
-					class="neo-button p-2 !hidden sm:!flex items-center justify-center bg-white hover:bg-neo-accent"
-					aria-label="Go to Dashboard"
-				>
-					<svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						stroke-width="2"
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						class="w-6 h-6"
-					>
-						<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-						<polyline points="9 22 9 12 15 12 15 22"></polyline>
-					</svg>
-				</a>
 				<div class="text-center">
 					<h1 class="text-3xl sm:text-5xl mb-2 font-bold whitespace-nowrap">Create Playlist</h1>
 					<p class="text-sm sm:text-lg text-gray-600">
@@ -385,13 +364,10 @@
 										fill="none"
 										stroke="currentColor"
 										viewBox="0 0 24 24"
+										stroke-width="2"
 									>
-										<path
-											stroke-linecap="round"
-											stroke-linejoin="round"
-											stroke-width="2"
-											d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-										/>
+										<circle cx="12" cy="12" r="9" />
+										<circle cx="12" cy="12" r="3" fill="currentColor" stroke="none" />
 									</svg>
 
 									<h2 class="text-2xl font-bold mb-2">Upload an Image</h2>
@@ -460,16 +436,6 @@
 										class:cursor-not-allowed={uploadState.is_uploading}
 									>
 										{uploadState.is_uploading ? 'Analyzing...' : 'Analyze Image →'}
-									</button>
-
-									<button
-										onclick={clearImage}
-										class="neo-button bg-white"
-										disabled={uploadState.is_uploading}
-										class:opacity-50={uploadState.is_uploading}
-										class:cursor-not-allowed={uploadState.is_uploading}
-									>
-										Change Image
 									</button>
 								</div>
 

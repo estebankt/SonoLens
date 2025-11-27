@@ -6,37 +6,44 @@
 
 <div class="min-h-screen p-4 sm:p-8">
 	<div class="max-w-4xl mx-auto">
-		<div
-			class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 sm:mb-8 gap-4"
-		>
-			<h1 class="text-4xl sm:text-5xl">Dashboard</h1>
-			<a href="/create" class="neo-button"> Create Playlist from Image </a>
-		</div>
+		<!-- Dashboard Header -->
+		<h1 class="text-4xl sm:text-5xl mb-6 sm:mb-8">Dashboard</h1>
 
-		<div class="neo-card mb-6">
-			{#if data.user}
-				<div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
-					{#if data.user.images && data.user.images.length > 0}
-						<img
-							src={data.user.images[0].url}
-							alt={data.user.display_name}
-							class="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0"
-							style="border: 4px solid black;"
-						/>
-					{/if}
+		<!-- Two-Column Layout for Profile and Create Playlist Button -->
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+			<!-- Column 1: Profile Square -->
+			<div class="neo-card">
+				{#if data.user}
+					<div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
+						{#if data.user.images && data.user.images.length > 0}
+							<img
+								src={data.user.images[0].url}
+								alt={data.user.display_name}
+								class="w-24 h-24 sm:w-32 sm:h-32 flex-shrink-0"
+								style="border: 4px solid black;"
+							/>
+						{/if}
 
-					<div class="text-center sm:text-left flex-grow">
-						<h2 class="mb-2 text-3xl sm:text-4xl">{data.user.display_name}</h2>
-						<p class="text-lg sm:text-xl mb-4 break-all">{data.user.email}</p>
+						<div class="text-center sm:text-left flex-grow">
+							<h2 class="mb-2 text-3xl sm:text-4xl">{data.user.display_name}</h2>
+							<p class="text-lg sm:text-xl mb-4 break-all">{data.user.email}</p>
 
-						<form method="POST" action="/auth/logout">
-							<button type="submit" class="neo-button w-full sm:w-auto"> Logout </button>
-						</form>
+							<form method="POST" action="/auth/logout">
+								<button type="submit" class="neo-button w-full sm:w-auto"> Logout </button>
+							</form>
+						</div>
 					</div>
-				</div>
-			{:else}
-				<p class="text-center">Loading user data...</p>
-			{/if}
+				{:else}
+					<p class="text-center">Loading user data...</p>
+				{/if}
+			</div>
+
+			<!-- Column 2: Create Playlist Button -->
+			<div class="neo-card flex items-center justify-center p-6">
+				<a href="/create" class="neo-button text-xl px-8 py-4 w-full text-center animate-breathe">
+					Create Playlist from Image
+				</a>
+			</div>
 		</div>
 
 		{#if data.topArtists && data.topArtists.length > 0}
@@ -132,3 +139,21 @@
 		{/if}
 	</div>
 </div>
+
+<style>
+	@keyframes breathe {
+		0% {
+			transform: scale(1);
+		}
+		50% {
+			transform: scale(1.05);
+		}
+		100% {
+			transform: scale(1);
+		}
+	}
+
+	.animate-breathe {
+		animation: breathe 2s infinite ease-in-out;
+	}
+</style>

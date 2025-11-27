@@ -45,9 +45,9 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		// Fetch user profile, top artists, top tracks, and recently played from Spotify
 		const [user, topArtists, topTracks, recentlyPlayed] = await Promise.all([
 			getUserProfile(accessToken!),
-			getTopArtists(accessToken!, 'medium_term', 10),
-			getTopTracks(accessToken!, 'medium_term', 10),
-			getRecentlyPlayed(accessToken!, 10)
+			getTopArtists(accessToken!, 'medium_term', 4),
+			getTopTracks(accessToken!, 'medium_term', 4),
+			getRecentlyPlayed(accessToken!, 4)
 		]);
 
 		return {
@@ -76,9 +76,9 @@ export const load: PageServerLoad = async ({ cookies }) => {
 				// Retry getting user profile, top artists, top tracks, and recently played
 				const [user, topArtists, topTracks, recentlyPlayed] = await Promise.all([
 					getUserProfile(tokens.access_token),
-					getTopArtists(tokens.access_token, 'medium_term', 10),
-					getTopTracks(tokens.access_token, 'medium_term', 10),
-					getRecentlyPlayed(tokens.access_token, 10)
+					getTopArtists(tokens.access_token, 'medium_term', 4),
+					getTopTracks(tokens.access_token, 'medium_term', 4),
+					getRecentlyPlayed(tokens.access_token, 4)
 				]);
 				return {
 					user,
