@@ -88,13 +88,78 @@ test.describe('Core Flow (Authenticated)', () => {
 		await expect(uploadLabel).toBeVisible();
 	});
 
-	// Note: Full flow test with file upload is skipped due to FileReader limitations in Playwright
-	// FileReader.readAsDataURL() doesn't work reliably with Playwright's setInputFiles()
-	// The file validation and upload logic is tested at the unit test level
-	// This E2E suite focuses on authenticated routing and UI smoke tests
-	test.skip('should complete full flow: upload → analyze → generate → save', async () => {
-		// This test is skipped because Playwright's setInputFiles doesn't trigger FileReader properly
-		// The file upload, analysis, and playlist generation flow should be tested manually or with
-		// a different E2E framework that supports real file uploads
+	test('should complete full flow: upload → analyze → generate → save', async ({ page }) => {
+		await page.goto('/create');
+		await page.waitForLoadState('networkidle'); // Ensure page is fully loaded/hydrated
+
+		// 1. Upload Image
+		// Create a dummy image buffer (red pixel)
+		const buffer = Buffer.from(
+			'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==',
+			'base64'
+		);
+
+		// Setup the wait for the API REQUEST (not response yet) to confirm trigger
+		const analyzeRequestPromise = page.waitForRequest(request => 
+			request.url().includes('/api/analyze-image')
+		);
+
+		const fileInput = page.locator('input[type="file"]');
+		// Set the file on the input element
+		// Note: The input might be hidden or styled, so we target it directly
+		await fileInput.setInputFiles({
+			name: 'test-image.png',
+			mimeType: 'image/png',
+			buffer
+		});
+		
+		// Verify file is selected (UI updated)
+		await expect(page.getByText('test-image.png')).toBeVisible();
+
+		// Click "Analyze Image" to trigger the API call (it's not automatic)
+		const analyzeButton = page.getByRole('button', { name: 'Analyze Image' });
+		await analyzeButton.click();
+
+		// Wait for the request to be sent
+		await analyzeRequestPromise;
+
+		        await expect(page.getByRole('heading', { name: 'Mood', level: 3 })).toBeVisible({ timeout: 5000 });
+		        await expect(page.getByRole('heading', { name: 'Energy', level: 3 })).toBeVisible();
+		        await expect(page.getByRole('heading', { name: 'Genres', level: 3 })).toBeVisible();
+		        
+		        // Verify mock data is displayed (using MOCK_MOOD_ANALYSIS values)
+		        await expect(page.getByText(MOCK_MOOD_ANALYSIS.mood_tags[0])).toBeVisible(); // e.g., 'calm'
+		        await expect(page.getByText(MOCK_MOOD_ANALYSIS.energy_level)).toBeVisible(); // e.g., 'low'
+		        await expect(page.getByText(MOCK_MOOD_ANALYSIS.recommended_genres[0])).toBeVisible(); // e.g., 'ambient'
+		        
+		        // 3. Generate Playlist
+		        const generateButton = page.getByRole('button', { name: 'Generate Playlist' });		await expect(generateButton).toBeVisible();
+		await generateButton.click();
+
+		// 4. Verify Tracks Display (Wait for API call and UI update)
+		// The UI shows the playlist title, not "Recommended Tracks"
+		await expect(page.getByRole('heading', { name: MOCK_MOOD_ANALYSIS.suggested_playlist_title, level: 2 }).first()).toBeVisible({ timeout: 10000 });
+		
+		// Verify at least one mock track is visible
+		// Assuming mock data has a track like "Midnight City"
+		const firstTrack = MOCK_TRACKS[0];
+		if (firstTrack) {
+			await expect(page.getByText(firstTrack.name).first()).toBeVisible();
+			await expect(page.getByText(firstTrack.artists[0].name).first()).toBeVisible();
+		}
+
+		// 5. Save to Spotify
+		const saveButton = page.getByRole('button', { name: 'Save to Spotify' });
+		await expect(saveButton).toBeVisible();
+		await saveButton.click();
+
+		// 6. Verify Success
+		// Wait for success toast or modal
+		await expect(page.getByRole('heading', { name: 'Playlist Saved to Spotify!' })).toBeVisible({ timeout: 10000 });
+		
+		// Verify link to Spotify is present
+		const spotifyLink = page.getByRole('link', { name: 'Open in Spotify' });
+		await expect(spotifyLink).toBeVisible();
+		await expect(spotifyLink).toHaveAttribute('href', MOCK_SAVED_PLAYLIST.external_urls.spotify);
 	});
 });
