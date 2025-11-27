@@ -92,7 +92,7 @@ test.describe('Core Flow (Authenticated)', () => {
 	// FileReader.readAsDataURL() doesn't work reliably with Playwright's setInputFiles()
 	// The file validation and upload logic is tested at the unit test level
 	// This E2E suite focuses on authenticated routing and UI smoke tests
-	test.skip('should complete full flow: upload → analyze → generate → save', async ({ page }) => {
+	test.skip('should complete full flow: upload → analyze → generate → save', async () => {
 		// This test is skipped because Playwright's setInputFiles doesn't trigger FileReader properly
 		// The file upload, analysis, and playlist generation flow should be tested manually or with
 		// a different E2E framework that supports real file uploads
