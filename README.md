@@ -37,7 +37,7 @@ Music and imagery are deeply connected. SonoLens aims to bridge the gap between 
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) (Neo-Brutalism Theme)
 - **AI:** [OpenAI API](https://platform.openai.com/) (GPT-4o Vision)
 - **Music Data:** [Spotify Web API](https://developer.spotify.com/documentation/web-api)
-- **Testing:** [Vitest](https://vitest.dev/)
+- **Testing:** [Vitest](https://vitest.dev/) (Unit), [Playwright](https://playwright.dev/) (E2E)
 - **Deployment:** Vercel
 
 ---
@@ -140,12 +140,16 @@ This project implements a **production-grade CI/CD pipeline** using GitHub Actio
             │  Build  │  ← Type check & build
             └────┬────┘
                  │
-        ┌────────┴────────┐
-        │                 │
-    ┌───▼────┐      ┌────▼─────┐
-    │ Preview│      │Production│  ← Conditional deployment
-    │ Deploy │      │  Deploy  │
-    └────────┘      └──────────┘
+        ┌────────┴────────┬────────┐
+        │                 │        │
+    ┌───▼────┐      ┌────▼─────┐  │
+    │ E2E    │      │ Preview  │  │ ← Run in parallel
+    │ Tests  │      │  Deploy  │  │
+    └────────┘      └──────────┘  │
+                              ┌───▼────────┐
+                              │Production  │
+                              │  Deploy    │
+                              └────────────┘
 ```
 
 ### Optimization Features
@@ -174,8 +178,11 @@ All test environment variables managed at workflow level for easier maintenance 
 | **Lint** | Code quality (Prettier, ESLint) | All branches | None |
 | **Test** | Unit tests (Vitest) | All branches | None |
 | **Build** | Type checking + SvelteKit build | All branches | Lint + Test |
+| **E2E Tests** | End-to-end tests (Playwright) | All branches | Build |
 | **Preview Deploy** | Vercel preview environment | PRs only | Build |
 | **Production Deploy** | Live deployment | Main branch only | Build |
+
+**Note:** E2E tests run against a local preview server (not deployed environment) for reliability and speed.
 
 ### Deployment Targets
 
@@ -206,6 +213,7 @@ We welcome contributions! Whether it's fixing a bug, improving the UI, or adding
 - `npm run dev`: Start dev server.
 - `npm run check`: Check TypeScript types.
 - `npm run test`: Run unit tests via Vitest.
+- `npm run test:e2e`: Run end-to-end tests via Playwright.
 - `npm run format`: Format code with Prettier.
 - `npm run lint`: Run ESLint.
 
