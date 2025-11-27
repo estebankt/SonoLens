@@ -27,7 +27,8 @@ export const GET: RequestHandler = async ({ cookies }) => {
 		'playlist-modify-private',
 		'streaming', // Required for Web Playback SDK
 		'user-modify-playback-state', // Required for playback controls (volume, seek, etc.)
-		'user-read-playback-state' // Required to read current playback state
+		'user-read-playback-state', // Required to read current playback state
+		'ugc-image-upload' // Required for uploading playlist cover images
 	]);
 
 	throw redirect(302, authUrl);

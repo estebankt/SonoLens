@@ -87,6 +87,71 @@ export async function fileToBase64ForAI(file: File): Promise<string> {
 }
 
 /**
+ * Compress and convert image to base64 specifically for Spotify Playlist Cover
+ * Requirements: JPEG, Max 256KB payload
+ */
+export async function compressImageForSpotifyCover(file: File): Promise<string> {
+	return new Promise((resolve, reject) => {
+		const img = new Image();
+		const canvas = document.createElement('canvas');
+		const ctx = canvas.getContext('2d');
+
+		if (!ctx) {
+			reject(new Error('Failed to get canvas context'));
+			return;
+		}
+
+		img.onload = () => {
+			// Spotify recommends at least 300x300. We'll aim for 512x512 to keep size down.
+			const maxDimension = 512;
+			let { width, height } = img;
+
+			// Resize to max dimension while maintaining aspect ratio
+			// Note: Spotify playlist covers are usually square, but we handle any aspect ratio
+			if (width > maxDimension || height > maxDimension) {
+				const ratio = Math.min(maxDimension / width, maxDimension / height);
+				width *= ratio;
+				height *= ratio;
+			}
+
+			canvas.width = width;
+			canvas.height = height;
+
+			// Draw image to canvas
+			ctx.drawImage(img, 0, 0, width, height);
+
+			// Iteratively reduce quality until size is under 256KB
+			// 256KB = 256 * 1024 bytes = 262,144 bytes
+			// Base64 overhead is ~33%, so max string length is ~350,000 chars
+			// We'll be safe and aim for < 250KB binary (~340,000 base64 chars)
+			const MAX_SIZE_BYTES = 250 * 1024; // Safe limit below 256KB
+			const MAX_BASE64_LENGTH = Math.floor((MAX_SIZE_BYTES * 4) / 3);
+
+			let quality = 0.9;
+			let dataURL = canvas.toDataURL('image/jpeg', quality);
+			let base64 = dataURL.split(',')[1];
+
+			// Try reducing quality if too large
+			while (base64.length > MAX_BASE64_LENGTH && quality > 0.1) {
+				quality -= 0.1;
+				dataURL = canvas.toDataURL('image/jpeg', quality);
+				base64 = dataURL.split(',')[1];
+			}
+
+			URL.revokeObjectURL(img.src);
+			resolve(base64);
+		};
+
+		img.onerror = () => {
+			URL.revokeObjectURL(img.src);
+			reject(new Error('Failed to load image for compression'));
+		};
+
+		img.src = URL.createObjectURL(file);
+	});
+}
+
+/**
  * Get image dimensions
  */
 export function getImageDimensions(file: File): Promise<{ width: number; height: number }> {
