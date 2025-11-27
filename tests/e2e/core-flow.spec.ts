@@ -100,7 +100,7 @@ test.describe('Core Flow (Authenticated)', () => {
 		);
 
 		// Setup the wait for the API REQUEST (not response yet) to confirm trigger
-		const analyzeRequestPromise = page.waitForRequest(request => 
+		const analyzeRequestPromise = page.waitForRequest((request) =>
 			request.url().includes('/api/analyze-image')
 		);
 
@@ -112,7 +112,7 @@ test.describe('Core Flow (Authenticated)', () => {
 			mimeType: 'image/png',
 			buffer
 		});
-		
+
 		// Verify file is selected (UI updated)
 		await expect(page.getByText('test-image.png')).toBeVisible();
 
@@ -123,23 +123,30 @@ test.describe('Core Flow (Authenticated)', () => {
 		// Wait for the request to be sent
 		await analyzeRequestPromise;
 
-		        await expect(page.getByRole('heading', { name: 'Mood', level: 3 })).toBeVisible({ timeout: 5000 });
-		        await expect(page.getByRole('heading', { name: 'Energy', level: 3 })).toBeVisible();
-		        await expect(page.getByRole('heading', { name: 'Genres', level: 3 })).toBeVisible();
-		        
-		        // Verify mock data is displayed (using MOCK_MOOD_ANALYSIS values)
-		        await expect(page.getByText(MOCK_MOOD_ANALYSIS.mood_tags[0])).toBeVisible(); // e.g., 'calm'
-		        await expect(page.getByText(MOCK_MOOD_ANALYSIS.energy_level)).toBeVisible(); // e.g., 'low'
-		        await expect(page.getByText(MOCK_MOOD_ANALYSIS.recommended_genres[0])).toBeVisible(); // e.g., 'ambient'
-		        
-		        // 3. Generate Playlist
-		        const generateButton = page.getByRole('button', { name: 'Generate Playlist' });		await expect(generateButton).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Mood', level: 3 })).toBeVisible({
+			timeout: 5000
+		});
+		await expect(page.getByRole('heading', { name: 'Energy', level: 3 })).toBeVisible();
+		await expect(page.getByRole('heading', { name: 'Genres', level: 3 })).toBeVisible();
+
+		// Verify mock data is displayed (using MOCK_MOOD_ANALYSIS values)
+		await expect(page.getByText(MOCK_MOOD_ANALYSIS.mood_tags[0])).toBeVisible(); // e.g., 'calm'
+		await expect(page.getByText(MOCK_MOOD_ANALYSIS.energy_level)).toBeVisible(); // e.g., 'low'
+		await expect(page.getByText(MOCK_MOOD_ANALYSIS.recommended_genres[0])).toBeVisible(); // e.g., 'ambient'
+
+		// 3. Generate Playlist
+		const generateButton = page.getByRole('button', { name: 'Generate Playlist' });
+		await expect(generateButton).toBeVisible();
 		await generateButton.click();
 
 		// 4. Verify Tracks Display (Wait for API call and UI update)
 		// The UI shows the playlist title, not "Recommended Tracks"
-		await expect(page.getByRole('heading', { name: MOCK_MOOD_ANALYSIS.suggested_playlist_title, level: 2 }).first()).toBeVisible({ timeout: 10000 });
-		
+		await expect(
+			page
+				.getByRole('heading', { name: MOCK_MOOD_ANALYSIS.suggested_playlist_title, level: 2 })
+				.first()
+		).toBeVisible({ timeout: 10000 });
+
 		// Verify at least one mock track is visible
 		// Assuming mock data has a track like "Midnight City"
 		const firstTrack = MOCK_TRACKS[0];
@@ -155,13 +162,15 @@ test.describe('Core Flow (Authenticated)', () => {
 
 		// 6. Verify Success
 		// Wait for success toast or modal
-		await expect(page.getByRole('heading', { name: 'Playlist Saved to Spotify!' })).toBeVisible({ timeout: 10000 });
-		
+		await expect(page.getByRole('heading', { name: 'Playlist Saved to Spotify!' })).toBeVisible({
+			timeout: 10000
+		});
+
 		// Verify link to Spotify is present
 		// Using getByText because the element appears as 'generic' in the snapshot
 		const spotifyLink = page.getByText('Open in Spotify');
 		await expect(spotifyLink).toBeVisible();
-		
+
 		// Optional: Check if it's a link or wrapped in one
 		// await expect(spotifyLink.locator('xpath=..')).toHaveAttribute('href', MOCK_SAVED_PLAYLIST.external_urls.spotify);
 	});
