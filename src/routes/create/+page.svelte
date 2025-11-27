@@ -391,7 +391,8 @@
 
 									<h2 class="text-2xl font-bold mb-2">Upload an Image</h2>
 									<p class="text-gray-600 mb-6">
-										Choose a photo, take a picture, or paste (Cmd+V) an image that represents the mood
+										Choose a photo, take a picture, or paste (Cmd+V) an image that represents the
+										mood
 									</p>
 
 									<input
