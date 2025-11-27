@@ -9,11 +9,10 @@ import { mockMoodAnalysis, mockSpotifyTrack } from '../../../../tests/unit/helpe
 
 // Mock Spotify functions
 vi.mock('$lib/spotify', () => ({
-	searchTrackFull: vi.fn(),
 	processBatches: vi.fn()
 }));
 
-import { searchTrackFull, processBatches } from '$lib/spotify';
+import { processBatches } from '$lib/spotify';
 
 describe('API: /api/spotify/recommend', () => {
 	beforeEach(() => {

@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { validateMoodAnalysis, analyzeImage } from './ai';
-import type { MoodAnalysis } from '../types/phase2';
 import { mockMoodAnalysis } from '../../../tests/unit/helpers/fixtures';
 
 // Mock OpenAI
