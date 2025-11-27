@@ -23,7 +23,7 @@ export default defineConfig({
 
 	// Reporter configuration
 	reporter: process.env.CI
-		? 'github' // GitHub Actions annotations in CI
+		? [['github'], ['html']] // Use both in CI
 		: 'html', // Interactive HTML report in development
 
 	use: {
