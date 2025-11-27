@@ -27,8 +27,8 @@ export default defineConfig({
 		: 'html', // Interactive HTML report in development
 
 	use: {
-		// Base URL: preview server in CI (port 4173), dev server locally (port 5173)
-		baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
+		// Base URL: Use env var if set (e.g. Vercel Preview), otherwise localhost
+		baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || (process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173'),
 
 		// Trace on first retry for debugging
 		trace: 'on-first-retry',
@@ -50,18 +50,20 @@ export default defineConfig({
 		}
 	],
 
-	// Start preview server in CI (serves built app), dev server locally
-	webServer: process.env.CI
-		? {
-				command: 'npm run preview',
-				url: 'http://localhost:4173',
-				reuseExistingServer: false,
-				timeout: 120000
-			}
-		: {
-				command: 'npm run dev',
-				url: 'http://localhost:5173',
-				reuseExistingServer: true,
-				timeout: 120000
-			}
+	// Start server only if we're not testing a remote URL
+	webServer: process.env.PLAYWRIGHT_TEST_BASE_URL
+		? undefined
+		: process.env.CI
+			? {
+					command: 'npm run preview',
+					url: 'http://localhost:4173',
+					reuseExistingServer: false,
+					timeout: 120000
+				}
+			: {
+					command: 'npm run dev',
+					url: 'http://localhost:5173',
+					reuseExistingServer: true,
+					timeout: 120000
+				}
 });
