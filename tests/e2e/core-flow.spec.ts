@@ -1,6 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { authenticateUser } from './fixtures/auth';
-import { MOCK_MOOD_ANALYSIS, MOCK_TRACKS, MOCK_SAVED_PLAYLIST } from './fixtures/mock-data';
+import {
+	MOCK_MOOD_ANALYSIS,
+	MOCK_TRACKS,
+	MOCK_USER_PROFILE,
+	MOCK_SAVED_PLAYLIST
+} from './fixtures/mock-data';
 
 test.describe('Core Flow (Authenticated)', () => {
 	test.beforeEach(async ({ page, context }) => {
