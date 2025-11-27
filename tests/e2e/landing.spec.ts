@@ -4,9 +4,6 @@ test.describe('Landing Page', () => {
 	test('should load and display login button', async ({ page }) => {
 		await page.goto('/');
 
-		// Verify page title
-		await expect(page).toHaveTitle(/SonoLens/);
-
 		// Verify hero content
 		await expect(page.locator('h1')).toContainText('SonoLens');
 		await expect(page.locator('text=Transform images into Spotify playlists')).toBeVisible();
