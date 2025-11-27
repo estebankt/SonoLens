@@ -33,3 +33,8 @@ PRD.md
 
 # Gemini
 .gemini-clipboard/
+
+# Playwright
+/test-results/
+/playwright-report/
+/playwright/.cache/
