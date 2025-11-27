@@ -1,204 +1,167 @@
-# SonoLens
+# SonoLens 🎵👁️
 
-Transform images into Spotify playlists using AI.
+![CI/CD Pipeline](https://github.com/estebankt/SonoLens/actions/workflows/ci.yml/badge.svg)
 
-## 🚀 Overview
-SonoLens is an experimental SvelteKit app that transforms **images into AI‑generated Spotify playlists**. The MVP focuses on authentication and foundation features, with a strong emphasis on clean engineering and a modern CI/CD workflow.
+Live URL: https://sono-lens.vercel.app/
 
----
+> **See the Vibe. Hear the Mood.**
 
-## 📌 MVP Status
-The current MVP implements **Spotify Authorization Code with PKCE** flow, allowing users to:
-- Authenticate with their Spotify account
-- View profile information in a Neo‑Brutalism styled dashboard
-- Securely manage OAuth tokens using encrypted cookies
+SonoLens is a multimodal, AI-enhanced music exploration tool that converts visual inspiration into personalized Spotify playlists. By analyzing the mood, color palette, and atmosphere of an uploaded image using GPT-4o Vision, SonoLens curates a sonic experience that matches what you see.
 
-Upcoming versions will introduce **image uploads, AI mood extraction, and automatic playlist generation**.
+Built with a bold **Neo-Brutalist** aesthetic, it is designed to be a functional and visually distinct creative assistant.
 
 ---
 
-## 🧩 Prerequisites
+## 🚀 Project Overview
 
-### 1. Spotify Developer App
-Create an app at the Spotify Developer Dashboard:
-1. Go to https://developer.spotify.com/dashboard
-2. Create a new app
-3. Add this Redirect URI:
-   ```
-   http://127.0.0.1:5173/auth/callback
-   ```
-4. Copy your Client ID
+**Intention:**
+Music and imagery are deeply connected. SonoLens aims to bridge the gap between visual and auditory senses (synesthesia), allowing users to generate soundtracks for their photos, art, or environments instantly. Whether you're capturing a rainy street, a vibrant party, or a quiet sunset, SonoLens finds the music that fits.
 
-### 2. Environment Variables
-Create a `.env` file based on `.env.example`:
-```sh
-SPOTIFY_CLIENT_ID=your_client_id_here
-SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/auth/callback
-```
-
-⚠️ `.env` is already ignored via `.gitignore`.
+### Key Features
+- **🔐 Secure Authentication:** Full Spotify OAuth 2.0 implementation using the PKCE flow (Proof Key for Code Exchange) for maximum security.
+- **📸 Image Analysis:** Uses OpenAI's **GPT-4o Vision** to extract mood, energy, color theory, and descriptive keywords from any image.
+- **🤖 AI-Powered Curation:** Translates visual data into specific Spotify audio features (valence, energy, danceability) and seed genres.
+- **🎧 Interactive Playlist Generation:**
+  - Generates ~20 track recommendations based on the analysis.
+  - **Mini Player:** Preview tracks directly in the browser (30s clips or full playback for Premium).
+  - **Editor:** Remove unwanted tracks or drag-and-drop to reorder the flow.
+- **💾 Save to Spotify:** One-click export to save the curated playlist directly to your Spotify library.
+- **📱 Responsive Design:** Fully functional on desktop and mobile (including camera capture support).
 
 ---
 
-## 🛠 Setup
-Install dependencies:
-```sh
-npm install
-```
-Start development server:
-```sh
-npm run dev
-```
-Open:
-```
-http://127.0.0.1:5173
-```
-and test logging in with Spotify.
+## 🛠️ Tech Stack
+
+- **Framework:** [SvelteKit](https://kit.svelte.dev/) (Full-stack SSR/CSR)
+- **Language:** TypeScript
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) (Neo-Brutalism Theme)
+- **AI:** [OpenAI API](https://platform.openai.com/) (GPT-4o Vision)
+- **Music Data:** [Spotify Web API](https://developer.spotify.com/documentation/web-api)
+- **Testing:** [Vitest](https://vitest.dev/)
+- **Deployment:** Vercel
 
 ---
 
-## 📂 Project Structure
-```
-src/
-  lib/
-    spotify.ts              # Spotify API helpers (OAuth, user profile)
-  routes/
-    +layout.svelte          # Global layout & styles
-    +page.svelte            # Landing page
-    auth/
-      login/+server.ts      # Starts OAuth flow
-      callback/+server.ts   # Handles OAuth callback
-      logout/+server.ts     # Clears session
-    dashboard/
-      +page.svelte          # Dashboard UI
-      +page.server.ts       # Server-side data loading
-```
+## ⚙️ Prerequisites
+
+Before you begin, you will need keys for the following services:
+
+1.  **Spotify Developer Account:**
+    *   Create an app in the [Spotify Dashboard](https://developer.spotify.com/dashboard).
+    *   Set the Redirect URI to `http://127.0.0.1:5173/auth/callback` (for local dev).
+    *   Note your `Client ID`.
+2.  **OpenAI API Key:**
+    *   Get an API key from [OpenAI Platform](https://platform.openai.com/).
+    *   Ensure you have access to the `gpt-4o` model.
 
 ---
 
-## 🧰 Tech Stack
-- **Framework:** SvelteKit + TypeScript
-- **Styling:** TailwindCSS + Neo‑Brutalism aesthetic
-- **Auth:** Spotify Authorization Code with PKCE
-- **Cookies:** Secure, HTTP-only server-side sessions
-- **CI/CD:** GitHub Actions → Vercel
+## 📥 Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone https://github.com/yourusername/sonolens.git
+    cd sonolens
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Configure Environment Variables:**
+    Create a `.env` file in the root directory:
+    ```bash
+    cp .env.example .env
+    ```
+    Update it with your credentials:
+    ```env
+    # Spotify Configuration
+    SPOTIFY_CLIENT_ID=your_spotify_client_id
+    SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/auth/callback
+
+    # OpenAI Configuration
+    OPENAI_API_KEY=your_openai_api_key
+    OPENAI_MODEL=gpt-4o
+    ```
+
+4.  **Start the development server:**
+    ```bash
+    npm run dev
+    ```
+
+5.  **Open the app:**
+    Visit `http://127.0.0.1:5173` in your browser.
 
 ---
 
-## 💡 Development Tips
+## 📖 Usage Examples
 
-### OAuth Testing
-- Must use `127.0.0.1` (not localhost)
-- Spotify redirect URI must match **exactly**:
-  ```
-  http://127.0.0.1:5173/auth/callback
-  ```
+### 1. Authenticate
+Click **"Login with Spotify"** on the home page. You will be redirected to Spotify to grant SonoLens permission to create playlists on your behalf.
 
-### Environment Variables
-- Never commit `.env`
-- Use Vercel environment variables in Production/Preview
+### 2. Upload or Capture
+Navigate to the **Create** page.
+- **Desktop:** Drag and drop an image or click to browse.
+- **Mobile:** Tap to take a photo of your surroundings or choose from your library.
 
-### Debugging
-- Server logs: terminal running `npm run dev`
-- Client errors: browser console
-- Spotify API errors: logged on server with full detail
+### 3. Analyze & Generate
+Once uploaded, the AI will analyze the image. You'll see a breakdown of the **Mood**, **Colors**, and **Energy**. Click **"Generate Playlist"** to fetch songs.
 
----
+### 4. Edit & Preview
+- **Preview:** Click the play button on any track to hear a snippet.
+- **Reorder:** Drag tracks to change the flow of the playlist.
+- **Remove:** Click the 'X' to remove tracks that don't fit the vibe.
 
-## 🛠 Available Scripts
-- `npm run dev` — Start dev server
-- `npm run build` — Build for production
-- `npm run preview` — Preview the built app
-- `npm run check` — TypeScript type checking
-- `npm test` — Run tests
+### 5. Save
+Click **"Save to Spotify"**. The playlist will appear in your Spotify account immediately, titled based on the AI's mood suggestion (e.g., *"Midnight Rain Vibes"*).
 
 ---
 
-## 📦 Building
-Build production bundle:
-```sh
-npm run build
-```
-Preview build:
-```sh
-npm run preview
-```
+## 🔄 CI/CD Pipeline
+
+This project uses **GitHub Actions** for Continuous Integration and Deployment to **Vercel**.
+
+### Workflow Stages
+1.  **Lint:** Runs `Prettier` and `ESLint` to ensure code quality.
+2.  **Tests:** Runs unit tests via `Vitest`.
+3.  **Build:** Performs Type Checking (`svelte-check`) and builds the project.
+4.  **Deploy:**
+    -   **Pull Requests:** Automatically deploys to a Vercel **Preview** environment. A link is posted as a comment on the PR.
+    -   **Main Branch:** Automatically deploys to **Production** ([https://sono-lens.vercel.app](https://sono-lens.vercel.app/)).
+
+### Manual Deployment
+The workflow supports manual triggers via GitHub Actions interface:
+-   Select the **CI/CD Pipeline** workflow.
+-   Choose the branch and target environment (`staging` or `production`).
 
 ---
 
-## 🧹 Troubleshooting
-### "Failed to exchange authorization code"
-- Check `SPOTIFY_CLIENT_ID`
-- Ensure redirect URI matches Spotify Dashboard
-- Use correct origin: `http://127.0.0.1:5173`
+## 🤝 Contribution Guidelines
 
-### "Session expired"
-- Access tokens expire after 1 hour
-- App automatically refreshes using refresh token
-- If refresh fails, user must log in again
+We welcome contributions! Whether it's fixing a bug, improving the UI, or adding new features.
 
-### Build Errors
-- Run:
-  ```sh
-  npm run check
-  ```
-- Ensure environment variables exist (even dummy ones)
+1.  **Fork the Project**
+2.  **Create your Feature Branch** (`git checkout -b feature/AmazingFeature`)
+3.  **Commit your Changes** (`git commit -m 'Add some AmazingFeature'`)
+4.  **Run Tests** (`npm test`) to ensure nothing broke.
+5.  **Push to the Branch** (`git push origin feature/AmazingFeature`)
+6.  **Open a Pull Request**
 
----
-
-## 🪄 CI/CD Pipeline Overview
-The project uses **GitHub Actions** for continuous integration and deployment. Pull Requests deploy automatically to Vercel Preview; merges to `main` deploy to **production**.
-
-```mermaid
-flowchart TD
-
-    subgraph Dev["👨‍💻 Developer Workflow"]
-        A1[Create feature/* branch] --> A2[Commit & Push]
-        A2 --> A3[Open Pull Request → main]
-    end
-
-    subgraph CI["🔧 Continuous Integration"]
-        A3 --> B1[Run Lint]
-        B1 --> B2[Run Tests]
-        B2 --> B3[Type Check & Build]
-    end
-
-    subgraph Staging["🧪 Staging / Preview"]
-        B3 --> C1{PR?}
-        C1 -->|Yes| C2[Deploy to Vercel Preview]
-        C2 --> C3[Comment Preview URL on PR]
-    end
-
-    subgraph Production["🚀 Production"]
-        B3 --> D1{Push to main?}
-        D1 -->|Yes| D2[Deploy to Vercel Production]
-        D2 --> D3([https://sono-lens.vercel.app/])
-    end
-
-    subgraph Manual["🎛 Manual Workflow"]
-        X1[workflow_dispatch] --> X2{Environment?}
-        X2 -->|staging| C2
-        X2 -->|production| D2
-    end
-```
-
-See the workflow file here:
-```
-.github/workflows/ci.yml
-```
+### Development Scripts
+- `npm run dev`: Start dev server.
+- `npm run check`: Check TypeScript types.
+- `npm run test`: Run unit tests via Vitest.
+- `npm run format`: Format code with Prettier.
+- `npm run lint`: Run ESLint.
 
 ---
 
-## 🗺 Roadmap
-1. Image upload interface
-2. AI-powered mood extraction from images
-3. Playlist generation from AI mood tags
-4. Playlist sharing tools
+## 📄 License
+
+This project is currently unlicensed (Private).
+*Contact the maintainer for usage permissions.*
 
 ---
 
-## ⭐ Credit
-Built with SvelteKit, TailwindCSS, and a lot of coffee.
-
-If you enjoy this project, feel free to star the repo! ⭐
-
+*Built with 🖤 by Mario Guillen, with lots of coffee.*

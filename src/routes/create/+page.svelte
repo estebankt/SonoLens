@@ -52,12 +52,7 @@
 		}
 	}
 
-	function handleFileSelect(event: Event) {
-		const target = event.target as HTMLInputElement;
-		const file = target.files?.[0];
-
-		if (!file) return;
-
+	function processFile(file: File) {
 		// Reset error and analysis
 		uploadState.error = null;
 		moodAnalysis = null;
@@ -85,6 +80,32 @@
 		reader.readAsDataURL(file);
 	}
 
+	function handleFileSelect(event: Event) {
+		const target = event.target as HTMLInputElement;
+		const file = target.files?.[0];
+
+		if (!file) return;
+		processFile(file);
+	}
+
+	function handlePaste(event: ClipboardEvent) {
+		// Only handle paste if we are in the upload step (step 0)
+		if (currentStep !== 0) return;
+
+		const items = event.clipboardData?.items;
+		if (!items) return;
+
+		for (const item of items) {
+			if (item.kind === 'file' && item.type.startsWith('image/')) {
+				const file = item.getAsFile();
+				if (file) {
+					processFile(file);
+					break; // Only process the first image found
+				}
+			}
+		}
+	}
+
 	function clearImage() {
 		uploadState = {
 			file: null,
@@ -93,9 +114,7 @@
 			error: null
 		};
 		moodAnalysis = null;
-		if (fileInput) {
-			fileInput.value = '';
-		}
+		if (fileInput) fileInput.value = '';
 	}
 
 	function startOver() {
@@ -114,9 +133,7 @@
 		isSavingPlaylist = false;
 		isGeneratingPlaylist = false;
 		imageBase64 = null;
-		if (fileInput) {
-			fileInput.value = '';
-		}
+		if (fileInput) fileInput.value = '';
 		goToStep(0);
 	}
 
@@ -297,6 +314,8 @@
 	}
 </script>
 
+<svelte:window onpaste={handlePaste} />
+
 <div class="min-h-screen p-4 sm:p-8 overflow-x-hidden">
 	<div class="max-w-3xl mx-auto">
 		<!-- Header with Navigation -->
@@ -372,28 +391,25 @@
 
 									<h2 class="text-2xl font-bold mb-2">Upload an Image</h2>
 									<p class="text-gray-600 mb-6">
-										Choose a photo that represents the mood you want to capture
+										Choose a photo, take a picture, or paste (Cmd+V) an image that represents the mood
 									</p>
 
 									<input
 										bind:this={fileInput}
 										type="file"
 										accept="image/jpeg,image/png,image/webp"
-										capture="environment"
 										onchange={handleFileSelect}
 										class="hidden"
 										id="file-input"
 										aria-label="Select or capture an image file"
 									/>
 
-									<div class="flex flex-col sm:flex-row gap-3 justify-center">
-										<label for="file-input" class="neo-button cursor-pointer"> Choose File </label>
-
-										<label for="file-input" class="neo-button cursor-pointer"> Take Photo </label>
+									<div class="flex justify-center">
+										<label for="file-input" class="neo-button cursor-pointer"> UPLOAD PHOTO </label>
 									</div>
 
 									<p class="text-sm text-gray-500 mt-4">
-										Supported formats: JPG, PNG, WebP (Max 10MB)
+										Supported formats: JPEG, JPG, PNG, WebP (Max 10MB)
 									</p>
 								</div>
 
