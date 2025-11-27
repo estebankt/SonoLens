@@ -7,11 +7,7 @@ export const handle: Handle = async ({ event, resolve }) => {
 
 	try {
 		const response = await resolve(event);
-		const duration = Date.now() - startTime;
-
-		// Log successful requests
-		console.log(`[${method}] ${pathname} - ${response.status} (${duration}ms)`);
-
+		const _duration = Date.now() - startTime;
 		return response;
 	} catch (error: any) {
 		const duration = Date.now() - startTime;

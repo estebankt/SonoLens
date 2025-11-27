@@ -28,7 +28,9 @@ export default defineConfig({
 
 	use: {
 		// Base URL: Use env var if set (e.g. Vercel Preview), otherwise localhost
-		baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || (process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173'),
+		baseURL:
+			process.env.PLAYWRIGHT_TEST_BASE_URL ||
+			(process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173'),
 
 		// Trace on first retry for debugging
 		trace: 'on-first-retry',

@@ -33,7 +33,7 @@ async function analyzeWithFallback(
 
 	for (const model of uniqueModels) {
 		try {
-			console.log(`🔍 Attempting image analysis with model: ${model}`);
+			console.warn(`🔍 Attempting image analysis with model: ${model}`);
 
 			const response = await openai.chat.completions.create({
 				model,
@@ -65,7 +65,7 @@ async function analyzeWithFallback(
 			}
 
 			const choice = response.choices[0];
-			console.log(`Model ${model} finish_reason:`, choice.finish_reason);
+			console.warn(`Model ${model} finish_reason:`, choice.finish_reason);
 
 			// Handle different finish reasons
 			if (choice.finish_reason === 'content_filter') {
@@ -90,7 +90,7 @@ async function analyzeWithFallback(
 				);
 			}
 
-			console.log(`✓ Successfully analyzed image with model: ${model}`);
+			console.warn(`✓ Successfully analyzed image with model: ${model}`);
 			return content;
 		} catch (error) {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
@@ -105,7 +105,7 @@ async function analyzeWithFallback(
 			}
 
 			// Otherwise, try the next model
-			console.log(`Falling back to next model...`);
+			console.warn(`Falling back to next model...`);
 			continue;
 		}
 	}
@@ -178,7 +178,7 @@ Respond ONLY with valid JSON, no additional text.`;
 
 		return analysis;
 	} catch (error) {
-		console.error('Error analyzing image with OpenAI:', error);
+		console.warn(`Error generating image analysis: ${error}`);
 		throw new Error(
 			`Failed to analyze image: ${error instanceof Error ? error.message : 'Unknown error'}`
 		);
