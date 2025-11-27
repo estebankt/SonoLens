@@ -12,7 +12,6 @@ import { type BrowserContext } from '@playwright/test';
 export async function authenticateUser(context: BrowserContext) {
 	// Use localhost for both dev and CI (preview server)
 	const baseURL = process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173';
-	const url = new URL(baseURL);
 
 	// Set Spotify access token cookie
 	await context.addCookies([
