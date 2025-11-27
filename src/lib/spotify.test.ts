@@ -127,12 +127,20 @@ describe('Spotify API Client', () => {
 					json: async () => mockTokenResponse
 				});
 
-				const result = await getTokensFromSpotify(mockCode, mockVerifier, mockClientId, mockRedirectUri);
+				const result = await getTokensFromSpotify(
+					mockCode,
+					mockVerifier,
+					mockClientId,
+					mockRedirectUri
+				);
 
-				expect(fetchMock).toHaveBeenCalledWith('https://accounts.spotify.com/api/token', expect.objectContaining({
-					method: 'POST',
-					headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
-				}));
+				expect(fetchMock).toHaveBeenCalledWith(
+					'https://accounts.spotify.com/api/token',
+					expect.objectContaining({
+						method: 'POST',
+						headers: { 'Content-Type': 'application/x-www-form-urlencoded' }
+					})
+				);
 				expect(result).toEqual(mockTokenResponse);
 			});
 
@@ -144,8 +152,9 @@ describe('Spotify API Client', () => {
 					text: async () => 'Invalid code'
 				});
 
-				await expect(getTokensFromSpotify(mockCode, mockVerifier, mockClientId, mockRedirectUri))
-					.rejects.toThrow('Failed to get tokens');
+				await expect(
+					getTokensFromSpotify(mockCode, mockVerifier, mockClientId, mockRedirectUri)
+				).rejects.toThrow('Failed to get tokens');
 			});
 		});
 
@@ -162,10 +171,13 @@ describe('Spotify API Client', () => {
 
 				const result = await refreshToken('old-refresh-token', mockClientId);
 
-				expect(fetchMock).toHaveBeenCalledWith('https://accounts.spotify.com/api/token', expect.objectContaining({
-					method: 'POST',
-					body: expect.any(URLSearchParams)
-				}));
+				expect(fetchMock).toHaveBeenCalledWith(
+					'https://accounts.spotify.com/api/token',
+					expect.objectContaining({
+						method: 'POST',
+						body: expect.any(URLSearchParams)
+					})
+				);
 				expect(result).toEqual(mockRefreshResponse);
 			});
 
@@ -176,8 +188,9 @@ describe('Spotify API Client', () => {
 					statusText: 'Unauthorized'
 				});
 
-				await expect(refreshToken('invalid-token', mockClientId))
-					.rejects.toThrow('Failed to refresh token');
+				await expect(refreshToken('invalid-token', mockClientId)).rejects.toThrow(
+					'Failed to refresh token'
+				);
 			});
 		});
 	});
@@ -207,8 +220,7 @@ describe('Spotify API Client', () => {
 					statusText: 'Unauthorized'
 				});
 
-				await expect(getUserProfile(mockAccessToken))
-					.rejects.toThrow('Failed to get user profile');
+				await expect(getUserProfile(mockAccessToken)).rejects.toThrow('Failed to get user profile');
 			});
 		});
 
@@ -314,7 +326,9 @@ describe('Spotify API Client', () => {
 					statusText: 'Error'
 				});
 
-				await expect(getRecentlyPlayed(mockAccessToken)).rejects.toThrow('Failed to get recently played');
+				await expect(getRecentlyPlayed(mockAccessToken)).rejects.toThrow(
+					'Failed to get recently played'
+				);
 			});
 		});
 	});
@@ -348,8 +362,7 @@ describe('Spotify API Client', () => {
 			});
 
 			it('should validate that at least one seed is provided', async () => {
-				await expect(getRecommendations(mockAccessToken, {}))
-					.rejects.toThrow('At least one seed');
+				await expect(getRecommendations(mockAccessToken, {})).rejects.toThrow('At least one seed');
 			});
 
 			it('should limit total seeds to 5', async () => {
@@ -377,8 +390,9 @@ describe('Spotify API Client', () => {
 					text: async () => 'API Error'
 				});
 
-				await expect(getRecommendations(mockAccessToken, { seed_genres: ['pop'] }))
-					.rejects.toThrow('Failed to get recommendations');
+				await expect(getRecommendations(mockAccessToken, { seed_genres: ['pop'] })).rejects.toThrow(
+					'Failed to get recommendations'
+				);
 			});
 		});
 
@@ -397,7 +411,9 @@ describe('Spotify API Client', () => {
 				const result = await searchTracksByMood(mockAccessToken, params);
 
 				expect(fetchMock).toHaveBeenCalledWith(
-					expect.stringMatching(/q=genre%3A%22pop%22\+OR\+genre%3A%22rock%22|q=genre%3A%22pop%22\+OR\+genre%3A%22rock%22/),
+					expect.stringMatching(
+						/q=genre%3A%22pop%22\+OR\+genre%3A%22rock%22|q=genre%3A%22pop%22\+OR\+genre%3A%22rock%22/
+					),
 					expect.any(Object)
 				);
 				expect(result.tracks).toHaveLength(1);
@@ -410,8 +426,9 @@ describe('Spotify API Client', () => {
 					text: async () => 'API Error'
 				});
 
-				await expect(searchTracksByMood(mockAccessToken, { genres: ['pop'] }))
-					.rejects.toThrow('Failed to search tracks');
+				await expect(searchTracksByMood(mockAccessToken, { genres: ['pop'] })).rejects.toThrow(
+					'Failed to search tracks'
+				);
 			});
 		});
 
@@ -508,7 +525,9 @@ describe('Spotify API Client', () => {
 
 			it('should throw error on failure', async () => {
 				fetchMock.mockResolvedValueOnce({ ok: false, statusText: 'Error' });
-				await expect(getAvailableGenreSeeds(mockAccessToken)).rejects.toThrow('Failed to get genre seeds');
+				await expect(getAvailableGenreSeeds(mockAccessToken)).rejects.toThrow(
+					'Failed to get genre seeds'
+				);
 			});
 		});
 	});
@@ -569,8 +588,9 @@ describe('Spotify API Client', () => {
 					text: async () => 'Error'
 				});
 
-				await expect(createPlaylist(mockAccessToken, mockUserId, 'Fail'))
-					.rejects.toThrow('Failed to create playlist');
+				await expect(createPlaylist(mockAccessToken, mockUserId, 'Fail')).rejects.toThrow(
+					'Failed to create playlist'
+				);
 			});
 		});
 
@@ -601,8 +621,9 @@ describe('Spotify API Client', () => {
 					text: async () => 'Error'
 				});
 
-				await expect(addTracksToPlaylist(mockAccessToken, mockPlaylistId, []))
-					.rejects.toThrow('Failed to add tracks');
+				await expect(addTracksToPlaylist(mockAccessToken, mockPlaylistId, [])).rejects.toThrow(
+					'Failed to add tracks'
+				);
 			});
 		});
 
@@ -640,8 +661,9 @@ describe('Spotify API Client', () => {
 					text: async () => 'Error'
 				});
 
-				await expect(uploadPlaylistCover(mockAccessToken, mockPlaylistId, 'img'))
-					.rejects.toThrow('Failed to upload playlist cover');
+				await expect(uploadPlaylistCover(mockAccessToken, mockPlaylistId, 'img')).rejects.toThrow(
+					'Failed to upload playlist cover'
+				);
 			});
 		});
 	});

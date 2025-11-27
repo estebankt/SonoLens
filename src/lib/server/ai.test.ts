@@ -48,10 +48,12 @@ describe('AI Analysis Utilities', () => {
 			const result = await analyzeImage('base64-data', 'image/jpeg');
 
 			expect(result).toEqual(mockMoodAnalysis);
-			expect(mockCreate).toHaveBeenCalledWith(expect.objectContaining({
-				model: 'gpt-4o',
-				response_format: { type: 'json_object' }
-			}));
+			expect(mockCreate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					model: 'gpt-4o',
+					response_format: { type: 'json_object' }
+				})
+			);
 		});
 
 		it('should handle content filter errors', async () => {
@@ -66,11 +68,13 @@ describe('AI Analysis Utilities', () => {
 			// Second attempt fails too (since we can't change model response easily in loop for same mock)
 			// Actually, the code tries multiple models.
 			// If we want to test fallback, we need mockCreate to return sequence of responses.
-			
+
 			// To simulate complete failure:
 			mockCreate.mockRejectedValue(new Error('Content policy violation'));
 
-			await expect(analyzeImage('base64-data', 'image/jpeg')).rejects.toThrow('Failed to analyze image');
+			await expect(analyzeImage('base64-data', 'image/jpeg')).rejects.toThrow(
+				'Failed to analyze image'
+			);
 		});
 
 		it('should retry with different models on failure', async () => {
@@ -116,7 +120,9 @@ describe('AI Analysis Utilities', () => {
 				]
 			});
 
-			await expect(analyzeImage('base64-data', 'image/jpeg')).rejects.toThrow('missing required fields');
+			await expect(analyzeImage('base64-data', 'image/jpeg')).rejects.toThrow(
+				'missing required fields'
+			);
 		});
 	});
 
