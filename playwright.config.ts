@@ -27,8 +27,8 @@ export default defineConfig({
 		: 'html', // Interactive HTML report in development
 
 	use: {
-		// Base URL from environment variable (preview URL in CI, localhost in dev)
-		baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173',
+		// Base URL: preview server in CI (port 4173), dev server locally (port 5173)
+		baseURL: process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173',
 
 		// Trace on first retry for debugging
 		trace: 'on-first-retry',
@@ -50,13 +50,18 @@ export default defineConfig({
 		}
 	],
 
-	// Don't start local dev server in CI (tests run against deployed preview)
+	// Start preview server in CI (serves built app), dev server locally
 	webServer: process.env.CI
-		? undefined
+		? {
+				command: 'npm run preview',
+				url: 'http://localhost:4173',
+				reuseExistingServer: false,
+				timeout: 120000
+			}
 		: {
 				command: 'npm run dev',
 				url: 'http://localhost:5173',
-				reuseExistingServer: !process.env.CI,
+				reuseExistingServer: true,
 				timeout: 120000
 			}
 });

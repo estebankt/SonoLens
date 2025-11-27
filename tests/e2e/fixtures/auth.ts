@@ -10,19 +10,18 @@ import { type BrowserContext } from '@playwright/test';
  * @param context - Playwright browser context
  */
 export async function authenticateUser(context: BrowserContext) {
-	const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173';
+	// Use localhost for both dev and CI (preview server)
+	const baseURL = process.env.CI ? 'http://localhost:4173' : 'http://localhost:5173';
 	const url = new URL(baseURL);
-	const domain = url.hostname;
 
 	// Set Spotify access token cookie
 	await context.addCookies([
 		{
 			name: 'spotify_access_token',
 			value: 'mock-access-token-for-e2e-tests',
-			domain,
-			path: '/',
+			url: baseURL,
 			httpOnly: true,
-			secure: url.protocol === 'https:',
+			secure: false, // Always false for localhost
 			sameSite: 'Lax',
 			// Expire in 1 hour
 			expires: Math.floor(Date.now() / 1000) + 3600
@@ -30,10 +29,9 @@ export async function authenticateUser(context: BrowserContext) {
 		{
 			name: 'spotify_refresh_token',
 			value: 'mock-refresh-token-for-e2e-tests',
-			domain,
-			path: '/',
+			url: baseURL,
 			httpOnly: true,
-			secure: url.protocol === 'https:',
+			secure: false, // Always false for localhost
 			sameSite: 'Lax',
 			// Expire in 30 days
 			expires: Math.floor(Date.now() / 1000) + 2592000
