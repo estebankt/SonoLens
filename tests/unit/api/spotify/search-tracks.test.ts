@@ -23,7 +23,7 @@ describe('API: /api/spotify/search-tracks', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -37,7 +37,7 @@ describe('API: /api/spotify/search-tracks', () => {
 				cookies: createMockCookies({}) // No tokens
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(401);
@@ -56,7 +56,7 @@ describe('API: /api/spotify/search-tracks', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(fetchMock).toHaveBeenCalledWith(
@@ -83,7 +83,7 @@ describe('API: /api/spotify/search-tracks', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(401);
@@ -103,7 +103,7 @@ describe('API: /api/spotify/search-tracks', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
@@ -119,7 +119,7 @@ describe('API: /api/spotify/search-tracks', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);

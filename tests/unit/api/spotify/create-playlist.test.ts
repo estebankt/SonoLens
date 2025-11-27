@@ -46,7 +46,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({}) // No tokens
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(401);
@@ -68,7 +68,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -90,7 +90,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -112,7 +112,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 
 			expect(response.status).toBe(400);
 		});
@@ -132,7 +132,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 
 			expect(response.status).toBe(400);
 		});
@@ -140,7 +140,7 @@ describe('API: /api/spotify/create-playlist', () => {
 		it('should successfully create playlist with minimum required fields', async () => {
 			vi.mocked(getUserProfile).mockResolvedValue(mockUserProfile);
 			vi.mocked(createPlaylist).mockResolvedValue(mockPlaylist);
-			vi.mocked(addTracksToPlaylist).mockResolvedValue(undefined);
+			vi.mocked(addTracksToPlaylist).mockResolvedValue({ snapshot_id: 'mock-snapshot-id' });
 
 			const mockRequest = createMockRequestWithBody(
 				'http://localhost:5173/api/spotify/create-playlist',
@@ -156,7 +156,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-access-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(getUserProfile).toHaveBeenCalledWith('mock-access-token');
@@ -182,7 +182,7 @@ describe('API: /api/spotify/create-playlist', () => {
 		it('should use custom description when provided', async () => {
 			vi.mocked(getUserProfile).mockResolvedValue(mockUserProfile);
 			vi.mocked(createPlaylist).mockResolvedValue(mockPlaylist);
-			vi.mocked(addTracksToPlaylist).mockResolvedValue(undefined);
+			vi.mocked(addTracksToPlaylist).mockResolvedValue({ snapshot_id: 'mock-snapshot-id' });
 
 			const mockRequest = createMockRequestWithBody(
 				'http://localhost:5173/api/spotify/create-playlist',
@@ -199,7 +199,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			await POST(mockEvent);
+			await POST(mockEvent as any);
 
 			expect(createPlaylist).toHaveBeenCalledWith(
 				'mock-token',
@@ -214,7 +214,7 @@ describe('API: /api/spotify/create-playlist', () => {
 		it('should respect is_public flag when false', async () => {
 			vi.mocked(getUserProfile).mockResolvedValue(mockUserProfile);
 			vi.mocked(createPlaylist).mockResolvedValue(mockPlaylist);
-			vi.mocked(addTracksToPlaylist).mockResolvedValue(undefined);
+			vi.mocked(addTracksToPlaylist).mockResolvedValue({ snapshot_id: 'mock-snapshot-id' });
 
 			const mockRequest = createMockRequestWithBody(
 				'http://localhost:5173/api/spotify/create-playlist',
@@ -231,7 +231,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			await POST(mockEvent);
+			await POST(mockEvent as any);
 
 			expect(createPlaylist).toHaveBeenCalledWith(
 				'mock-token',
@@ -246,7 +246,7 @@ describe('API: /api/spotify/create-playlist', () => {
 		it('should upload cover image when provided', async () => {
 			vi.mocked(getUserProfile).mockResolvedValue(mockUserProfile);
 			vi.mocked(createPlaylist).mockResolvedValue(mockPlaylist);
-			vi.mocked(addTracksToPlaylist).mockResolvedValue(undefined);
+			vi.mocked(addTracksToPlaylist).mockResolvedValue({ snapshot_id: 'mock-snapshot-id' });
 			vi.mocked(uploadPlaylistCover).mockResolvedValue(undefined);
 
 			const mockRequest = createMockRequestWithBody(
@@ -264,7 +264,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			await POST(mockEvent);
+			await POST(mockEvent as any);
 
 			expect(uploadPlaylistCover).toHaveBeenCalledWith(
 				'mock-token',
@@ -276,7 +276,7 @@ describe('API: /api/spotify/create-playlist', () => {
 		it('should succeed even if cover upload fails', async () => {
 			vi.mocked(getUserProfile).mockResolvedValue(mockUserProfile);
 			vi.mocked(createPlaylist).mockResolvedValue(mockPlaylist);
-			vi.mocked(addTracksToPlaylist).mockResolvedValue(undefined);
+			vi.mocked(addTracksToPlaylist).mockResolvedValue({ snapshot_id: 'mock-snapshot-id' });
 			vi.mocked(uploadPlaylistCover).mockRejectedValue(new Error('Image upload failed'));
 
 			const mockRequest = createMockRequestWithBody(
@@ -294,7 +294,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
@@ -305,7 +305,7 @@ describe('API: /api/spotify/create-playlist', () => {
 		it('should not call uploadPlaylistCover when no cover_image provided', async () => {
 			vi.mocked(getUserProfile).mockResolvedValue(mockUserProfile);
 			vi.mocked(createPlaylist).mockResolvedValue(mockPlaylist);
-			vi.mocked(addTracksToPlaylist).mockResolvedValue(undefined);
+			vi.mocked(addTracksToPlaylist).mockResolvedValue({ snapshot_id: 'mock-snapshot-id' });
 
 			const mockRequest = createMockRequestWithBody(
 				'http://localhost:5173/api/spotify/create-playlist',
@@ -321,7 +321,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			await POST(mockEvent);
+			await POST(mockEvent as any);
 
 			expect(uploadPlaylistCover).not.toHaveBeenCalled();
 		});
@@ -343,7 +343,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
@@ -369,7 +369,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
@@ -395,7 +395,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
@@ -405,7 +405,7 @@ describe('API: /api/spotify/create-playlist', () => {
 		it('should return playlist details in response', async () => {
 			vi.mocked(getUserProfile).mockResolvedValue(mockUserProfile);
 			vi.mocked(createPlaylist).mockResolvedValue(mockPlaylist);
-			vi.mocked(addTracksToPlaylist).mockResolvedValue(undefined);
+			vi.mocked(addTracksToPlaylist).mockResolvedValue({ snapshot_id: 'mock-snapshot-id' });
 
 			const mockRequest = createMockRequestWithBody(
 				'http://localhost:5173/api/spotify/create-playlist',
@@ -421,7 +421,7 @@ describe('API: /api/spotify/create-playlist', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(data.playlist).toEqual({

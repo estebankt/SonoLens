@@ -16,7 +16,7 @@ describe('API: /api/auth/check', () => {
 				cookies: createMockCookies({ access: 'mock-access-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
@@ -29,7 +29,7 @@ describe('API: /api/auth/check', () => {
 				cookies: createMockCookies({ refresh: 'mock-refresh-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
@@ -41,7 +41,7 @@ describe('API: /api/auth/check', () => {
 				cookies: createMockCookies({ refresh: 'mock-refresh-token' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(data.accessToken).toBeUndefined();
@@ -52,7 +52,7 @@ describe('API: /api/auth/check', () => {
 				cookies: createMockCookies({}) // No tokens
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(401);
@@ -64,7 +64,7 @@ describe('API: /api/auth/check', () => {
 				cookies: createMockCookies({ access: 'mock-access', refresh: 'mock-refresh' })
 			});
 
-			const response = await GET(mockEvent);
+			const response = await GET(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);

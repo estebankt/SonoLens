@@ -35,7 +35,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({}) // No tokens
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(401);
@@ -57,7 +57,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -79,7 +79,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -102,7 +102,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -127,7 +127,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
@@ -151,7 +151,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 
 			expect(response.status).toBe(200);
 		});
@@ -173,7 +173,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 
 			expect(response.status).toBe(200);
 		});
@@ -195,7 +195,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(analyzeImage).toHaveBeenCalledWith('base64-image-data', 'image/jpeg');
@@ -221,7 +221,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
@@ -246,7 +246,7 @@ describe('API: /api/analyze-image', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);

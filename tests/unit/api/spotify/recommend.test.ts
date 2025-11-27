@@ -37,7 +37,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({}) // No tokens
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(401);
@@ -57,7 +57,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -78,7 +78,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(400);
@@ -101,7 +101,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(processBatches).toHaveBeenCalled();
@@ -126,7 +126,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
@@ -150,7 +150,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(404);
@@ -172,7 +172,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(500);
@@ -186,10 +186,10 @@ describe('API: /api/spotify/recommend', () => {
 			const mockRequest = createMockRequestWithBody(
 				'http://localhost:5173/api/spotify/recommend',
 				'POST',
-				{
-					mood_analysis: {
-						...mockMoodAnalysis,
-						seed_tracks: Array(50).fill('Track')
+				{ 
+					mood_analysis: { 
+						...mockMoodAnalysis, 
+						seed_tracks: Array(50).fill('Track') 
 					},
 					limit: 5
 				}
@@ -200,7 +200,7 @@ describe('API: /api/spotify/recommend', () => {
 				cookies: createMockCookies({ access: 'mock-token' })
 			});
 
-			await POST(mockEvent);
+			await POST(mockEvent as any);
 
 			// processBatches first arg should be array of 5 items
 			const callArgs = vi.mocked(processBatches).mock.calls[0];

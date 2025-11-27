@@ -39,7 +39,7 @@ describe('API: /api/auth/refresh', () => {
 				})
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(refreshToken).toHaveBeenCalledWith('mock-refresh-token', 'test-client-id');
@@ -65,7 +65,7 @@ describe('API: /api/auth/refresh', () => {
 				})
 			});
 
-			await expect(POST(mockEvent)).rejects.toThrow();
+			await expect(POST(mockEvent as any)).rejects.toThrow();
 		});
 
 		it('should clear cookies and throw 401 when refresh fails', async () => {
@@ -79,7 +79,7 @@ describe('API: /api/auth/refresh', () => {
 				})
 			});
 
-			await expect(POST(mockEvent)).rejects.toThrow();
+			await expect(POST(mockEvent as any)).rejects.toThrow();
 
 			// Verify cookies were cleared
 			expect(mockCookies.delete).toHaveBeenCalledWith('spotify_access_token', { path: '/' });
@@ -97,7 +97,7 @@ describe('API: /api/auth/refresh', () => {
 				})
 			});
 
-			await expect(POST(mockEvent)).rejects.toThrow();
+			await expect(POST(mockEvent as any)).rejects.toThrow();
 			expect(mockCookies.delete).toHaveBeenCalled();
 		});
 
@@ -117,7 +117,7 @@ describe('API: /api/auth/refresh', () => {
 				})
 			});
 
-			await POST(mockEvent);
+			await POST(mockEvent as any);
 
 			expect(mockCookies.set).toHaveBeenCalledWith(
 				'spotify_access_token',
@@ -145,7 +145,7 @@ describe('API: /api/auth/refresh', () => {
 				})
 			});
 
-			const response = await POST(mockEvent);
+			const response = await POST(mockEvent as any);
 			const data = await response.json();
 
 			expect(response.status).toBe(200);
@@ -166,7 +166,7 @@ describe('API: /api/auth/refresh', () => {
 				})
 			});
 
-			await POST(mockEvent);
+			await POST(mockEvent as any);
 
 			// Should only set access token, not refresh token
 			expect(mockCookies.set).toHaveBeenCalledTimes(1);
