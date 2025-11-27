@@ -85,36 +85,38 @@ test.describe('Core Flow (Authenticated)', () => {
 		await fileInput.setInputFiles(testImage);
 
 		// 5. Wait for preview to appear (indicates client-side validation passed)
-		await expect(page.locator('img[alt*="review"]').or(page.locator('img[alt*="Upload"]'))).toBeVisible({
+		await expect(
+			page.locator('img[alt*="review"]').or(page.locator('img[alt*="Upload"]'))
+		).toBeVisible({
 			timeout: 5000
 		});
 
 		// 6. Click "Analyze Image" button (or equivalent)
-		const analyzeButton = page.locator('button:has-text("Analyze")').or(
-			page.locator('button:has-text("Continue")')
-		);
+		const analyzeButton = page
+			.locator('button:has-text("Analyze")')
+			.or(page.locator('button:has-text("Continue")'));
 		await expect(analyzeButton).toBeVisible();
 		await analyzeButton.click();
 
 		// 7. Wait for mood analysis to display
 		await expect(
-			page.locator('text=Mood Analysis').or(page.locator(`text=${MOCK_MOOD_ANALYSIS.suggested_playlist_title}`))
+			page
+				.locator('text=Mood Analysis')
+				.or(page.locator(`text=${MOCK_MOOD_ANALYSIS.suggested_playlist_title}`))
 		).toBeVisible({ timeout: 15000 });
 
 		// Verify mood details are shown
 		await expect(page.locator(`text=${MOCK_MOOD_ANALYSIS.mood_tags[0]}`)).toBeVisible();
 
 		// 8. Click "Generate Playlist" button
-		const generateButton = page.locator('button:has-text("Generate")').or(
-			page.locator('button:has-text("Continue")')
-		);
+		const generateButton = page
+			.locator('button:has-text("Generate")')
+			.or(page.locator('button:has-text("Continue")'));
 		await expect(generateButton).toBeVisible();
 		await generateButton.click();
 
 		// 9. Wait for tracks to display
-		await expect(
-			page.locator(`text=${MOCK_TRACKS[0].name}`)
-		).toBeVisible({ timeout: 15000 });
+		await expect(page.locator(`text=${MOCK_TRACKS[0].name}`)).toBeVisible({ timeout: 15000 });
 
 		// Verify track list is shown
 		await expect(page.locator(`text=${MOCK_TRACKS[0].artists[0].name}`)).toBeVisible();
@@ -125,9 +127,9 @@ test.describe('Core Flow (Authenticated)', () => {
 		await saveButton.click();
 
 		// 11. Verify success message
-		await expect(
-			page.locator('text=Playlist Saved').or(page.locator('text=Success'))
-		).toBeVisible({ timeout: 15000 });
+		await expect(page.locator('text=Playlist Saved').or(page.locator('text=Success'))).toBeVisible({
+			timeout: 15000
+		});
 
 		// Verify "Open in Spotify" link or similar success indicator
 		await expect(
@@ -144,9 +146,9 @@ test.describe('Core Flow (Authenticated)', () => {
 
 		// Verify error message appears
 		// Note: Error message may vary based on implementation
-		const errorLocator = page.locator('.bg-red').or(
-			page.locator('text=/invalid|supported|error/i')
-		);
+		const errorLocator = page
+			.locator('.bg-red')
+			.or(page.locator('text=/invalid|supported|error/i'));
 		await expect(errorLocator).toBeVisible({ timeout: 5000 });
 	});
 
@@ -159,17 +161,21 @@ test.describe('Core Flow (Authenticated)', () => {
 		await fileInput.setInputFiles(testImage);
 
 		// Wait for preview
-		await expect(page.locator('img[alt*="review"]').or(page.locator('img[alt*="Upload"]'))).toBeVisible();
+		await expect(
+			page.locator('img[alt*="review"]').or(page.locator('img[alt*="Upload"]'))
+		).toBeVisible();
 
 		// Click analyze
-		const analyzeButton = page.locator('button:has-text("Analyze")').or(
-			page.locator('button:has-text("Continue")')
-		);
+		const analyzeButton = page
+			.locator('button:has-text("Analyze")')
+			.or(page.locator('button:has-text("Continue")'));
 		await analyzeButton.click();
 
 		// Wait for mood analysis
 		await expect(
-			page.locator('text=Mood Analysis').or(page.locator(`text=${MOCK_MOOD_ANALYSIS.suggested_playlist_title}`))
+			page
+				.locator('text=Mood Analysis')
+				.or(page.locator(`text=${MOCK_MOOD_ANALYSIS.suggested_playlist_title}`))
 		).toBeVisible({ timeout: 15000 });
 
 		// Look for "Back" button

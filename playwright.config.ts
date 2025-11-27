@@ -23,8 +23,8 @@ export default defineConfig({
 
 	// Reporter configuration
 	reporter: process.env.CI
-		? 'github'  // GitHub Actions annotations in CI
-		: 'html',   // Interactive HTML report in development
+		? 'github' // GitHub Actions annotations in CI
+		: 'html', // Interactive HTML report in development
 
 	use: {
 		// Base URL from environment variable (preview URL in CI, localhost in dev)
@@ -39,15 +39,15 @@ export default defineConfig({
 
 		// Timeouts
 		actionTimeout: 10000,
-		navigationTimeout: 30000,
+		navigationTimeout: 30000
 	},
 
 	// Test configuration
 	projects: [
 		{
 			name: 'chromium',
-			use: { ...devices['Desktop Chrome'] },
-		},
+			use: { ...devices['Desktop Chrome'] }
+		}
 	],
 
 	// Don't start local dev server in CI (tests run against deployed preview)
@@ -57,6 +57,6 @@ export default defineConfig({
 				command: 'npm run dev',
 				url: 'http://localhost:5173',
 				reuseExistingServer: !process.env.CI,
-				timeout: 120000,
-		  },
+				timeout: 120000
+			}
 });
