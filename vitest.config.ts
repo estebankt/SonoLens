@@ -8,11 +8,13 @@ export default defineConfig({
 		// Updated to include 'tests' folder AND 'src' folder
 		include: ['src/**/*.{test,spec}.{js,ts}', 'tests/**/*.{test,spec}.{js,ts}'],
 		// Exclude server-side tests (require Node environment, not jsdom)
+		// Also exclude Playwright E2E tests (run separately with Playwright)
 		exclude: [
 			'**/node_modules/**',
 			'**/dist/**',
 			'**/.svelte-kit/**',
-			'src/lib/server/**/*.test.ts'
+			'src/lib/server/**/*.test.ts',
+			'tests/e2e/**' // Exclude Playwright tests from Vitest
 		],
 		environment: 'jsdom',
 		globals: true,
