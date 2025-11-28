@@ -33,7 +33,6 @@
 	let showAddTrackModal = $state(false);
 
 	// Auto-scroll state
-	let trackListContainer = $state<HTMLElement | null>(null);
 	let scroller = $state(makeScroller());
 
 	function handleTrackChange(newIndex: number) {
@@ -70,10 +69,10 @@
 		}
 		dragOverIndex = index;
 
-		// Trigger auto-scroll if dragging near container edges
-		if (trackListContainer && scroller) {
+		// Trigger auto-scroll when dragging near window edges
+		if (scroller) {
 			const pointer = { x: event.clientX, y: event.clientY };
-			scroller.scrollIfNeeded(pointer, trackListContainer);
+			scroller.scrollIfNeeded(pointer, document.documentElement);
 		}
 	}
 
@@ -202,15 +201,9 @@
 		{/if}
 	</div>
 
-	<!-- Track List - Scrollable Container -->
-	<div
-		bind:this={trackListContainer}
-		class="max-h-[60vh] sm:max-h-[70vh] overflow-y-auto mb-6"
-		role="region"
-		aria-label="Playlist tracks"
-	>
-		<div class="space-y-2" role="list">
-			{#each tracks as track, index (index)}
+	<!-- Track List -->
+	<div class="space-y-2 mb-6" role="list">
+		{#each tracks as track, index (index)}
 			<div class="relative overflow-hidden" transition:fly={{ y: -20, duration: 300 }}>
 				<!-- Red Background for Swipe Delete -->
 				{#if isEditable && onRemoveTrack}
@@ -342,8 +335,7 @@
 					</div>
 				</div>
 			</div>
-			{/each}
-		</div>
+		{/each}
 	</div>
 
 	<!-- Save Button -->
