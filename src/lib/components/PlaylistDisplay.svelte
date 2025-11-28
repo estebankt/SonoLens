@@ -47,14 +47,14 @@
 			}
 			overflowingTitles = overflowingTitles;
 		};
-		
+
 		// Check on mount
 		check();
-		
+
 		// Re-check on resize
 		const resizeObserver = new ResizeObserver(check);
 		resizeObserver.observe(node);
-		
+
 		return {
 			destroy() {
 				resizeObserver.disconnect();
@@ -95,11 +95,11 @@
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData('text/plain', index.toString());
-			
+
 			// Get the track row element
 			const target = event.target as HTMLElement;
 			const trackRow = target.closest('[role="button"]') as HTMLElement;
-			
+
 			if (trackRow) {
 				// Use the track row directly as the drag image
 				event.dataTransfer.setDragImage(trackRow, 10, 10);
@@ -228,70 +228,6 @@
 	}
 </script>
 
-<style>
-	@keyframes marquee {
-		0% {
-			transform: translateX(0%);
-		}
-		100% {
-			transform: translateX(-50%);
-		}
-	}
-
-	.marquee-container {
-		overflow: hidden;
-		position: relative;
-		width: 100%;
-	}
-
-	.marquee-content {
-		display: inline-block;
-		white-space: nowrap;
-		/* No animation by default */
-	}
-
-	/* Only animate when track is selected */
-	.marquee-active .marquee-content {
-		animation: marquee 15s linear infinite;
-		padding-right: 2rem;
-	}
-
-	.marquee-active .marquee-content::after {
-		content: attr(data-text);
-		padding-left: 2rem;
-	}
-
-	.marquee-container:hover .marquee-content {
-		animation-play-state: paused;
-	}
-
-	/* When not animating, show truncate behavior */
-	.marquee-content:not(.marquee-active .marquee-content) {
-		max-width: 100%;
-		overflow: hidden;
-		text-overflow: ellipsis;
-	}
-
-	/* Mobile font sizes - override Tailwind on mobile */
-	@media (max-width: 768px) {
-		.playlist-title {
-			font-size: 2.25rem; /* 18px */
-		}
-
-		.track-title {
-			font-size: 1.125rem; /* 14px */
-		}
-
-		.track-artist {
-			font-size: 0.75rem; /* 12px */
-		}
-
-		.track-count {
-			font-size: 0.875rem; /* 14px */
-		}
-	}
-</style>
-
 <div class="neo-card mb-24">
 	<!-- Playlist Header -->
 	<div class="mb-6 flex items-start justify-between gap-4">
@@ -348,17 +284,32 @@
 					style="transform: translateX({swipedTrackIndex === index ? currentSwipeOffset : 0}px)"
 					class="relative flex items-center gap-6 p-4 border-2 transition-colors touch-pan-y cursor-pointer"
 					aria-label={`${selectedTrackIndex === index ? 'Selected' : 'Select'} track: ${track.name} by ${track.artists.map((a) => a.name).join(', ')}`}
-					class:bg-white={draggedIndex !== index && selectedTrackIndex !== index && currentTrackIndex !== index && dragOverIndex !== index}
-					class:hover:bg-gray-50={draggedIndex === null && selectedTrackIndex !== index && currentTrackIndex !== index && dragOverIndex !== index}
+					class:bg-white={draggedIndex !== index &&
+						selectedTrackIndex !== index &&
+						currentTrackIndex !== index &&
+						dragOverIndex !== index}
+					class:hover:bg-gray-50={draggedIndex === null &&
+						selectedTrackIndex !== index &&
+						currentTrackIndex !== index &&
+						dragOverIndex !== index}
 					class:bg-yellow-100={currentTrackIndex === index && draggedIndex !== index}
 					class:border-yellow-600={currentTrackIndex === index && draggedIndex !== index}
-					class:bg-blue-100={selectedTrackIndex === index && currentTrackIndex !== index && draggedIndex !== index}
-					class:border-blue-600={selectedTrackIndex === index && currentTrackIndex !== index && draggedIndex !== index}
-					class:border-black={selectedTrackIndex !== index && currentTrackIndex !== index && dragOverIndex !== index}
+					class:bg-blue-100={selectedTrackIndex === index &&
+						currentTrackIndex !== index &&
+						draggedIndex !== index}
+					class:border-blue-600={selectedTrackIndex === index &&
+						currentTrackIndex !== index &&
+						draggedIndex !== index}
+					class:border-black={selectedTrackIndex !== index &&
+						currentTrackIndex !== index &&
+						dragOverIndex !== index}
 					class:border-4={currentTrackIndex === index && draggedIndex !== index}
 					class:border-2={currentTrackIndex !== index || draggedIndex === index}
 					class:opacity-50={draggedIndex === index}
-					class:bg-blue-50={dragOverIndex === index && draggedIndex !== index && selectedTrackIndex !== index && currentTrackIndex !== index}
+					class:bg-blue-50={dragOverIndex === index &&
+						draggedIndex !== index &&
+						selectedTrackIndex !== index &&
+						currentTrackIndex !== index}
 					class:border-blue-500={dragOverIndex === index && draggedIndex !== index}
 					class:border-dashed={dragOverIndex === index && draggedIndex !== index}
 				>
@@ -423,9 +374,12 @@
 
 					<!-- Track Info -->
 					<div class="flex-grow min-w-0">
-						<div class="marquee-container" class:marquee-active={selectedTrackIndex === index && overflowingTitles.has(index)}>
-							<h3 
-								class="marquee-content track-title font-bold text-sm sm:text-lg" 
+						<div
+							class="marquee-container"
+							class:marquee-active={selectedTrackIndex === index && overflowingTitles.has(index)}
+						>
+							<h3
+								class="marquee-content track-title font-bold text-sm sm:text-lg"
 								data-text={track.name}
 								use:checkTitleOverflow={index}
 							>
@@ -500,3 +454,67 @@
 
 <!-- Spotify Web Player -->
 <SpotifyWebPlayer {tracks} {currentTrackIndex} onTrackChange={handleTrackChange} />
+
+<style>
+	@keyframes marquee {
+		0% {
+			transform: translateX(0%);
+		}
+		100% {
+			transform: translateX(-50%);
+		}
+	}
+
+	.marquee-container {
+		overflow: hidden;
+		position: relative;
+		width: 100%;
+	}
+
+	.marquee-content {
+		display: inline-block;
+		white-space: nowrap;
+		/* No animation by default */
+	}
+
+	/* Only animate when track is selected */
+	.marquee-active .marquee-content {
+		animation: marquee 15s linear infinite;
+		padding-right: 2rem;
+	}
+
+	.marquee-active .marquee-content::after {
+		content: attr(data-text);
+		padding-left: 2rem;
+	}
+
+	.marquee-container:hover .marquee-content {
+		animation-play-state: paused;
+	}
+
+	/* When not animating, show truncate behavior */
+	.marquee-content:not(.marquee-active .marquee-content) {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* Mobile font sizes - override Tailwind on mobile */
+	@media (max-width: 768px) {
+		.playlist-title {
+			font-size: 2.25rem; /* 18px */
+		}
+
+		.track-title {
+			font-size: 1.125rem; /* 14px */
+		}
+
+		.track-artist {
+			font-size: 0.75rem; /* 12px */
+		}
+
+		.track-count {
+			font-size: 0.875rem; /* 14px */
+		}
+	}
+</style>
