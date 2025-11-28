@@ -47,6 +47,12 @@
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData('text/plain', index.toString());
+			// Create a custom drag image from the entire track row
+			const target = event.target as HTMLElement;
+			const trackRow = target.closest('[role="listitem"]') as HTMLElement;
+			if (trackRow) {
+				event.dataTransfer.setDragImage(trackRow, 0, 0);
+			}
 		}
 	}
 
@@ -195,12 +201,9 @@
 
 				<div
 					role="listitem"
-					draggable={isEditable && !!onReorderTracks}
-					ondragstart={(e) => handleDragStart(e, index)}
 					ondragover={(e) => handleDragOver(e, index)}
 					ondragleave={handleDragLeave}
 					ondrop={(e) => handleDrop(e, index)}
-					ondragend={handleDragEnd}
 					ondblclick={() => handlePlayTrack(index)}
 					ontouchstart={(e) => handleTouchStart(e, index)}
 					ontouchmove={handleTouchMove}
@@ -215,12 +218,14 @@
 					class:bg-blue-50={dragOverIndex === index && draggedIndex !== index}
 					class:border-blue-500={dragOverIndex === index && draggedIndex !== index}
 					class:border-dashed={dragOverIndex === index && draggedIndex !== index}
-					class:cursor-move={isEditable && !!onReorderTracks}
 				>
 					<!-- Drag Handle (only show if reordering is enabled) -->
 					{#if isEditable && onReorderTracks}
 						<div
-							class="hidden sm:block flex-shrink-0 cursor-move text-gray-400 hover:text-gray-600"
+							draggable="true"
+							ondragstart={(e) => handleDragStart(e, index)}
+							ondragend={handleDragEnd}
+							class="hidden sm:block flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
 							title="Drag to reorder"
 						>
 							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
