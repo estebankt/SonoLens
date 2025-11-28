@@ -23,4 +23,22 @@ test.describe('Protected Routes', () => {
 		// Should verify we are on home page
 		await expect(page.getByRole('heading', { name: 'SonoLens' })).toBeVisible();
 	});
+
+	test('should redirect user with invalid token from /create to home', async ({ context, page }) => {
+		const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173';
+		
+		// Set invalid cookies
+		await context.addCookies([
+			{
+				name: 'spotify_access_token',
+				value: 'invalid-token',
+				url: baseURL,
+				httpOnly: true
+			}
+		]);
+
+		await page.goto('/create');
+		// Expect redirect to home, possibly with error param
+		await expect(page).toHaveURL(/\/\?error=session_expired/);
+	});
 });
