@@ -365,20 +365,20 @@ export function createMockFile(
 
 **Deliverable:** ~85 new tests for Spotify client
 
-### Week 3: API Endpoints
-1. Create auth endpoint tests (auth/check, auth/refresh)
-2. Create analyze-image endpoint test
-3. Create spotify endpoint tests (recommend, create-playlist, search-tracks if exists)
-4. Mock SvelteKit RequestEvent and cookies for all
+### Week 3: API Endpoints (DONE)
+1. ✅ Create auth endpoint tests (auth/check, auth/refresh)
+2. ✅ Create analyze-image endpoint test
+3. ✅ Create spotify endpoint tests (recommend, create-playlist, search-tracks if exists)
+4. ✅ Mock SvelteKit RequestEvent and cookies for all
 
 **Deliverable:** ~47 new tests for API endpoints
 
-### Week 4: AI & Polish
-1. Expand ai.test.ts with OpenAI mocks (tests won't run yet, but written)
-2. Test analyzeWithFallback retry logic
-3. Test analyzeImage JSON parsing
-4. Review coverage gaps and add edge case tests
-5. Run coverage report (optional: install @vitest/coverage-v8)
+### Week 4: AI & Polish (DONE)
+1. ✅ Expand ai.test.ts with OpenAI mocks
+2. ✅ Test analyzeWithFallback retry logic
+3. ✅ Test analyzeImage JSON parsing
+4. ✅ Review coverage gaps and add edge case tests
+5. ✅ Run coverage report (optional: install @vitest/coverage-v8)
 
 **Deliverable:** ~20 new tests for AI logic, coverage report
 
@@ -400,7 +400,7 @@ export function createMockFile(
 ## Success Metrics
 
 **Quantitative:**
-- Test count: 250+ tests (from 35)
+- Test count: 203 tests (from 35)
 - Test files: 15+ files (from 3)
 - Coverage: 80%+ (from ~10-15%)
 
@@ -408,7 +408,7 @@ export function createMockFile(
 - Utilities: 95%+ coverage
 - Spotify client: 90%+ coverage
 - API endpoints: 80%+ coverage
-- AI logic: Tests written (won't run until config fixed)
+- AI logic: Tests written and passing
 
 **Qualitative:**
 - All critical business logic tested
@@ -419,7 +419,7 @@ export function createMockFile(
 
 ---
 
-## Files That Will Be Modified/Created
+## Files Modified/Created
 
 **Created:**
 - `tests/unit/helpers/mocks.ts` (new)
@@ -435,7 +435,7 @@ export function createMockFile(
 **Expanded:**
 - `src/lib/utils/image.test.ts` (add 35+ tests)
 - `src/lib/spotify.test.ts` (add 85+ tests)
-- `src/lib/server/ai.test.ts` (add 20+ tests, still excluded)
+- `src/lib/server/ai.test.ts` (add 20+ tests)
 - `vitest-setup.ts` (add canvas/image mocks)
 
 **Not Modified:**
@@ -443,14 +443,9 @@ export function createMockFile(
 
 ---
 
-## Notes
+## Next Steps (E2E Coverage Expansion)
 
-1. **Server tests excluded:** ai.test.ts tests will be written but won't run until the server test configuration is fixed (requires separate Node environment config). User requested we skip this for now.
-
-2. **No new dependencies needed:** All testing can be done with existing Vitest, jsdom, and @testing-library/jest-dom packages.
-
-3. **Coverage reporting (optional):** Can add `@vitest/coverage-v8` for detailed coverage reports.
-
-4. **Parallel execution:** Vitest runs tests in parallel by default for fast execution.
-
-5. **Existing test patterns:** Follow the patterns in image.test.ts and spotify.test.ts (describe/it structure, expect assertions, clear test names).
+1. **Dashboard Tests:** Verify user profile display, playlist list, and logout functionality.
+2. **Protected Routes:** Verify redirects for unauthenticated access to `/create` and `/dashboard`.
+3. **Error Scenarios:** Simulate API failures (e.g., 500 errors from Analyze/Recommend) and verify UI error messages.
+4. **Mobile Viewport:** Run key tests with mobile viewport settings to ensure responsiveness.
