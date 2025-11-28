@@ -3,6 +3,7 @@
 	import type { SpotifyTrack } from '$lib/types/phase2';
 	import SpotifyWebPlayer from './SpotifyWebPlayer.svelte';
 	import AddTrackModal from './AddTrackModal.svelte';
+	import { makeScroller } from '$lib/utils/scroller';
 
 	interface Props {
 		title: string;
@@ -30,6 +31,10 @@
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
 	let showAddTrackModal = $state(false);
+
+	// Auto-scroll state
+	let trackListContainer = $state<HTMLElement | null>(null);
+	let scroller = $state(makeScroller());
 
 	function handleTrackChange(newIndex: number) {
 		currentTrackIndex = newIndex;
@@ -64,6 +69,12 @@
 			event.dataTransfer.dropEffect = 'move';
 		}
 		dragOverIndex = index;
+
+		// Trigger auto-scroll if dragging near container edges
+		if (trackListContainer && scroller) {
+			const pointer = { x: event.clientX, y: event.clientY };
+			scroller.scrollIfNeeded(pointer, trackListContainer);
+		}
 	}
 
 	function handleDragLeave() {
@@ -73,6 +84,11 @@
 	function handleDragEnd() {
 		draggedIndex = null;
 		dragOverIndex = null;
+
+		// Stop auto-scrolling
+		if (scroller) {
+			scroller.resetScrolling();
+		}
 	}
 
 	function handleDrop(event: DragEvent, dropIndex: number) {
@@ -95,6 +111,11 @@
 			}
 
 			onReorderTracks(newTracks);
+		}
+
+		// Stop auto-scrolling
+		if (scroller) {
+			scroller.resetScrolling();
 		}
 
 		draggedIndex = null;
@@ -181,9 +202,15 @@
 		{/if}
 	</div>
 
-	<!-- Track List -->
-	<div class="space-y-2 mb-6" role="list">
-		{#each tracks as track, index (index)}
+	<!-- Track List - Scrollable Container -->
+	<div
+		bind:this={trackListContainer}
+		class="max-h-[60vh] sm:max-h-[70vh] overflow-y-auto mb-6"
+		role="region"
+		aria-label="Playlist tracks"
+	>
+		<div class="space-y-2" role="list">
+			{#each tracks as track, index (index)}
 			<div class="relative overflow-hidden" transition:fly={{ y: -20, duration: 300 }}>
 				<!-- Red Background for Swipe Delete -->
 				{#if isEditable && onRemoveTrack}
@@ -222,11 +249,14 @@
 					<!-- Drag Handle (only show if reordering is enabled) -->
 					{#if isEditable && onReorderTracks}
 						<div
+							role="button"
+							tabindex="0"
 							draggable="true"
 							ondragstart={(e) => handleDragStart(e, index)}
 							ondragend={handleDragEnd}
 							class="hidden sm:block flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
 							title="Drag to reorder"
+							aria-label="Drag to reorder track"
 						>
 							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
 								<path
@@ -312,7 +342,8 @@
 					</div>
 				</div>
 			</div>
-		{/each}
+			{/each}
+		</div>
 	</div>
 
 	<!-- Save Button -->
