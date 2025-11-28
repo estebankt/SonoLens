@@ -19,7 +19,7 @@ import {
 	createPlaylist,
 	addTracksToPlaylist,
 	uploadPlaylistCover
-} from './spotify';
+} from '../../../src/lib/spotify';
 import {
 	mockTokenResponse,
 	mockUserProfile,
@@ -32,7 +32,7 @@ import {
 	mockPlaylist,
 	mockGenreSeedsResponse,
 	mockSpotifyTrack
-} from '../../tests/unit/helpers/fixtures';
+} from '../helpers/fixtures';
 
 // Mock global fetch
 const fetchMock = vi.fn();
