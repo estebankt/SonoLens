@@ -180,8 +180,8 @@
 	<!-- Playlist Header -->
 	<div class="mb-6 flex items-start justify-between gap-4">
 		<div class="flex-1">
-			<h2 class="text-2xl sm:text-4xl font-bold mb-2">{title}</h2>
-			<p class="text-base sm:text-lg text-gray-600">
+			<h2 class="text-xl sm:text-4xl font-bold mb-2">{title}</h2>
+			<p class="text-sm sm:text-lg text-gray-600">
 				{tracks.length}
 				{tracks.length === 1 ? 'track' : 'tracks'} • {calculateTotalDuration(tracks)}
 			</p>
@@ -298,8 +298,8 @@
 
 					<!-- Track Info -->
 					<div class="flex-grow min-w-0">
-						<h3 class="font-bold text-base sm:text-lg truncate">{track.name}</h3>
-						<p class="text-sm sm:text-base text-gray-600 truncate">
+						<h3 class="font-bold text-sm sm:text-lg truncate">{track.name}</h3>
+						<p class="text-xs sm:text-base text-gray-600 truncate">
 							{track.artists.map((a) => a.name).join(', ')}
 						</p>
 					</div>
