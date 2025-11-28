@@ -32,9 +32,35 @@
 	let dragOverIndex = $state<number | null>(null);
 	let showAddTrackModal = $state(false);
 	let selectedTrackIndex = $state<number | null>(null);
+	let overflowingTitles = $state<Set<number>>(new Set());
 
 	// Auto-scroll state
 	let scroller = $state(makeScroller());
+
+	function checkTitleOverflow(node: HTMLElement, index: number) {
+		const check = () => {
+			const hasOverflow = node.scrollWidth > node.clientWidth;
+			if (hasOverflow) {
+				overflowingTitles.add(index);
+			} else {
+				overflowingTitles.delete(index);
+			}
+			overflowingTitles = overflowingTitles;
+		};
+		
+		// Check on mount
+		check();
+		
+		// Re-check on resize
+		const resizeObserver = new ResizeObserver(check);
+		resizeObserver.observe(node);
+		
+		return {
+			destroy() {
+				resizeObserver.disconnect();
+			}
+		};
+	}
 
 	function handleTrackChange(newIndex: number) {
 		currentTrackIndex = newIndex;
@@ -69,11 +95,14 @@
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData('text/plain', index.toString());
-			// Create a custom drag image from the entire track row
+			
+			// Get the track row element
 			const target = event.target as HTMLElement;
-			const trackRow = target.closest('[role="listitem"]') as HTMLElement;
+			const trackRow = target.closest('[role="button"]') as HTMLElement;
+			
 			if (trackRow) {
-				event.dataTransfer.setDragImage(trackRow, 0, 0);
+				// Use the track row directly as the drag image
+				event.dataTransfer.setDragImage(trackRow, 10, 10);
 			}
 		}
 	}
@@ -246,11 +275,11 @@
 	/* Mobile font sizes - override Tailwind on mobile */
 	@media (max-width: 768px) {
 		.playlist-title {
-			font-size: 1.125rem; /* 18px */
+			font-size: 2.25rem; /* 18px */
 		}
 
 		.track-title {
-			font-size: 0.875rem; /* 14px */
+			font-size: 1.125rem; /* 14px */
 		}
 
 		.track-artist {
@@ -394,8 +423,12 @@
 
 					<!-- Track Info -->
 					<div class="flex-grow min-w-0">
-						<div class="marquee-container" class:marquee-active={selectedTrackIndex === index}>
-							<h3 class="marquee-content track-title font-bold text-sm sm:text-lg" data-text={track.name}>
+						<div class="marquee-container" class:marquee-active={selectedTrackIndex === index && overflowingTitles.has(index)}>
+							<h3 
+								class="marquee-content track-title font-bold text-sm sm:text-lg" 
+								data-text={track.name}
+								use:checkTitleOverflow={index}
+							>
 								{track.name}
 							</h3>
 						</div>
