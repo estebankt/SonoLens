@@ -336,11 +336,9 @@
 								{track.name}
 							</h3>
 						</div>
-						<div class="marquee-container">
-							<p class="marquee-content text-xs sm:text-base text-gray-600" data-text={track.artists.map((a) => a.name).join(', ')}>
-								{track.artists.map((a) => a.name).join(', ')}
-							</p>
-						</div>
+						<p class="text-xs sm:text-base text-gray-600 truncate">
+							{track.artists.map((a) => a.name).join(', ')}
+						</p>
 					</div>
 
 					<!-- Duration -->
