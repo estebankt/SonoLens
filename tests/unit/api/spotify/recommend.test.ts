@@ -186,10 +186,10 @@ describe('API: /api/spotify/recommend', () => {
 			const mockRequest = createMockRequestWithBody(
 				'http://localhost:5173/api/spotify/recommend',
 				'POST',
-				{ 
-					mood_analysis: { 
-						...mockMoodAnalysis, 
-						seed_tracks: Array(50).fill('Track') 
+				{
+					mood_analysis: {
+						...mockMoodAnalysis,
+						seed_tracks: Array(50).fill('Track')
 					},
 					limit: 5
 				}
