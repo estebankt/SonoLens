@@ -14,7 +14,9 @@ export default [
 			'build/**',
 			'.vercel/**',
 			'node_modules/**',
-			'vite.config.ts.timestamp-*'
+			'vite.config.ts.timestamp-*',
+			'playwright-report/**',
+			'test-results/**'
 		]
 	},
 
