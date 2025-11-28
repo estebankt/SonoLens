@@ -218,17 +218,29 @@
 	.marquee-content {
 		display: inline-block;
 		white-space: nowrap;
+		/* No animation by default */
+	}
+
+	/* Only animate when track is selected */
+	.marquee-active .marquee-content {
 		animation: marquee 15s linear infinite;
 		padding-right: 2rem;
 	}
 
-	.marquee-content::after {
+	.marquee-active .marquee-content::after {
 		content: attr(data-text);
 		padding-left: 2rem;
 	}
 
 	.marquee-container:hover .marquee-content {
 		animation-play-state: paused;
+	}
+
+	/* When not animating, show truncate behavior */
+	.marquee-content:not(.marquee-active .marquee-content) {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	/* Mobile font sizes - override Tailwind on mobile */
@@ -382,7 +394,7 @@
 
 					<!-- Track Info -->
 					<div class="flex-grow min-w-0">
-						<div class="marquee-container">
+						<div class="marquee-container" class:marquee-active={selectedTrackIndex === index}>
 							<h3 class="marquee-content track-title font-bold text-sm sm:text-lg" data-text={track.name}>
 								{track.name}
 							</h3>
