@@ -95,14 +95,11 @@
 		if (event.dataTransfer) {
 			event.dataTransfer.effectAllowed = 'move';
 			event.dataTransfer.setData('text/plain', index.toString());
-
-			// Get the track row element
+			// Create a custom drag image from the entire track row
 			const target = event.target as HTMLElement;
-			const trackRow = target.closest('[role="button"]') as HTMLElement;
-
+			const trackRow = target.closest('[role="listitem"]') as HTMLElement;
 			if (trackRow) {
-				// Use the track row directly as the drag image
-				event.dataTransfer.setDragImage(trackRow, 10, 10);
+				event.dataTransfer.setDragImage(trackRow, 0, 0);
 			}
 		}
 	}
@@ -270,10 +267,7 @@
 				{/if}
 
 				<div
-					role="button"
-					tabindex="0"
-					onclick={() => handleTrackClick(index)}
-					onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTrackClick(index)}
+					role="listitem"
 					ondragover={(e) => handleDragOver(e, index)}
 					ondragleave={handleDragLeave}
 					ondrop={(e) => handleDrop(e, index)}
@@ -316,8 +310,6 @@
 					<!-- Drag Handle (only show if reordering is enabled) -->
 					{#if isEditable && onReorderTracks}
 						<div
-							role="button"
-							tabindex="0"
 							draggable="true"
 							ondragstart={(e) => handleDragStart(e, index)}
 							ondragend={handleDragEnd}
