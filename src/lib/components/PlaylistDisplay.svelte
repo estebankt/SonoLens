@@ -286,16 +286,19 @@
 					ontouchmove={handleTouchMove}
 					ontouchend={handleTouchEnd}
 					style="transform: translateX({swipedTrackIndex === index ? currentSwipeOffset : 0}px)"
-					class="relative flex items-center gap-6 p-4 bg-white border-2 border-black transition-colors touch-pan-y cursor-pointer"
+					class="relative flex items-center gap-6 p-4 border-2 transition-colors touch-pan-y cursor-pointer"
 					aria-label={`${selectedTrackIndex === index ? 'Selected' : 'Select'} track: ${track.name} by ${track.artists.map((a) => a.name).join(', ')}`}
-					class:hover:bg-gray-50={draggedIndex === null && selectedTrackIndex !== index && currentTrackIndex !== index}
+					class:bg-white={draggedIndex !== index && selectedTrackIndex !== index && currentTrackIndex !== index && dragOverIndex !== index}
+					class:hover:bg-gray-50={draggedIndex === null && selectedTrackIndex !== index && currentTrackIndex !== index && dragOverIndex !== index}
 					class:bg-yellow-100={currentTrackIndex === index && draggedIndex !== index}
 					class:border-yellow-600={currentTrackIndex === index && draggedIndex !== index}
-					class:border-4={currentTrackIndex === index && draggedIndex !== index}
 					class:bg-blue-100={selectedTrackIndex === index && currentTrackIndex !== index && draggedIndex !== index}
 					class:border-blue-600={selectedTrackIndex === index && currentTrackIndex !== index && draggedIndex !== index}
+					class:border-black={selectedTrackIndex !== index && currentTrackIndex !== index && dragOverIndex !== index}
+					class:border-4={currentTrackIndex === index && draggedIndex !== index}
+					class:border-2={currentTrackIndex !== index || draggedIndex === index}
 					class:opacity-50={draggedIndex === index}
-					class:bg-blue-50={dragOverIndex === index && draggedIndex !== index && selectedTrackIndex !== index}
+					class:bg-blue-50={dragOverIndex === index && draggedIndex !== index && selectedTrackIndex !== index && currentTrackIndex !== index}
 					class:border-blue-500={dragOverIndex === index && draggedIndex !== index}
 					class:border-dashed={dragOverIndex === index && draggedIndex !== index}
 				>
