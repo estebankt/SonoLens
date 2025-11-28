@@ -174,8 +174,6 @@ export const MOCK_TRACKS: SpotifyTrack[] = [
 		},
 		popularity: 85
 	}
-	// Note: For testing purposes, 5 tracks is sufficient
-	// In a real scenario, this would be expanded to 20 tracks
 ];
 
 /**
@@ -209,4 +207,58 @@ export const MOCK_SAVED_PLAYLIST = {
 	},
 	uri: 'spotify:playlist:test-playlist-id',
 	snapshot_id: 'test-snapshot-id'
+};
+
+/**
+ * Mock top artists response
+ */
+export const MOCK_TOP_ARTISTS = {
+	items: [
+		{
+			id: '4LEiUm1SRbFMgfqnQTwUbQ',
+			name: 'Bon Iver',
+			external_urls: { spotify: 'https://open.spotify.com/artist/4LEiUm1SRbFMgfqnQTwUbQ' },
+			images: [{ url: 'https://i.scdn.co/image/mock-artist-image', height: 640, width: 640 }],
+			genres: ['indie folk', 'chamber pop']
+		}
+	]
+};
+
+/**
+ * Mock top tracks response
+ */
+export const MOCK_TOP_TRACKS = {
+	items: [
+		{
+			id: '4AyQ5GVjobMjZfir4RX1BO',
+			name: 'Holocene',
+			artists: [{ name: 'Bon Iver' }],
+			album: {
+				name: 'Bon Iver',
+				images: [{ url: 'https://i.scdn.co/image/mock-track-image', height: 640, width: 640 }]
+			},
+			external_urls: { spotify: 'https://open.spotify.com/track/4AyQ5GVjobMjZfir4RX1BO' }
+		}
+	]
+};
+
+/**
+ * Mock recently played response
+ */
+export const MOCK_RECENTLY_PLAYED = {
+	items: [
+		{
+			track: {
+				id: '3JOVTQ5h8HGFnNdh',
+				name: 'Mad World',
+				artists: [{ name: 'Gary Jules' }],
+				album: {
+					name: 'Trading Snakeoil',
+					images: [{ url: 'https://i.scdn.co/image/mock-recent-image', height: 640, width: 640 }]
+				},
+				external_urls: { spotify: 'https://open.spotify.com/track/3JOVTQ5h8HGFnNdh' }
+			},
+			played_at: '2025-01-01T12:00:00Z'
+		}
+	]
 };

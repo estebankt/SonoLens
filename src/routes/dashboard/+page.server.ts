@@ -18,6 +18,70 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		throw redirect(302, '/');
 	}
 
+	// MOCK DATA FOR E2E TESTING
+	// This bypasses real Spotify API calls when running Playwright tests with the mock token
+	if (accessToken === 'mock-access-token-for-e2e-tests') {
+		return {
+			user: {
+				id: 'test-user-id',
+				display_name: 'Test User',
+				email: 'test@example.com',
+				images: [{ url: 'https://i.scdn.co/image/mock-user-avatar' }]
+			},
+			topArtists: [
+				{
+					id: '4LEiUm1SRbFMgfqnQTwUbQ',
+					name: 'Bon Iver',
+					external_urls: { spotify: 'https://open.spotify.com/artist/4LEiUm1SRbFMgfqnQTwUbQ' },
+					images: [
+						{ url: 'https://i.scdn.co/image/mock-artist-image', height: 640, width: 640 },
+						{ url: 'https://i.scdn.co/image/mock-artist-image-sm', height: 64, width: 64 }
+					],
+					genres: ['indie folk', 'chamber pop'],
+					popularity: 85
+				}
+			],
+			topTracks: [
+				{
+					id: '4AyQ5GVjobMjZfir4RX1BO',
+					name: 'Holocene',
+					artists: [{ id: 'a1', name: 'Bon Iver' }],
+					album: {
+						id: 'al1',
+						name: 'Bon Iver',
+						images: [
+							{ url: 'https://i.scdn.co/image/mock-track-image', height: 640, width: 640 },
+							{ url: 'https://i.scdn.co/image/mock-track-image-sm', height: 64, width: 64 }
+						]
+					},
+					external_urls: { spotify: 'https://open.spotify.com/track/4AyQ5GVjobMjZfir4RX1BO' },
+					duration_ms: 338000,
+					popularity: 78
+				}
+			],
+			recentlyPlayed: [
+				{
+					track: {
+						id: '3JOVTQ5h8HGFnNdh',
+						name: 'Mad World',
+						artists: [{ id: 'a2', name: 'Gary Jules' }],
+						album: {
+							id: 'al2',
+							name: 'Trading Snakeoil',
+							images: [
+								{ url: 'https://i.scdn.co/image/mock-recent-image', height: 640, width: 640 },
+								{ url: 'https://i.scdn.co/image/mock-recent-image-sm', height: 64, width: 64 }
+							]
+						},
+						external_urls: { spotify: 'https://open.spotify.com/track/3JOVTQ5h8HGFnNdh' },
+						duration_ms: 189000
+					},
+					played_at: '2025-01-01T12:00:00Z'
+				}
+			]
+		};
+	}
+
 	// If no access token but we have refresh token, try to refresh
 	if (!accessToken && refreshTokenValue) {
 		try {

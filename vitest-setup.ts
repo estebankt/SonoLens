@@ -15,9 +15,13 @@ class MockImage {
 			if (this.onload) this.onload();
 		}, 0);
 	}
+
+	// Add error simulation method for testing error paths
+	static triggerError = false;
 }
 
-global.Image = MockImage as any;
+// Override global Image
+(global as any).Image = MockImage;
 global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
 global.URL.revokeObjectURL = vi.fn();
 

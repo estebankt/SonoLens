@@ -1,22 +1,134 @@
-import { describe, it, expect } from 'vitest';
-import { validateMoodAnalysis } from './ai';
-import type { MoodAnalysis } from '../types/phase2';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { validateMoodAnalysis, analyzeImage } from './ai';
+import { mockMoodAnalysis } from '../../../tests/unit/helpers/fixtures';
+
+// Mock OpenAI
+const mockCreate = vi.fn();
+vi.mock('openai', () => {
+	return {
+		default: vi.fn().mockImplementation(() => ({
+			chat: {
+				completions: {
+					create: mockCreate
+				}
+			}
+		}))
+	};
+});
+
+// Mock environment variables
+vi.mock('$env/static/private', () => ({
+	OPENAI_API_KEY: 'test-api-key'
+}));
+
+vi.mock('$env/dynamic/private', () => ({
+	env: { OPENAI_MODEL: 'gpt-4o' }
+}));
 
 describe('AI Analysis Utilities', () => {
+	beforeEach(() => {
+		vi.clearAllMocks();
+		// Suppress console output
+		vi.spyOn(console, 'log').mockImplementation(() => {});
+		vi.spyOn(console, 'warn').mockImplementation(() => {});
+		vi.spyOn(console, 'error').mockImplementation(() => {});
+	});
+
+	describe('analyzeImage', () => {
+		it('should successfully analyze image and return parsed data', async () => {
+			mockCreate.mockResolvedValueOnce({
+				choices: [
+					{
+						message: { content: JSON.stringify(mockMoodAnalysis) },
+						finish_reason: 'stop'
+					}
+				]
+			});
+
+			const result = await analyzeImage('base64-data', 'image/jpeg');
+
+			expect(result).toEqual(mockMoodAnalysis);
+			expect(mockCreate).toHaveBeenCalledWith(
+				expect.objectContaining({
+					model: 'gpt-4o',
+					response_format: { type: 'json_object' }
+				})
+			);
+		});
+
+		it('should handle content filter errors', async () => {
+			mockCreate.mockResolvedValueOnce({
+				choices: [
+					{
+						message: { content: null },
+						finish_reason: 'content_filter'
+					}
+				]
+			});
+			// Second attempt fails too (since we can't change model response easily in loop for same mock)
+			// Actually, the code tries multiple models.
+			// If we want to test fallback, we need mockCreate to return sequence of responses.
+
+			// To simulate complete failure:
+			mockCreate.mockRejectedValue(new Error('Content policy violation'));
+
+			await expect(analyzeImage('base64-data', 'image/jpeg')).rejects.toThrow(
+				'Failed to analyze image'
+			);
+		});
+
+		it('should retry with different models on failure', async () => {
+			// First call fails
+			mockCreate.mockRejectedValueOnce(new Error('Model overloaded'));
+			// Second call succeeds
+			mockCreate.mockResolvedValueOnce({
+				choices: [
+					{
+						message: { content: JSON.stringify(mockMoodAnalysis) },
+						finish_reason: 'stop'
+					}
+				]
+			});
+
+			const result = await analyzeImage('base64-data', 'image/jpeg');
+
+			expect(result).toEqual(mockMoodAnalysis);
+			expect(mockCreate).toHaveBeenCalledTimes(2);
+		});
+
+		it('should throw error if response is not valid JSON', async () => {
+			mockCreate.mockResolvedValue({
+				choices: [
+					{
+						message: { content: 'Not JSON' },
+						finish_reason: 'stop'
+					}
+				]
+			});
+
+			await expect(analyzeImage('base64-data', 'image/jpeg')).rejects.toThrow();
+		});
+
+		it('should throw error if required fields are missing', async () => {
+			const incompleteData = { mood_tags: [] }; // Missing energy_level etc.
+			mockCreate.mockResolvedValue({
+				choices: [
+					{
+						message: { content: JSON.stringify(incompleteData) },
+						finish_reason: 'stop'
+					}
+				]
+			});
+
+			await expect(analyzeImage('base64-data', 'image/jpeg')).rejects.toThrow(
+				'missing required fields'
+			);
+		});
+	});
+
 	describe('validateMoodAnalysis', () => {
 		it('should validate a complete valid mood analysis', () => {
-			const validAnalysis: MoodAnalysis = {
-				mood_tags: ['calm', 'peaceful', 'serene'],
-				energy_level: 'low',
-				emotional_descriptors: ['relaxed', 'content', 'tranquil'],
-				atmosphere: 'A peaceful beach scene at sunset',
-				recommended_genres: ['ambient', 'chillout', 'downtempo'],
-				seed_tracks: ['Breathe - Pink Floyd', 'Weightless - Marconi Union'],
-				suggested_playlist_title: 'Coastal Serenity',
-				confidence_score: 0.85
-			};
-
-			expect(validateMoodAnalysis(validAnalysis)).toBe(true);
+			expect(validateMoodAnalysis(mockMoodAnalysis)).toBe(true);
 		});
 
 		it('should reject analysis with missing mood_tags', () => {
