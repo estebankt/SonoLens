@@ -31,6 +31,7 @@
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
 	let showAddTrackModal = $state(false);
+	let selectedTrackIndex = $state<number | null>(null);
 
 	// Auto-scroll state
 	let scroller = $state(makeScroller());
@@ -41,6 +42,23 @@
 
 	function handlePlayTrack(index: number) {
 		currentTrackIndex = index;
+	}
+
+	function handleTrackClick(index: number) {
+		// Don't trigger click if user was swiping
+		if (isSwipeGesture) {
+			isSwipeGesture = false;
+			return;
+		}
+
+		// First click/tap: select the track
+		if (selectedTrackIndex !== index) {
+			selectedTrackIndex = index;
+		} else {
+			// Second click/tap on same track: play it
+			handlePlayTrack(index);
+			selectedTrackIndex = null; // Clear selection after playing
+		}
 	}
 
 	// Drag and Drop handlers
@@ -124,12 +142,14 @@
 	let swipedTrackIndex = $state<number | null>(null);
 	let swipeStartX = $state<number | null>(null);
 	let currentSwipeOffset = $state(0);
+	let isSwipeGesture = $state(false);
 
 	function handleTouchStart(event: TouchEvent, index: number) {
 		if (!isEditable || !onRemoveTrack) return;
 		swipeStartX = event.touches[0].clientX;
 		swipedTrackIndex = index;
 		currentSwipeOffset = 0;
+		isSwipeGesture = false;
 	}
 
 	function handleTouchMove(event: TouchEvent) {
@@ -140,6 +160,9 @@
 
 		// Only allow swiping left (negative diff)
 		if (diff < 0) {
+			if (Math.abs(diff) > 10) {
+				isSwipeGesture = true; // Mark as swipe if moved more than 10px
+			}
 			currentSwipeOffset = Math.max(diff, -100); // Limit swipe to -100px
 		}
 	}
@@ -251,7 +274,10 @@
 				{/if}
 
 				<div
-					role="listitem"
+					role="button"
+					tabindex="0"
+					onclick={() => handleTrackClick(index)}
+					onkeydown={(e) => (e.key === 'Enter' || e.key === ' ') && handleTrackClick(index)}
 					ondragover={(e) => handleDragOver(e, index)}
 					ondragleave={handleDragLeave}
 					ondrop={(e) => handleDrop(e, index)}
@@ -260,13 +286,16 @@
 					ontouchmove={handleTouchMove}
 					ontouchend={handleTouchEnd}
 					style="transform: translateX({swipedTrackIndex === index ? currentSwipeOffset : 0}px)"
-					class="relative flex items-center gap-6 p-4 bg-white border-2 border-black transition-colors touch-pan-y"
-					class:hover:bg-gray-50={draggedIndex === null}
+					class="relative flex items-center gap-6 p-4 bg-white border-2 border-black transition-colors touch-pan-y cursor-pointer"
+					aria-label={`${selectedTrackIndex === index ? 'Selected' : 'Select'} track: ${track.name} by ${track.artists.map((a) => a.name).join(', ')}`}
+					class:hover:bg-gray-50={draggedIndex === null && selectedTrackIndex !== index && currentTrackIndex !== index}
 					class:bg-yellow-100={currentTrackIndex === index && draggedIndex !== index}
 					class:border-yellow-600={currentTrackIndex === index && draggedIndex !== index}
 					class:border-4={currentTrackIndex === index && draggedIndex !== index}
+					class:bg-blue-100={selectedTrackIndex === index && currentTrackIndex !== index && draggedIndex !== index}
+					class:border-blue-600={selectedTrackIndex === index && currentTrackIndex !== index && draggedIndex !== index}
 					class:opacity-50={draggedIndex === index}
-					class:bg-blue-50={dragOverIndex === index && draggedIndex !== index}
+					class:bg-blue-50={dragOverIndex === index && draggedIndex !== index && selectedTrackIndex !== index}
 					class:border-blue-500={dragOverIndex === index && draggedIndex !== index}
 					class:border-dashed={dragOverIndex === index && draggedIndex !== index}
 				>
