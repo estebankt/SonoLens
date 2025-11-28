@@ -4,6 +4,7 @@
  */
 
 const SCROLL_ZONE_PX = 30;
+const BOTTOM_OFFSET_PX = 80; // Offset for fixed player at bottom
 
 interface Point {
 	x: number;
@@ -69,10 +70,10 @@ export function makeScroller(): Scroller {
 	): { top: number; bottom: number; left: number; right: number } | null {
 		// Handle scrolling element (window)
 		const rect =
-			el === document.scrollingElement
+			el === document.scrollingElement || el === document.documentElement
 				? {
 						top: 0,
-						bottom: window.innerHeight,
+						bottom: window.innerHeight - BOTTOM_OFFSET_PX, // Account for fixed player
 						left: 0,
 						right: window.innerWidth
 					}
