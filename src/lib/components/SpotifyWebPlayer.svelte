@@ -410,19 +410,24 @@
 		transition:fly={{ y: 1000, duration: 300, easing: cubicOut }}
 	>
 		<!-- Expanded Player Header -->
-		<div class="flex items-center justify-between p-4 border-b-4 border-black bg-black text-white">
-			<button onclick={toggleExpanded} class="p-2 hover:text-gray-300" aria-label="Collapse player">
-				<svg
-					class="w-8 h-8"
-					fill="none"
-					stroke="currentColor"
-					viewBox="0 0 24 24"
-					xmlns="http://www.w3.org/2000/svg"
-				>
-					<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"
-					></path>
-				</svg>
-			</button>
+		<div
+			class="flex items-center justify-between p-4 border-b-4 border-black bg-black text-white cursor-pointer hover:bg-gray-900 transition-colors"
+			onclick={toggleExpanded}
+			onkeydown={(e) => e.key === 'Enter' && toggleExpanded()}
+			role="button"
+			tabindex="0"
+			aria-label="Collapse player"
+		>
+			<svg
+				class="w-8 h-8"
+				fill="none"
+				stroke="currentColor"
+				viewBox="0 0 24 24"
+				xmlns="http://www.w3.org/2000/svg"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7"
+				></path>
+			</svg>
 			<span class="font-bold text-lg">Now Playing</span>
 			<div class="w-8"></div>
 			<!-- Spacer for centering -->
