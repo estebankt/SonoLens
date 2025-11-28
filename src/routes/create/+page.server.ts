@@ -1,6 +1,6 @@
 import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
-import { refreshToken } from '$lib/spotify';
+import { getUserProfile, refreshToken } from '$lib/spotify';
 import { SPOTIFY_CLIENT_ID } from '$env/static/private';
 
 export const load: PageServerLoad = async ({ cookies }) => {
@@ -38,6 +38,38 @@ export const load: PageServerLoad = async ({ cookies }) => {
 			cookies.delete('spotify_refresh_token', { path: '/' });
 			throw redirect(302, '/?error=session_expired');
 		}
+	}
+
+	// Validate token by fetching user profile
+	// This ensures the token is actually valid, not just present
+	try {
+		await getUserProfile(accessToken!);
+	} catch (err: any) {
+		console.error('Failed to validate session:', err);
+
+		// If 401 error and we have refresh token, try refreshing
+		if (err.message?.includes('401') && refreshTokenValue) {
+			try {
+				const tokens = await refreshToken(refreshTokenValue, SPOTIFY_CLIENT_ID);
+				cookies.set('spotify_access_token', tokens.access_token, {
+					httpOnly: true,
+					secure: false,
+					path: '/',
+					sameSite: 'lax',
+					maxAge: tokens.expires_in
+				});
+				// Retry validation
+				await getUserProfile(tokens.access_token);
+				return {};
+			} catch (refreshErr) {
+				console.error('Token refresh failed during validation:', refreshErr);
+			}
+		}
+
+		// Clear invalid tokens and redirect to home
+		cookies.delete('spotify_access_token', { path: '/' });
+		cookies.delete('spotify_refresh_token', { path: '/' });
+		throw redirect(302, '/?error=session_expired');
 	}
 
 	return {};

@@ -7,7 +7,7 @@ test.describe('Protected Routes', () => {
 
 		// Should redirect to home page
 		await expect(page).toHaveURL('/');
-		
+
 		// Should verify we are on home page (e.g. check for "SonoLens" title or login button)
 		await expect(page.getByRole('heading', { name: 'SonoLens' })).toBeVisible();
 		await expect(page.getByRole('link', { name: 'Login with Spotify' })).toBeVisible();
@@ -19,14 +19,17 @@ test.describe('Protected Routes', () => {
 
 		// Should redirect to home page
 		await expect(page).toHaveURL('/');
-		
+
 		// Should verify we are on home page
 		await expect(page.getByRole('heading', { name: 'SonoLens' })).toBeVisible();
 	});
 
-	test('should redirect user with invalid token from /create to home', async ({ context, page }) => {
+	test('should redirect user with invalid token from /create to home', async ({
+		context,
+		page
+	}) => {
 		const baseURL = process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173';
-		
+
 		// Set invalid cookies
 		await context.addCookies([
 			{
