@@ -3,6 +3,7 @@
 	import type { SpotifyTrack } from '$lib/types/phase2';
 	import SpotifyWebPlayer from './SpotifyWebPlayer.svelte';
 	import AddTrackModal from './AddTrackModal.svelte';
+	import { makeScroller } from '$lib/utils/scroller';
 
 	interface Props {
 		title: string;
@@ -30,6 +31,36 @@
 	let draggedIndex = $state<number | null>(null);
 	let dragOverIndex = $state<number | null>(null);
 	let showAddTrackModal = $state(false);
+	let selectedTrackIndex = $state<number | null>(null);
+	let overflowingTitles = $state<Set<number>>(new Set());
+
+	// Auto-scroll state
+	let scroller = $state(makeScroller());
+
+	function checkTitleOverflow(node: HTMLElement, index: number) {
+		const check = () => {
+			const hasOverflow = node.scrollWidth > node.clientWidth;
+			if (hasOverflow) {
+				overflowingTitles.add(index);
+			} else {
+				overflowingTitles.delete(index);
+			}
+			overflowingTitles = overflowingTitles;
+		};
+
+		// Check on mount
+		check();
+
+		// Re-check on resize
+		const resizeObserver = new ResizeObserver(check);
+		resizeObserver.observe(node);
+
+		return {
+			destroy() {
+				resizeObserver.disconnect();
+			}
+		};
+	}
 
 	function handleTrackChange(newIndex: number) {
 		currentTrackIndex = newIndex;
@@ -37,6 +68,23 @@
 
 	function handlePlayTrack(index: number) {
 		currentTrackIndex = index;
+	}
+
+	function handleTrackClick(index: number) {
+		// Don't trigger click if user was swiping
+		if (isSwipeGesture) {
+			isSwipeGesture = false;
+			return;
+		}
+
+		// First click/tap: select the track
+		if (selectedTrackIndex !== index) {
+			selectedTrackIndex = index;
+		} else {
+			// Second click/tap on same track: play it
+			handlePlayTrack(index);
+			selectedTrackIndex = null; // Clear selection after playing
+		}
 	}
 
 	// Drag and Drop handlers
@@ -64,6 +112,12 @@
 			event.dataTransfer.dropEffect = 'move';
 		}
 		dragOverIndex = index;
+
+		// Trigger auto-scroll when dragging near window edges
+		if (scroller) {
+			const pointer = { x: event.clientX, y: event.clientY };
+			scroller.scrollIfNeeded(pointer, document.documentElement);
+		}
 	}
 
 	function handleDragLeave() {
@@ -73,6 +127,11 @@
 	function handleDragEnd() {
 		draggedIndex = null;
 		dragOverIndex = null;
+
+		// Stop auto-scrolling
+		if (scroller) {
+			scroller.resetScrolling();
+		}
 	}
 
 	function handleDrop(event: DragEvent, dropIndex: number) {
@@ -97,6 +156,11 @@
 			onReorderTracks(newTracks);
 		}
 
+		// Stop auto-scrolling
+		if (scroller) {
+			scroller.resetScrolling();
+		}
+
 		draggedIndex = null;
 		dragOverIndex = null;
 	}
@@ -104,12 +168,14 @@
 	let swipedTrackIndex = $state<number | null>(null);
 	let swipeStartX = $state<number | null>(null);
 	let currentSwipeOffset = $state(0);
+	let isSwipeGesture = $state(false);
 
 	function handleTouchStart(event: TouchEvent, index: number) {
 		if (!isEditable || !onRemoveTrack) return;
 		swipeStartX = event.touches[0].clientX;
 		swipedTrackIndex = index;
 		currentSwipeOffset = 0;
+		isSwipeGesture = false;
 	}
 
 	function handleTouchMove(event: TouchEvent) {
@@ -120,8 +186,9 @@
 
 		// Only allow swiping left (negative diff)
 		if (diff < 0) {
-			// prevent scrolling while swiping
-			if (Math.abs(diff) > 10) event.preventDefault();
+			if (Math.abs(diff) > 10) {
+				isSwipeGesture = true; // Mark as swipe if moved more than 10px
+			}
 			currentSwipeOffset = Math.max(diff, -100); // Limit swipe to -100px
 		}
 	}
@@ -162,8 +229,8 @@
 	<!-- Playlist Header -->
 	<div class="mb-6 flex items-start justify-between gap-4">
 		<div class="flex-1">
-			<h2 class="text-3xl sm:text-4xl font-bold mb-2">{title}</h2>
-			<p class="text-lg text-gray-600">
+			<h2 class="playlist-title text-xl sm:text-4xl font-bold mb-2">{title}</h2>
+			<p class="track-count text-sm sm:text-lg text-gray-600">
 				{tracks.length}
 				{tracks.length === 1 ? 'track' : 'tracks'} • {calculateTotalDuration(tracks)}
 			</p>
@@ -209,13 +276,34 @@
 					ontouchmove={handleTouchMove}
 					ontouchend={handleTouchEnd}
 					style="transform: translateX({swipedTrackIndex === index ? currentSwipeOffset : 0}px)"
-					class="relative flex items-center gap-6 p-4 bg-white border-2 border-black transition-colors touch-pan-y"
-					class:hover:bg-gray-50={draggedIndex === null}
+					class="relative flex items-center gap-6 p-4 border-2 transition-colors touch-pan-y cursor-pointer"
+					aria-label={`${selectedTrackIndex === index ? 'Selected' : 'Select'} track: ${track.name} by ${track.artists.map((a) => a.name).join(', ')}`}
+					class:bg-white={draggedIndex !== index &&
+						selectedTrackIndex !== index &&
+						currentTrackIndex !== index &&
+						dragOverIndex !== index}
+					class:hover:bg-gray-50={draggedIndex === null &&
+						selectedTrackIndex !== index &&
+						currentTrackIndex !== index &&
+						dragOverIndex !== index}
 					class:bg-yellow-100={currentTrackIndex === index && draggedIndex !== index}
 					class:border-yellow-600={currentTrackIndex === index && draggedIndex !== index}
+					class:bg-blue-100={selectedTrackIndex === index &&
+						currentTrackIndex !== index &&
+						draggedIndex !== index}
+					class:border-blue-600={selectedTrackIndex === index &&
+						currentTrackIndex !== index &&
+						draggedIndex !== index}
+					class:border-black={selectedTrackIndex !== index &&
+						currentTrackIndex !== index &&
+						dragOverIndex !== index}
 					class:border-4={currentTrackIndex === index && draggedIndex !== index}
+					class:border-2={currentTrackIndex !== index || draggedIndex === index}
 					class:opacity-50={draggedIndex === index}
-					class:bg-blue-50={dragOverIndex === index && draggedIndex !== index}
+					class:bg-blue-50={dragOverIndex === index &&
+						draggedIndex !== index &&
+						selectedTrackIndex !== index &&
+						currentTrackIndex !== index}
 					class:border-blue-500={dragOverIndex === index && draggedIndex !== index}
 					class:border-dashed={dragOverIndex === index && draggedIndex !== index}
 				>
@@ -227,6 +315,7 @@
 							ondragend={handleDragEnd}
 							class="hidden sm:block flex-shrink-0 cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
 							title="Drag to reorder"
+							aria-label="Drag to reorder track"
 						>
 							<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
 								<path
@@ -277,8 +366,19 @@
 
 					<!-- Track Info -->
 					<div class="flex-grow min-w-0">
-						<h3 class="font-bold text-lg truncate">{track.name}</h3>
-						<p class="text-base text-gray-600 truncate">
+						<div
+							class="marquee-container"
+							class:marquee-active={selectedTrackIndex === index && overflowingTitles.has(index)}
+						>
+							<h3
+								class="marquee-content track-title font-bold text-sm sm:text-lg"
+								data-text={track.name}
+								use:checkTitleOverflow={index}
+							>
+								{track.name}
+							</h3>
+						</div>
+						<p class="track-artist text-xs sm:text-base text-gray-600 truncate">
 							{track.artists.map((a) => a.name).join(', ')}
 						</p>
 					</div>
@@ -346,3 +446,67 @@
 
 <!-- Spotify Web Player -->
 <SpotifyWebPlayer {tracks} {currentTrackIndex} onTrackChange={handleTrackChange} />
+
+<style>
+	@keyframes marquee {
+		0% {
+			transform: translateX(0%);
+		}
+		100% {
+			transform: translateX(-50%);
+		}
+	}
+
+	.marquee-container {
+		overflow: hidden;
+		position: relative;
+		width: 100%;
+	}
+
+	.marquee-content {
+		display: inline-block;
+		white-space: nowrap;
+		/* No animation by default */
+	}
+
+	/* Only animate when track is selected */
+	.marquee-active .marquee-content {
+		animation: marquee 15s linear infinite;
+		padding-right: 2rem;
+	}
+
+	.marquee-active .marquee-content::after {
+		content: attr(data-text);
+		padding-left: 2rem;
+	}
+
+	.marquee-container:hover .marquee-content {
+		animation-play-state: paused;
+	}
+
+	/* When not animating, show truncate behavior */
+	.marquee-content:not(.marquee-active .marquee-content) {
+		max-width: 100%;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+
+	/* Mobile font sizes - override Tailwind on mobile */
+	@media (max-width: 768px) {
+		.playlist-title {
+			font-size: 2.25rem; /* 18px */
+		}
+
+		.track-title {
+			font-size: 1.125rem; /* 14px */
+		}
+
+		.track-artist {
+			font-size: 0.75rem; /* 12px */
+		}
+
+		.track-count {
+			font-size: 0.875rem; /* 14px */
+		}
+	}
+</style>
