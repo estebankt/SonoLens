@@ -140,8 +140,6 @@
 
 		// Only allow swiping left (negative diff)
 		if (diff < 0) {
-			// prevent scrolling while swiping
-			if (Math.abs(diff) > 10) event.preventDefault();
 			currentSwipeOffset = Math.max(diff, -100); // Limit swipe to -100px
 		}
 	}
