@@ -176,6 +176,39 @@
 	}
 </script>
 
+<style>
+	@keyframes marquee {
+		0% {
+			transform: translateX(0%);
+		}
+		100% {
+			transform: translateX(-50%);
+		}
+	}
+
+	.marquee-container {
+		overflow: hidden;
+		position: relative;
+		width: 100%;
+	}
+
+	.marquee-content {
+		display: inline-block;
+		white-space: nowrap;
+		animation: marquee 15s linear infinite;
+		padding-right: 2rem;
+	}
+
+	.marquee-content::after {
+		content: attr(data-text);
+		padding-left: 2rem;
+	}
+
+	.marquee-container:hover .marquee-content {
+		animation-play-state: paused;
+	}
+</style>
+
 <div class="neo-card mb-24">
 	<!-- Playlist Header -->
 	<div class="mb-6 flex items-start justify-between gap-4">
@@ -298,10 +331,16 @@
 
 					<!-- Track Info -->
 					<div class="flex-grow min-w-0">
-						<h3 class="font-bold text-sm sm:text-lg truncate">{track.name}</h3>
-						<p class="text-xs sm:text-base text-gray-600 truncate">
-							{track.artists.map((a) => a.name).join(', ')}
-						</p>
+						<div class="marquee-container">
+							<h3 class="marquee-content font-bold text-sm sm:text-lg" data-text={track.name}>
+								{track.name}
+							</h3>
+						</div>
+						<div class="marquee-container">
+							<p class="marquee-content text-xs sm:text-base text-gray-600" data-text={track.artists.map((a) => a.name).join(', ')}>
+								{track.artists.map((a) => a.name).join(', ')}
+							</p>
+						</div>
 					</div>
 
 					<!-- Duration -->
