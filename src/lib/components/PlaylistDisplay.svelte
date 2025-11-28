@@ -230,14 +230,33 @@
 	.marquee-container:hover .marquee-content {
 		animation-play-state: paused;
 	}
+
+	/* Mobile font sizes - override Tailwind on mobile */
+	@media (max-width: 768px) {
+		.playlist-title {
+			font-size: 1.125rem; /* 18px */
+		}
+
+		.track-title {
+			font-size: 0.875rem; /* 14px */
+		}
+
+		.track-artist {
+			font-size: 0.75rem; /* 12px */
+		}
+
+		.track-count {
+			font-size: 0.875rem; /* 14px */
+		}
+	}
 </style>
 
 <div class="neo-card mb-24">
 	<!-- Playlist Header -->
 	<div class="mb-6 flex items-start justify-between gap-4">
 		<div class="flex-1">
-			<h2 class="text-xl sm:text-4xl font-bold mb-2">{title}</h2>
-			<p class="text-sm sm:text-lg text-gray-600">
+			<h2 class="playlist-title text-xl sm:text-4xl font-bold mb-2">{title}</h2>
+			<p class="track-count text-sm sm:text-lg text-gray-600">
 				{tracks.length}
 				{tracks.length === 1 ? 'track' : 'tracks'} • {calculateTotalDuration(tracks)}
 			</p>
@@ -364,11 +383,11 @@
 					<!-- Track Info -->
 					<div class="flex-grow min-w-0">
 						<div class="marquee-container">
-							<h3 class="marquee-content font-bold text-sm sm:text-lg" data-text={track.name}>
+							<h3 class="marquee-content track-title font-bold text-sm sm:text-lg" data-text={track.name}>
 								{track.name}
 							</h3>
 						</div>
-						<p class="text-xs sm:text-base text-gray-600 truncate">
+						<p class="track-artist text-xs sm:text-base text-gray-600 truncate">
 							{track.artists.map((a) => a.name).join(', ')}
 						</p>
 					</div>
