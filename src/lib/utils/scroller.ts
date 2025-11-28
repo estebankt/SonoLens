@@ -33,7 +33,9 @@ function isPointInsideRect(
 	point: Point,
 	rect: { top: number; bottom: number; left: number; right: number }
 ): boolean {
-	return point.y <= rect.bottom && point.y >= rect.top && point.x >= rect.left && point.x <= rect.right;
+	return (
+		point.y <= rect.bottom && point.y >= rect.top && point.x >= rect.left && point.x <= rect.right
+	);
 }
 
 /**
