@@ -118,9 +118,9 @@ async function analyzeWithFallback(
  * Analyze image and extract mood/atmosphere data
  */
 export async function analyzeImage(imageBase64: string, imageType: string): Promise<MoodAnalysis> {
-	const prompt = `You are an expert music curator. Analyze this image and create a playlist of real songs that match its mood and atmosphere.
+	const prompt = `You are an expert music curator. Analyze this image deeply and generate a playlist that feels coherent, intentional, and unified — not just random songs.
 
-Your JSON format:
+Your output MUST be JSON with this exact structure:
 
 {
   "mood_tags": [...],
@@ -133,29 +133,55 @@ Your JSON format:
   "confidence_score": 0.0-1.0
 }
 
-Guidelines:
-- mood_tags: 3-6 words describing the emotional/atmospheric qualities
-- energy_level: Rate the visual energy as low, medium, or high
-- emotional_descriptors: 3-5 emotional qualities the image evokes
-- atmosphere: 1-2 sentence description of the overall vibe
-- recommended_genres: 3-6 music genres that match this mood (any genres are fine)
-- seed_tracks: Array of 8-12 REAL song names that match this mood and energy level
-  * Include artist name with track: "Song Name - Artist Name"
-  * Choose well-known songs that exist on Spotify
-  * Match the mood, energy, and atmosphere of the image
-  * Vary the artists (don't repeat the same artist too much)
-  * Examples: "Breathe - Pink Floyd", "Clair de Lune - Claude Debussy", "Nude - Radiohead"
-- suggested_playlist_title: A creative, evocative title for this playlist
-- confidence_score: Your confidence in the analysis (0.0-1.0)
+STRONG CONSTRAINTS FOR BETTER PLAYLISTS:
 
-CRITICAL: The output MUST:
-1. Be valid JSON matching the exact structure above
-2. Include ALL required fields
-3. Use only Spotify-compatible genre names
-4. Provide 8-12 diverse seed_tracks with artist names
-5. Format seed_tracks as "Track Name - Artist Name"
+**1. Cohesion Rule**
+All seed_tracks must feel like they belong to **the same playlist**.
+They should share:
+- similar mood & emotional tone
+- similar energy level
+- compatible instrumentation
+- compatible production style
+- compatible eras OR a deliberately blended aesthetic
 
-Respond ONLY with valid JSON, no additional text.`;
+The playlist must feel *curated*, not random.
+
+**2. Genre Rule**
+recommended_genres must:
+- be 3–6 genres
+- reflect a tight, unified sonic direction
+- avoid mixing unrelated genres (e.g., don’t mix metal + classical + EDM)
+
+**3. Track Selection Rules**
+seed_tracks must:
+- be 8–12 REAL, well-known songs
+- match the visual vibe closely
+- avoid huge genre jumps
+- avoid repeating artists
+- reflect the “center of gravity” of the mood
+- lean into the strongest visual theme (e.g. nostalgia, melancholy, energy, introspection)
+
+Examples of playlist cohesion:
+- “indie dream-pop + soft synth ambience”
+- “lofi beats + mellow jazz-hop”
+- “cinematic orchestral minimalism”
+- “dark synthwave + retro electronics”
+
+**4. Mood Extraction Logic**
+The playlist must be based on:
+- lighting (warm, cold, neon, natural)
+- colors (dark, pastel, saturated)
+- composition (busy, empty, balanced)
+- subject emotion
+- setting (urban, nature, night, rain, cozy, explosive)
+
+**5. Atmosphere Rule**
+The atmosphere must be 1–2 sentences describing the *exact vibe* that guides the music.
+
+**6. JSON Formatting Rule**
+Respond ONLY with the JSON — no explanations, no markdown, no commentary.
+
+`;
 
 	try {
 		// Use fallback strategy to try multiple models

@@ -219,6 +219,14 @@ We welcome contributions! Whether it's fixing a bug, improving the UI, or adding
 
 ---
 
+## 📚 Documentation
+
+Comprehensive documentation is available in the [`/docs`](./docs) directory:
+- **[Testing Guide](./docs/TestingGuide.md)** - Complete guide to unit and E2E testing
+- **[Testing Plan](./docs/TestingPlan.md)** - Playwright E2E testing implementation strategy
+- **[Coverage Plan](./docs/CoveragePlan.md)** - Detailed unit test coverage plan
+- **[CLAUDE.md](./CLAUDE.md)** - Project context for AI assistants
+
 ## 📄 License
 
 This project is currently unlicensed (Private).
