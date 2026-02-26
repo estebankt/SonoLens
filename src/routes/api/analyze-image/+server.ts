@@ -2,9 +2,21 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { analyzeImage } from '$lib/server/ai';
 import type { AnalyzeImageRequest, AnalyzeImageResponse } from '$lib/types/phase2';
+import { DEMO_MOOD_ANALYSIS } from '$lib/demo-data';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
+		// Demo mode: return mock analysis
+		const isDemoMode = cookies.get('demo_mode') === 'true';
+		if (isDemoMode) {
+			// Add a small delay to simulate processing
+			await new Promise((resolve) => setTimeout(resolve, 1500));
+			return json({
+				success: true,
+				mood_analysis: DEMO_MOOD_ANALYSIS
+			} satisfies AnalyzeImageResponse);
+		}
+
 		// Check if user is authenticated
 		const accessToken = cookies.get('spotify_access_token');
 		if (!accessToken) {

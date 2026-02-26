@@ -1,10 +1,32 @@
-import type { SpotifyTrack } from './types/phase2';
+import type { SpotifyTrack, MoodAnalysis } from './types/phase2';
 
 export const DEMO_USER = {
 	id: 'demo',
 	display_name: 'Demo User',
 	email: 'demo@sonolens.app',
 	images: [] as Array<{ url: string }>
+};
+
+export const DEMO_MOOD_ANALYSIS: MoodAnalysis = {
+	mood_tags: ['energetic', 'vibrant', 'summer', 'happy'],
+	energy_level: 'high',
+	emotional_descriptors: ['excited', 'uplifted', 'carefree'],
+	atmosphere: 'A sunny afternoon at a beach club with friends.',
+	recommended_genres: ['Pop', 'Synthpop', 'Indie Pop', 'Nu-Disco'],
+	seed_tracks: [
+		'Blinding Lights - The Weeknd',
+		'Midnight City - M83',
+		'Get Lucky - Daft Punk',
+		'As It Was - Harry Styles',
+		'Levitating - Dua Lipa',
+		'Walking On Sunshine - Katrina & The Waves',
+		"Can't Stop The Feeling! - Justin Timberlake",
+		'Watermelon Sugar - Harry Styles',
+		'Electric Feel - MGMT',
+		'Safe And Sound - Capital Cities'
+	],
+	suggested_playlist_title: 'Sunny Vibes & Neon Lights',
+	confidence_score: 0.95
 };
 
 export const DEMO_TRACKS: SpotifyTrack[] = [

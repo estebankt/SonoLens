@@ -49,4 +49,26 @@ test.describe('Landing Page', () => {
 		await expect(errorCard).toBeVisible();
 		await expect(errorCard).toContainText('An unknown error occurred');
 	});
+
+	test('should display Try Demo button', async ({ page }) => {
+		await page.goto('/');
+
+		const demoButton = page.locator('a[href="/demo"]');
+		await expect(demoButton).toBeVisible();
+		await expect(demoButton).toContainText('Try Demo');
+	});
+
+	test('should redirect to /create and set demo cookie when clicking Try Demo', async ({
+		page
+	}) => {
+		await page.goto('/');
+		await page.click('a[href="/demo"]');
+
+		await expect(page).toHaveURL('/create', { timeout: 10000 });
+
+		const cookies = await page.context().cookies();
+		const demoCookie = cookies.find((c) => c.name === 'demo_mode');
+		expect(demoCookie).toBeDefined();
+		expect(demoCookie?.value).toBe('true');
+	});
 });

@@ -1,5 +1,6 @@
 import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
+import { DEMO_TRACKS } from '$lib/demo-data';
 
 export const GET: RequestHandler = async ({ url, cookies }) => {
 	// Get search query from URL params
@@ -8,6 +9,18 @@ export const GET: RequestHandler = async ({ url, cookies }) => {
 	// Validate query
 	if (!query || query.trim().length === 0) {
 		return json({ success: false, error: 'Search query required' }, { status: 400 });
+	}
+
+	// Demo mode: search in mock tracks
+	const isDemoMode = cookies.get('demo_mode') === 'true';
+	if (isDemoMode) {
+		const searchResults = DEMO_TRACKS.filter(
+			(track) =>
+				track.name.toLowerCase().includes(query.toLowerCase()) ||
+				track.artists.some((a) => a.name.toLowerCase().includes(query.toLowerCase()))
+		).slice(0, 10);
+
+		return json({ success: true, tracks: searchResults });
 	}
 
 	// Get access token from cookies

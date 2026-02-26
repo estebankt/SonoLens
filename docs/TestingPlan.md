@@ -155,11 +155,12 @@ lint + test (parallel) → build → deploy-preview → e2e-tests
    - Configure `e2e-tests` to use `PLAYWRIGHT_TEST_BASE_URL`
 3. ✅ Update `.gitignore`
 
-### ⏳ Phase 4: Expand Coverage (TODO)
+### ✅ Phase 4: Expand Coverage (PARTIALLY DONE)
 
-1. ⏳ Error scenario tests (network failures, validation errors)
-2. ⏳ Mobile viewport tests
-3. ⏳ Dashboard tests
+1. ✅ Dashboard tests (`tests/e2e/dashboard.spec.ts` — 6 tests: profile, top artists, top tracks, recently played, create button, logout)
+2. ✅ Protected route tests (`tests/e2e/protected-routes.spec.ts` — 3 tests: unauthenticated redirects for `/create` and `/dashboard`)
+3. ⏳ Error scenario tests (network failures, validation errors)
+4. ⏳ Mobile viewport tests
 
 ---
 
