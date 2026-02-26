@@ -98,6 +98,43 @@ h3 {
 	transform: translateY(-2px);
 }
 
+.neo-button-secondary {
+	padding: 0.75rem 1.5rem;
+	border-width: 4px;
+	border-color: var(--color-neo-black);
+	background-color: var(--color-neo-white);
+	font-weight: 700;
+	font-size: 1.125rem;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	box-shadow: var(--shadow-neo);
+	transition: all 0.15s ease-out;
+	cursor: pointer;
+	text-decoration: none;
+	display: inline-block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.neo-button-secondary {
+		transition: none;
+	}
+}
+
+.neo-button-secondary:hover {
+	box-shadow: none;
+	transform: translate(4px, 4px);
+}
+
+.neo-button-secondary:active {
+	box-shadow: none;
+	transform: translate(4px, 4px);
+}
+
+.neo-button-secondary:focus-visible {
+	outline: 3px solid var(--color-neo-black);
+	outline-offset: 2px;
+}
+
 .neo-input {
 	padding: 0.75rem 1rem;
 	border-width: 3px;

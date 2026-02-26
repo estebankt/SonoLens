@@ -9,6 +9,9 @@
 		GeneratePlaylistResponse,
 		SpotifyTrack
 	} from '$lib/types/phase2';
+
+	let { data } = $props();
+	const isDemo = !!data?.isDemo;
 	import { fileToBase64ForAI, compressImageForSpotifyCover } from '$lib/utils/image';
 	import MoodAnalysisDisplay from '$lib/components/MoodAnalysisDisplay.svelte';
 	import PlaylistDisplay from '$lib/components/PlaylistDisplay.svelte';
@@ -549,11 +552,20 @@
 									clip-rule="evenodd"
 								/>
 							</svg>
-							<h3 class="text-2xl font-bold">Playlist Saved to Spotify!</h3>
+							<h3 class="text-2xl font-bold">{isDemo ? 'Playlist Ready!' : 'Playlist Saved to Spotify!'}</h3>
 						</div>
-						<p class="mb-6 text-lg">
-							<strong>{savedPlaylist.name}</strong> has been added to your Spotify library.
-						</p>
+						{#if isDemo}
+							<p class="mb-4 text-lg">
+								<strong>{savedPlaylist.name}</strong> was generated from your image.
+							</p>
+							<div class="mb-6 p-3 bg-yellow-100 border-2 border-black text-sm font-semibold">
+								In demo mode — <a href="/auth/login" class="underline">log in with Spotify</a> to save real playlists to your library.
+							</div>
+						{:else}
+							<p class="mb-6 text-lg">
+								<strong>{savedPlaylist.name}</strong> has been added to your Spotify library.
+							</p>
+						{/if}
 						<div class="flex flex-col sm:flex-row gap-4">
 							<a
 								href={savedPlaylist.url}
