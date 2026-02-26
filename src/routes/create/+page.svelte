@@ -552,14 +552,17 @@
 									clip-rule="evenodd"
 								/>
 							</svg>
-							<h3 class="text-2xl font-bold">{isDemo ? 'Playlist Ready!' : 'Playlist Saved to Spotify!'}</h3>
+							<h3 class="text-2xl font-bold">
+								{isDemo ? 'Playlist Ready!' : 'Playlist Saved to Spotify!'}
+							</h3>
 						</div>
 						{#if isDemo}
 							<p class="mb-4 text-lg">
 								<strong>{savedPlaylist.name}</strong> was generated from your image.
 							</p>
 							<div class="mb-6 p-3 bg-yellow-100 border-2 border-black text-sm font-semibold">
-								In demo mode — <a href="/auth/login" class="underline">log in with Spotify</a> to save real playlists to your library.
+								In demo mode — <a href="/auth/login" class="underline">log in with Spotify</a> to save
+								real playlists to your library.
 							</div>
 						{:else}
 							<p class="mb-6 text-lg">
