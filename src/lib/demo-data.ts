@@ -20,7 +20,7 @@ export const DEMO_MOOD_ANALYSIS: MoodAnalysis = {
 		'As It Was - Harry Styles',
 		'Levitating - Dua Lipa',
 		'Walking On Sunshine - Katrina & The Waves',
-		'Can\'t Stop The Feeling! - Justin Timberlake',
+		"Can't Stop The Feeling! - Justin Timberlake",
 		'Watermelon Sugar - Harry Styles',
 		'Electric Feel - MGMT',
 		'Safe And Sound - Capital Cities'
