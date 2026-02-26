@@ -18,12 +18,14 @@ SonoLens/
 │   │   ├── api/         # Backend API endpoints
 │   │   ├── create/      # Main playlist creation flow
 │   │   ├── dashboard/   # User dashboard
+│   │   ├── demo/        # Demo mode entry point (sets cookie, redirects to /create)
 │   │   └── auth/        # Spotify OAuth handlers
 │   └── lib/
 │       ├── components/  # Reusable Svelte components
 │       ├── server/      # Server-only code (AI integration)
 │       ├── utils/       # Client utilities (image, mood mapping)
-│       └── types/       # TypeScript type definitions
+│       ├── types/       # TypeScript type definitions
+│       └── demo-data.ts # Mock data used by demo mode across all routes
 └── tests/
     ├── unit/            # Vitest unit tests
     │   ├── api/         # API endpoint tests
@@ -64,7 +66,7 @@ npm run format   # Auto-format code
 
 **Current Coverage:**
 - ✅ **203 unit tests** passing across all modules
-- ✅ **17 E2E tests** covering critical user flows
+- ✅ **19 E2E tests** covering critical user flows
 - ✅ **High coverage** on utilities, API endpoints, and Spotify client
 
 **Coverage by Area:**
