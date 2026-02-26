@@ -6,9 +6,16 @@ import type {
 	GeneratePlaylistResponse,
 	SpotifyTrack
 } from '$lib/types/phase2';
+import { DEMO_TRACKS } from '$lib/demo-data';
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
+		// Demo mode: return curated mock tracks
+		const isDemoMode = cookies.get('demo_mode') === 'true';
+		if (isDemoMode) {
+			return json({ success: true, tracks: DEMO_TRACKS } satisfies GeneratePlaylistResponse);
+		}
+
 		// Check if user is authenticated
 		const accessToken = cookies.get('spotify_access_token');
 		if (!accessToken) {

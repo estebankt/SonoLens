@@ -28,6 +28,9 @@
 			</div>
 		{/if}
 
-		<a href="/auth/login" class="neo-button w-full sm:w-auto"> Login with Spotify </a>
+		<div class="flex flex-col sm:flex-row gap-4 justify-center items-center">
+			<a href="/auth/login" class="neo-button w-full sm:w-auto"> Login with Spotify </a>
+			<a href="/demo" class="neo-button-secondary w-full sm:w-auto">Try Demo (No account needed)</a>
+		</div>
 	</div>
 </div>

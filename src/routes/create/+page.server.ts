@@ -2,8 +2,15 @@ import { redirect } from '@sveltejs/kit';
 import type { PageServerLoad } from './$types';
 import { getUserProfile, refreshToken } from '$lib/spotify';
 import { SPOTIFY_CLIENT_ID } from '$env/static/private';
+import { DEMO_USER } from '$lib/demo-data';
 
 export const load: PageServerLoad = async ({ cookies }) => {
+	// Demo mode: skip all Spotify auth
+	const isDemoMode = cookies.get('demo_mode') === 'true';
+	if (isDemoMode) {
+		return { user: DEMO_USER, isDemo: true };
+	}
+
 	let accessToken = cookies.get('spotify_access_token');
 	const refreshTokenValue = cookies.get('spotify_refresh_token');
 
@@ -14,7 +21,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 
 	// Mock data check for E2E testing
 	if (accessToken === 'mock-access-token-for-e2e-tests') {
-		return {};
+		return { isDemo: false };
 	}
 
 	// If no access token but we have refresh token, try to refresh
@@ -60,7 +67,7 @@ export const load: PageServerLoad = async ({ cookies }) => {
 				});
 				// Retry validation
 				await getUserProfile(tokens.access_token);
-				return {};
+				return { isDemo: false };
 			} catch (refreshErr) {
 				console.error('Token refresh failed during validation:', refreshErr);
 			}
@@ -72,5 +79,5 @@ export const load: PageServerLoad = async ({ cookies }) => {
 		throw redirect(302, '/?error=session_expired');
 	}
 
-	return {};
+	return { isDemo: false };
 };

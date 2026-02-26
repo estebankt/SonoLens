@@ -9,6 +9,21 @@ import {
 
 export const POST: RequestHandler = async ({ request, cookies }) => {
 	try {
+		// Demo mode: return a mock saved playlist
+		const isDemoMode = cookies.get('demo_mode') === 'true';
+		if (isDemoMode) {
+			const body = await request.json();
+			return json({
+				success: true,
+				playlist: {
+					id: 'demo-playlist',
+					name: body.title,
+					url: 'https://open.spotify.com',
+					uri: 'spotify:playlist:demo'
+				}
+			});
+		}
+
 		// Check if user is authenticated
 		const accessToken = cookies.get('spotify_access_token');
 		if (!accessToken) {

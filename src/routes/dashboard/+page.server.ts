@@ -8,10 +8,21 @@ import {
 	getRecentlyPlayed
 } from '$lib/spotify';
 import { SPOTIFY_CLIENT_ID } from '$env/static/private';
+import { DEMO_USER, DEMO_TOP_ARTISTS, DEMO_TOP_TRACKS, DEMO_RECENTLY_PLAYED } from '$lib/demo-data';
 
 export const load: PageServerLoad = async ({ cookies }) => {
 	let accessToken = cookies.get('spotify_access_token');
 	const refreshTokenValue = cookies.get('spotify_refresh_token');
+
+	// Demo mode: return mock data without requiring Spotify auth
+	if (cookies.get('demo_mode') === 'true') {
+		return {
+			user: DEMO_USER,
+			topArtists: DEMO_TOP_ARTISTS,
+			topTracks: DEMO_TOP_TRACKS,
+			recentlyPlayed: DEMO_RECENTLY_PLAYED
+		};
+	}
 
 	// Redirect to home if not authenticated
 	if (!accessToken && !refreshTokenValue) {
