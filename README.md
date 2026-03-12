@@ -2,106 +2,122 @@
 
 ![CI/CD Pipeline](https://github.com/estebankt/SonoLens/actions/workflows/ci.yml/badge.svg)
 
-Live: https://sono-lens.vercel.app/
+Translates the visual mood of an image into a Spotify playlist using AI — bridging GPT-4o Vision's scene understanding with Spotify's audio feature graph.
 
-Upload an image, get a Spotify playlist. SonoLens uses GPT-4o Vision to read the mood, colors, and atmosphere of a photo and turns that into a playlist. Built with SvelteKit and a Neo-Brutalist design.
-
----
-
-## Demo mode
-
-The app is in Spotify's development mode, which limits access to 25 manually whitelisted accounts. To get around this, there's a demo mode that lets anyone try the full flow without a Spotify account.
-
-Click **"Try Demo"** on the homepage. You'll go through the same steps — upload an image, get a real AI analysis, browse generated tracks — but the playlist recommendations use mock data and saving is simulated. The OpenAI image analysis still runs for real.
+**Live:** https://sono-lens.vercel.app/
 
 ---
 
-## Features
+## Architecture & Design Decisions
 
-- Spotify OAuth 2.0 with PKCE
-- Image analysis via GPT-4o Vision (mood, energy, color, atmosphere)
-- Generates ~20 track recommendations
-- 30-second track previews in the browser
-- Edit the playlist: remove or reorder tracks before saving
-- Save directly to your Spotify library
-- Works on mobile (camera capture supported)
+### Stateless by design
+
+SonoLens has no database. Playlist state lives in Spotify. This eliminates a persistence layer entirely — session data moves through HTTP-only cookies, generated playlists are saved directly to the user's Spotify library, and the server holds no long-lived state between requests.
+
+### Image-to-audio feature pipeline
+
+The core flow is a two-stage inference chain:
+
+1. **Vision → Mood:** A compressed image (512x512, JPEG 0.7) is submitted to GPT-4o Vision with a structured prompt. The model returns a `MoodAnalysis` object — mood tags, energy level, emotional descriptors, genre seeds, and 8–12 specific seed tracks. Image downsampling at this stage saves ~20–30% on token cost with negligible quality loss.
+
+2. **Mood → Tracks:** The API maps mood descriptors to Spotify audio parameters (valence, energy, danceability) via keyword inference, then searches Spotify for the AI-specified seed tracks in parallel batches of 5. This replaces Spotify's `/recommendations` endpoint, which proved unreliable and has since been deprecated in the API.
+
+### OAuth 2.0 PKCE — no client secret in-flight
+
+Spotify authentication uses PKCE: a `code_verifier` is generated client-side, hashed to a `code_challenge`, and the authorization code is exchanged server-side. The client secret is never transmitted to the browser. Tokens are stored in HTTP-only cookies, not `localStorage`.
+
+### Demo mode without mocking the AI
+
+Spotify's development quota limits OAuth access to 25 whitelisted accounts. Demo mode (`/demo` route, `demo_mode` cookie) bypasses Spotify calls with fixture data while keeping the real OpenAI analysis path active. This lets visitors experience the full AI output without requiring a whitelisted Spotify account.
+
+### Graceful degradation on OpenAI failures
+
+The image analysis endpoint tries `gpt-4o` → `gpt-4-turbo` → `gpt-4-vision-preview` in sequence, handling content filter rejections, oversized responses, and empty completions at each stage. Playlist cover image upload is similarly treated as non-fatal — failure there does not block playlist creation.
 
 ---
 
-## Tech stack
+## Core Tech Stack
 
-- SvelteKit (SSR/CSR)
-- TypeScript
-- Tailwind CSS
-- OpenAI API (GPT-4o Vision)
-- Spotify Web API
-- Vitest (unit tests), Playwright (E2E)
-- Vercel
+| Layer | Technology |
+|---|---|
+| Framework | SvelteKit 2 (SSR + CSR hybrid) |
+| Language | TypeScript (strict mode) |
+| Styling | Tailwind CSS 4 |
+| AI | OpenAI GPT-4o Vision |
+| Music | Spotify Web API + Web Playback SDK |
+| Unit Testing | Vitest 4 + Testing Library |
+| E2E Testing | Playwright |
+| Deployment | Vercel (adapter-vercel, Node.js runtime) |
 
 ---
 
-## Setup
+## Engineering Standards
 
-You'll need a Spotify developer account and an OpenAI API key.
+### Testing
 
-**Spotify:** Create an app at https://developer.spotify.com/dashboard and set the redirect URI to `http://127.0.0.1:5173/auth/callback`.
+203 unit tests cover the three core utility domains: image processing, mood-to-audio-feature mapping, and the Spotify API client wrapper. API endpoint tests use fixture-based mocks with a shared `sveltekit-mocks.ts` helper to simulate `RequestEvent`.
 
-**OpenAI:** Get a key at https://platform.openai.com — needs access to `gpt-4o`.
+17 Playwright E2E tests cover the four critical paths: landing page, full creation flow, dashboard, and protected route redirection. E2E auth uses direct cookie injection (mock tokens) rather than real OAuth, keeping tests deterministic and CI-safe. API calls are intercepted via `page.route()`.
+
+See [`docs/TestingGuide.md`](./docs/TestingGuide.md) for framework configuration and [`docs/TestingPlan.md`](./docs/TestingPlan.md) for the mocking strategy.
+
+### CI/CD
+
+GitHub Actions pipeline with five jobs:
+
+- **Lint** and **Test** run in parallel on every push.
+- **Build** (`tsc` + Vite) gates on both passing.
+- **Deploy Preview** triggers on PRs, posts the URL as a PR comment, and feeds it to the E2E job.
+- **Deploy Production** triggers on merge to `main`.
+
+E2E tests run against the preview deployment, not production. Concurrency is scoped per `github.ref` with cancellation on superseding pushes.
+
+### Linting & Formatting
+
+ESLint with `@typescript-eslint` and the Svelte parser, enforced in CI. Prettier handles formatting. Both are required to pass before the build job runs.
+
+---
+
+## Getting Started
+
+Requires a Spotify Developer application (redirect URI: `http://127.0.0.1:5173/auth/callback`) and an OpenAI API key with `gpt-4o` access.
 
 ```bash
-git clone https://github.com/yourusername/sonolens.git
-cd sonolens
+git clone https://github.com/estebankt/SonoLens.git
+cd SonoLens
 npm install
 cp .env.example .env
 ```
 
-Fill in `.env`:
+Populate `.env`:
 
 ```env
-SPOTIFY_CLIENT_ID=your_spotify_client_id
+SPOTIFY_CLIENT_ID=
+SPOTIFY_CLIENT_SECRET=
 SPOTIFY_REDIRECT_URI=http://127.0.0.1:5173/auth/callback
-OPENAI_API_KEY=your_openai_api_key
+OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4o
 ```
 
 ```bash
-npm run dev
+npm run dev        # http://127.0.0.1:5173
+npm run test       # unit tests
+npm run test:e2e   # E2E (requires running dev server or sets one up automatically)
+npm run check      # TypeScript
+npm run lint       # ESLint + Prettier check
 ```
 
-Open `http://127.0.0.1:5173`.
-
 ---
 
-## Scripts
+## Documentation
 
-| Command | What it does |
+Detailed technical documentation is scoped to the relevant subdirectory rather than this file.
+
+| Document | Contents |
 |---|---|
-| `npm run dev` | Start dev server |
-| `npm run check` | TypeScript type check |
-| `npm run test` | Unit tests (Vitest) |
-| `npm run test:e2e` | E2E tests (Playwright) |
-| `npm run lint` | Lint |
-| `npm run format` | Format with Prettier |
-
----
-
-## CI/CD
-
-GitHub Actions pipeline with parallel lint/test jobs, node_modules caching, and automatic Vercel deploys.
-
-- Feature branches: lint, test, build
-- Pull requests: lint, test, build, preview deploy (URL posted as PR comment)
-- Main: lint, test, build, production deploy
-
-E2E tests run against a local preview server, not the deployed environment.
-
----
-
-## Docs
-
-- [Testing Guide](./docs/TestingGuide.md)
-- [Testing Plan](./docs/TestingPlan.md)
-- [Coverage Plan](./docs/CoveragePlan.md)
+| [`docs/TestingGuide.md`](./docs/TestingGuide.md) | Test structure, Vitest/Playwright config, auth mocking |
+| [`docs/TestingPlan.md`](./docs/TestingPlan.md) | E2E strategy, API interception patterns |
+| [`docs/CoveragePlan.md`](./docs/CoveragePlan.md) | Coverage targets by module |
 
 ---
 
